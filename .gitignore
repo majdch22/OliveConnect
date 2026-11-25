@@ -1,0 +1,27 @@
+# Dépendances et builds
+node_modules/
+dist/
+.angular/
+target/
+
+# Python (générateurs de diagrammes)
+__pycache__/
+*.pyc
+
+# Environnement et secrets
+.env
+*.local.yml
+
+# Données d'exécution (photos, sauvegardes, logs, archives d'import)
+uploads/
+backups/
+logs/
+*.log
+data/**/archive/
+
+# Éditeurs / système
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+~$*

@@ -1,0 +1,12 @@
+# Profil des tests : base séparée « oliveconnect_test », vidée par les tests eux-mêmes.
+spring:
+  mongodb:
+    uri: mongodb://localhost:27017/oliveconnect_test
+
+oliveconnect:
+  securite:
+    secret-jeton: secret-des-tests-oliveconnect-au-moins-32-caracteres
+  premier-administrateur:
+    email: administrateur@test.tn
+    telephone: "+21670000001"
+    mot-de-passe: MotDePasseAdministrateur1

@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>OliveConnect — Maquettes (wireframes)</title>
+<style>
+  :root { --ink:#2b2b2b; --mid:#8a8a8a; --line:#bdbdbd; --fill:#eeeeee; --soft:#f6f6f6; --acc:#5b7a1e; --warn:#b23a3a; --amber:#c58b1c; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:28px 32px 40px; font-family:"Segoe UI",Arial,sans-serif; color:var(--ink); background:#fff; width:1640px; }
+  h1 { margin:0; font-size:28px; color:#2f3e12; }
+  .sub { color:#666; margin:6px 0 22px; font-size:14px; }
+  h2 { font-size:19px; margin:26px 0 14px; padding-bottom:6px; border-bottom:2px solid #e2e2e2; }
+  .row { display:flex; gap:28px; flex-wrap:wrap; }
+  .cap { font-size:13px; font-weight:700; margin:0 0 6px; }
+  .cap span { font-weight:400; color:#777; }
+
+  /* phone */
+  .phone { width:360px; height:660px; border:3px solid #444; border-radius:30px; padding:12px 10px; background:#fafafa; position:relative; display:flex; flex-direction:column; }
+  .notch { width:110px; height:14px; background:#444; border-radius:0 0 10px 10px; margin:-12px auto 8px; }
+  .top { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:var(--acc); color:#fff; border-radius:10px; font-weight:700; font-size:14px; }
+  .top .ic { display:flex; gap:8px; }
+  .dot { width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,.35); display:inline-flex; align-items:center; justify-content:center; font-size:11px; }
+  .badge { position:relative; }
+  .badge::after { content:"3"; position:absolute; top:-6px; right:-6px; background:var(--warn); color:#fff; font-size:9px; border-radius:8px; padding:0 4px; }
+  .body { flex:1; overflow:hidden; padding:10px 4px; display:flex; flex-direction:column; gap:9px; font-size:12.5px; }
+  .nav { display:flex; justify-content:space-around; border-top:1px solid var(--line); padding-top:8px; font-size:10.5px; color:#555; }
+  .nav div { display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .nav i { width:20px; height:20px; border-radius:6px; background:var(--fill); display:block; }
+  .nav .on { color:var(--acc); font-weight:700; } .nav .on i { background:var(--acc); }
+  .help { position:absolute; right:18px; bottom:70px; width:34px; height:34px; border-radius:50%; background:#fff; border:2px solid var(--acc); color:var(--acc); font-weight:800; display:flex; align-items:center; justify-content:center; }
+
+  .card { border:1.5px solid var(--line); border-radius:10px; padding:9px 10px; background:#fff; }
+  .tiles { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .tile { border:1.5px solid var(--line); border-radius:12px; height:84px; padding:10px; background:#fff; display:flex; flex-direction:column; justify-content:space-between; font-weight:700; }
+  .tile i { width:26px; height:26px; border-radius:8px; background:var(--fill); display:block; }
+  .tile.primary { border-color:var(--acc); } .tile.primary i { background:var(--acc); }
+  .tile.alert { border-color:var(--warn); } .tile.alert i { background:var(--warn); }
+  .lbl { font-size:11px; color:#555; margin-bottom:3px; font-weight:600; }
+  .inp { height:34px; border:1.5px solid var(--line); border-radius:8px; background:#fff; display:flex; align-items:center; padding:0 10px; color:var(--mid); justify-content:space-between; }
+  .area { height:58px; align-items:flex-start; padding-top:7px; }
+  .btn { height:40px; border-radius:10px; background:var(--acc); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .btn.ghost { background:#fff; color:var(--acc); border:1.5px solid var(--acc); }
+  .btn.red { background:#fff; color:var(--warn); border:1.5px solid var(--warn); }
+  .btn.sm { height:28px; font-size:11.5px; padding:0 10px; border-radius:7px; display:inline-flex; }
+  .seg { display:flex; border:1.5px solid var(--line); border-radius:9px; overflow:hidden; }
+  .seg div { flex:1; text-align:center; padding:8px 0; font-weight:600; }
+  .seg .on { background:var(--acc); color:#fff; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { border:1.5px solid var(--line); border-radius:14px; padding:4px 10px; font-size:11.5px; background:#fff; }
+  .chip.on { border-color:var(--acc); background:#e8f0d8; font-weight:700; }
+  .st { font-size:10.5px; font-weight:700; border-radius:10px; padding:2px 8px; display:inline-block; }
+  .st.g { background:#e3f1d0; color:#3e5a10; } .st.b { background:#dde7f3; color:#2c4a73; } .st.a { background:#fbefd3; color:#8a5d00; } .st.r { background:#f6dddd; color:#922; } .st.grey { background:#eee; color:#555; }
+  .between { display:flex; justify-content:space-between; align-items:center; }
+  .muted { color:#777; font-size:11.5px; }
+  .bar { height:8px; background:var(--fill); border-radius:5px; overflow:hidden; } .bar b { display:block; height:100%; background:var(--acc); }
+  .map { background:repeating-linear-gradient(45deg,#eef2e6,#eef2e6 10px,#e6ecdc 10px,#e6ecdc 20px); border:1.5px solid var(--line); border-radius:10px; position:relative; overflow:hidden; }
+  .pin { position:absolute; width:14px; height:14px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid #fff; box-shadow:0 1px 2px rgba(0,0,0,.4); }
+  .p1 { background:#2e7d32; } .p2 { background:#c58b1c; } .p3 { background:#b23a3a; } .p4 { background:#777; }
+  .timeline { display:flex; justify-content:space-between; position:relative; margin:6px 2px 2px; }
+  .timeline::before { content:""; position:absolute; top:6px; left:6px; right:6px; height:2px; background:var(--line); }
+  .timeline div { position:relative; display:flex; flex-direction:column; align-items:center; font-size:9.5px; color:#777; gap:3px; }
+  .timeline div i { width:14px; height:14px; border-radius:50%; background:#fff; border:2px solid var(--line); display:block; }
+  .timeline .done i { background:var(--acc); border-color:var(--acc); } .timeline .done { color:#333; font-weight:600; }
+  .timeline .cur i { background:#fff; border-color:var(--acc); border-width:4px; }
+
+  /* desktop */
+  .desk { width:770px; height:520px; border:3px solid #444; border-radius:10px; background:#fafafa; display:flex; flex-direction:column; overflow:hidden; }
+  .chrome { height:26px; background:#444; display:flex; align-items:center; gap:6px; padding:0 10px; }
+  .chrome i { width:9px; height:9px; border-radius:50%; background:#888; display:block; }
+  .chrome span { margin-left:12px; background:#666; color:#ddd; font-size:10px; padding:2px 10px; border-radius:4px; }
+  .app { flex:1; display:flex; min-height:0; }
+  .side { width:150px; background:#2f3e12; color:#dfe7cf; padding:12px 10px; display:flex; flex-direction:column; gap:6px; font-size:12px; }
+  .side b { color:#fff; font-size:14px; margin-bottom:8px; }
+  .side div { padding:6px 8px; border-radius:6px; } .side .on { background:rgba(255,255,255,.16); color:#fff; font-weight:700; }
+  .main { flex:1; padding:12px 14px; display:flex; flex-direction:column; gap:10px; font-size:12px; min-width:0; }
+  .head { display:flex; justify-content:space-between; align-items:center; }
+  .head h3 { margin:0; font-size:16px; }
+  table { width:100%; border-collapse:collapse; font-size:11.5px; background:#fff; }
+  th { text-align:left; background:#f0f0f0; padding:6px 7px; font-weight:700; border-bottom:1.5px solid var(--line); }
+  td { padding:6px 7px; border-bottom:1px solid #e6e6e6; white-space:nowrap; }
+  .cols { display:flex; gap:10px; flex:1; min-height:0; }
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; }
+  .kpi { background:#fff; border:1.5px solid var(--line); border-radius:9px; padding:9px 10px; }
+  .kpi .v { font-size:20px; font-weight:800; margin-top:3px; } .kpi .t { font-size:10.5px; color:#3e5a10; }
+  .chart { background:#fff; border:1.5px solid var(--line); border-radius:9px; padding:9px; display:flex; flex-direction:column; }
+  .bars { flex:1; display:flex; align-items:flex-end; gap:9px; padding-top:8px; border-bottom:1.5px solid var(--line); }
+  .bars i { flex:1; background:#b9cc95; border-radius:3px 3px 0 0; display:block; } .bars i:nth-child(3n) { background:var(--acc); }
+  .cal { display:grid; grid-template-columns:120px repeat(7,1fr); font-size:10.5px; background:#fff; border:1.5px solid var(--line); border-radius:8px; overflow:hidden; }
+  .cal div { border-right:1px solid #e6e6e6; border-bottom:1px solid #e6e6e6; padding:5px 6px; min-height:28px; }
+  .cal .h { background:#f0f0f0; font-weight:700; }
+  .ev { background:#e3f1d0; border-left:3px solid var(--acc); border-radius:3px; padding:2px 4px; font-size:9.5px; }
+  .ev.x { background:#f6dddd; border-left-color:var(--warn); }
+  .ev.m { background:#f1e9f5; border-left-color:#7a4d93; }
+  .note { font-size:11.5px; color:#555; background:#fffbe9; border:1px dashed #d9c27a; border-radius:6px; padding:6px 8px; margin-top:6px; width:360px; }
+  .desk + .note { width:770px; }
+  /* ---- ajouts : écrans complémentaires ---- */
+  .overlay { position:absolute; inset:0; background:rgba(0,0,0,.55); border-radius:27px; }
+  .spot { position:absolute; border:3px solid #fff; border-radius:14px; box-shadow:0 0 0 4px rgba(155,187,89,.9); }
+  .bubble { position:absolute; background:#fff; border-radius:12px; padding:10px 12px; font-size:12px; box-shadow:0 4px 12px rgba(0,0,0,.3); }
+  .modal { position:absolute; background:#fff; border:2px solid #444; border-radius:10px; padding:12px; box-shadow:0 8px 24px rgba(0,0,0,.25); display:flex; flex-direction:column; gap:7px; font-size:12px; }
+  .shade { position:absolute; inset:0; background:rgba(0,0,0,.35); }
+  .form2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .item { display:flex; gap:9px; align-items:flex-start; border-bottom:1px solid #e6e6e6; padding:8px 2px; }
+  .item i { width:30px; height:30px; border-radius:50%; background:var(--fill); flex:none; display:block; }
+  .item.unread { background:#f6f9ef; border-radius:8px; }
+  .item.unread b::after { content:" ●"; color:var(--acc); }
+  .toggle { width:34px; height:18px; border-radius:10px; background:var(--acc); position:relative; flex:none; }
+  .toggle::after { content:""; position:absolute; right:2px; top:2px; width:14px; height:14px; border-radius:50%; background:#fff; }
+  .toggle.off { background:#ccc; } .toggle.off::after { right:auto; left:2px; }
+  .hero { background:linear-gradient(120deg,#e8f0d8,#f6f9ef); border:1.5px solid var(--line); border-radius:10px; padding:16px; display:flex; gap:14px; align-items:center; }
+  .imgph { background:repeating-linear-gradient(45deg,#e4e4e4,#e4e4e4 8px,#efefef 8px,#efefef 16px); border:1.5px solid var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#888; font-size:11px; }
+  .line-chart { flex:1; border-bottom:1.5px solid var(--line); border-left:1.5px solid var(--line); position:relative; }
+  .index { display:grid; grid-template-columns:repeat(4,1fr); gap:6px 18px; font-size:12px; background:#fafafa; border:1px solid #e2e2e2; border-radius:8px; padding:12px 16px; }
+  .index b { color:#2f3e12; display:block; margin-top:4px; }
+  .row > div:has(> .phone) { width:360px; } .row > div:has(> .desk) { width:770px; }
+  .sec-note { font-size:13px; color:#666; margin:-6px 0 14px; }
+</style>
+</head>
+<body>
+<h1>OliveConnect — Maquettes fil de fer (wireframes)</h1>
+<div class="sub">Basse fidélité · mobile-first pour le terrain (agriculteur, chef d'équipe, pressoir) · version bureau pour l'encadrement (collecte, logistique, tableau de bord, administration). Le bouton « ? » ouvre l'aide contextuelle sur chaque écran.</div>
+<div class="index">
+  <div><b>Authentification</b>M8 Connexion · AU1 Erreurs de connexion<br>AU2 Mot de passe oublié<br>P2 Inscription étape 1 · AU3 étape 2 · AU4 Envoyée<br>AU5 Connexion bureau · AU6 Inscription bureau<br><b>Public &amp; commun</b>M1 Carte publique · P1 Accueil public<br>P3 Notifications · P4 Profil<br>P5 Centre d'aide · P6 Visite guidée<br>P7 Accès refusé / hors connexion</div>
+  <div><b>Agriculteur</b>M2 Accueil · M3 Déclarer une récolte<br>M4 Signaler · M5 Mes collectes<br>A1 Mes vergers · A2 Ajouter / modifier un verger<br>A3 Détail d'une demande · A4 Mes alertes</div>
+  <div><b>Chef d'équipe · Pressoir</b>C1 Mes tournées · M6 Tournée terrain<br>C2 Livraison au pressoir<br>M7 Réception d'une benne<br>PR1 Historique &amp; capacité du pressoir</div>
+  <div><b>Encadrement (bureau)</b>D1 Planification · RC1 Examen d'une demande<br>RC2 Suivi des tournées · RC3 Alertes · RC4 Carte<br>D2 Calendrier · L1 Ressources · L2 Approvisionnements<br>D3 Tableau de bord · D4 Imports<br>AD1 Utilisateurs · AD2 Inscriptions · AD3 Paramètres · AD4 Supervision</div>
+</div>
+
+
+<h2>A. Écrans mobiles — terrain (24 écrans)</h2>
+<div class="sec-note">Authentification, visiteur, agriculteur, chef d'équipe et responsable du pressoir — mobile-first, utilisés au verger.</div>
+<div class="row">
+  <!-- M1 Carte publique -->
+  <div>
+    <div class="cap">M1 · Carte publique <span>— Visiteur (UC01)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span><span style="color:#9bbb59">●</span> OliveConnect</span><span class="btn sm ghost" style="background:#fff">Se connecter</span></div>
+      <div class="body">
+        <div class="inp">🔍 Rechercher un verger, une zone…</div>
+        <div class="chips"><span class="chip on">Toutes variétés</span><span class="chip">Chemlali</span><span class="chip">Chetoui</span><span class="chip">Maturité ≥ 70%</span></div>
+        <div class="map" style="flex:1">
+          <span class="pin p1" style="left:60px;top:60px"></span><span class="pin p1" style="left:110px;top:90px"></span>
+          <span class="pin p2" style="left:180px;top:70px"></span><span class="pin p2" style="left:230px;top:160px"></span>
+          <span class="pin p3" style="left:140px;top:200px"></span><span class="pin p4" style="left:260px;top:240px"></span>
+          <span class="pin p1" style="left:80px;top:260px"></span>
+          <div class="card" style="position:absolute;left:10px;right:10px;bottom:10px;font-size:11.5px">
+            <div class="between"><b>Verger Nord — Sakiet Ezzit</b><span class="st a">MÛR</span></div>
+            <div class="muted">Chemlali · 4,5 ha · maturité 72 %</div>
+          </div>
+        </div>
+        <div class="chips muted"><span>● récolté</span><span style="color:#c58b1c">● mûr</span><span style="color:#b23a3a">● alerte</span><span>● non mûr</span></div>
+        <div class="btn">Devenir adhérent</div>
+      </div>
+      <div class="help">?</div>
+    </div>
+  </div>
+
+  <!-- M8 Connexion -->
+  <div>
+    <div class="cap">M8 · Connexion + visite guidée <span>— UC04/06</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="body" style="justify-content:center;padding:20px 14px;gap:12px">
+        <div style="text-align:center;font-size:34px"><span style="color:#9bbb59">●</span></div>
+        <div style="text-align:center;font-weight:800;font-size:20px">OliveConnect</div>
+        <div style="text-align:center" class="muted">Coopérative oléicole de Sfax</div>
+        <div><div class="lbl">E-mail ou téléphone</div><div class="inp">ali@exemple.tn</div></div>
+        <div><div class="lbl">Mot de passe</div><div class="inp">••••••••</div></div>
+        <div class="btn">Se connecter</div>
+        <div style="text-align:center" class="muted">Pas encore adhérent ? <b style="color:var(--acc)">Demander une inscription</b></div>
+        <div class="card" style="border:2px solid var(--acc);margin-top:14px;background:#f6f9ef">
+          <b>👋 Première connexion ?</b>
+          <div class="muted" style="margin:4px 0 8px">Une visite guidée de 5 étapes vous montre comment déclarer une récolte et signaler la maturité.</div>
+          <div class="between"><span class="btn sm">Commencer la visite</span><span class="muted">Plus tard</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AU1 erreurs de connexion -->
+  <div>
+    <div class="cap">AU1 · Connexion : erreurs <span>— UC04 (scénarios alternatifs)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="body" style="padding:18px 14px;gap:10px">
+        <div style="text-align:center;color:#9bbb59;font-size:22px">●</div>
+        <div style="text-align:center;font-weight:800;font-size:19px">Connexion</div>
+        <div class="card" style="background:#f6dddd;border-color:#b23a3a;font-size:11.5px">✖ <b>Identifiants incorrects.</b> Il vous reste 3 tentatives avant blocage temporaire (15 min).</div>
+        <div><div class="lbl">E-mail ou téléphone</div><div class="inp"><span style="color:#333">+216 98 123 412</span></div></div>
+        <div><div class="lbl">Mot de passe</div><div class="inp" style="border-color:#b23a3a"><span style="color:#333">••••••</span><span>👁</span></div><div class="muted" style="color:#b23a3a;font-size:11px;margin-top:3px">Mot de passe incorrect</div></div>
+        <div class="between"><span class="muted"><span class="toggle off" style="display:inline-block;vertical-align:middle;margin-right:5px"></span>Rester connecté</span><b style="color:var(--acc);font-size:11.5px">Mot de passe oublié ?</b></div>
+        <div class="btn">Se connecter</div>
+        <div class="lbl" style="margin-top:8px">Autres messages possibles</div>
+        <div class="card" style="background:#fbefd3;border-color:#c58b1c;font-size:11.5px">⏳ <b>Compte en attente de validation.</b> La coopérative vérifie votre inscription (RG09). Vous recevrez un SMS.</div>
+        <div class="card" style="background:#eee;font-size:11.5px">🔒 <b>Compte bloqué</b> après 5 échecs. Réessayez dans 15 min ou réinitialisez votre mot de passe.</div>
+        <div class="card" style="background:#eee;font-size:11.5px">⛔ <b>Compte désactivé.</b> Contactez l'administrateur de la coopérative.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AU2 mot de passe oublié -->
+  <div>
+    <div class="cap">AU2 · Mot de passe oublié <span>— UC04 (réinitialisation par SMS)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Mot de passe oublié</span><span class="dot">?</span></div>
+      <div class="body">
+        <div class="lbl">Étape 1 — Recevoir un code</div>
+        <div class="card" style="display:flex;flex-direction:column;gap:7px">
+          <div><div class="lbl">Téléphone ou e-mail du compte</div><div class="inp"><span style="color:#333">+216 98 123 412</span></div></div>
+          <div class="btn sm" style="display:flex;height:32px">Envoyer le code</div>
+          <div class="muted" style="font-size:11px">✔ Code envoyé au +216 98 ••• 412 — valable 10 min</div>
+        </div>
+        <div class="lbl">Étape 2 — Saisir le code</div>
+        <div class="between" style="gap:6px">
+          <div class="inp" style="width:44px;justify-content:center;color:#333;font-weight:700">4</div><div class="inp" style="width:44px;justify-content:center;color:#333;font-weight:700">8</div><div class="inp" style="width:44px;justify-content:center;color:#333;font-weight:700">1</div><div class="inp" style="width:44px;justify-content:center;border-color:var(--acc)"></div><div class="inp" style="width:44px;justify-content:center"></div><div class="inp" style="width:44px;justify-content:center"></div>
+        </div>
+        <div class="muted" style="font-size:11px">Pas reçu ? <b style="color:var(--acc)">Renvoyer</b> dans 0:42</div>
+        <div class="lbl">Étape 3 — Nouveau mot de passe</div>
+        <div class="inp">•••••••••</div>
+        <div class="bar"><b style="width:70%"></b></div><div class="muted" style="font-size:10.5px">Robustesse : bonne · 8 caractères min., 1 chiffre</div>
+        <div class="inp">Confirmer le mot de passe</div>
+        <div style="flex:1"></div>
+        <div class="btn">Réinitialiser et se connecter</div>
+      </div>
+    </div>
+    <div class="note">Code faux 3 fois → nouveau code obligatoire · code expiré → message + renvoi.</div>
+  </div>
+
+  <!-- P2 Inscription -->
+  <div>
+    <div class="cap">P2 · Inscription — étape 1 : vos informations <span>— Visiteur (UC03)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Devenir adhérent</span><span class="dot">?</span></div>
+      <div class="body">
+        <div class="muted">Étape 1 / 2 — Vos informations</div>
+        <div class="bar"><b style="width:50%"></b></div>
+        <div class="form2"><div><div class="lbl">Nom</div><div class="inp">Ben Salah</div></div><div><div class="lbl">Prénom</div><div class="inp">Ali</div></div></div>
+        <div><div class="lbl">CIN</div><div class="inp">0123 4567</div></div>
+        <div><div class="lbl">Téléphone</div><div class="inp">+216 __ ___ ___</div></div>
+        <div><div class="lbl">E-mail (optionnel)</div><div class="inp">ali@exemple.tn</div></div>
+        <div><div class="lbl">Adresse / délégation</div><div class="inp">Sakiet Ezzit ▾</div></div>
+        <div><div class="lbl">Mot de passe</div><div class="inp">•••••••• <span class="muted">8 caractères min.</span></div></div>
+        <div class="muted" style="font-size:11px">Étape 2 : votre premier verger (facultatif, modifiable plus tard).</div>
+        <div style="flex:1"></div>
+        <div class="card muted" style="background:#f6f9ef;font-size:11px">ℹ Votre compte sera activé après vérification par la coopérative (RG09). Vous recevrez un SMS.</div>
+        <div class="btn">Continuer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AU3 inscription étape 2 -->
+  <div>
+    <div class="cap">AU3 · Inscription — étape 2 : premier verger <span>— Visiteur (UC03)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Devenir adhérent</span><span class="dot">?</span></div>
+      <div class="body">
+        <div class="muted">Étape 2 / 2 — Votre premier verger (facultatif)</div>
+        <div class="bar"><b style="width:100%"></b></div>
+        <div><div class="lbl">Nom du verger</div><div class="inp"><span style="color:#333">Verger Nord</span></div></div>
+        <div><div class="lbl">Position — utilisez le GPS ou touchez la carte</div>
+          <div class="map" style="height:140px"><span class="pin p2" style="left:150px;top:55px"></span>
+            <div class="btn sm ghost" style="position:absolute;right:8px;top:8px;background:#fff">📍 Ma position</div></div></div>
+        <div class="form2"><div><div class="lbl">Variété</div><div class="inp"><span style="color:#333">Chemlali</span>▾</div></div><div><div class="lbl">Surface (ha)</div><div class="inp"><span style="color:#333">4,5</span></div></div></div>
+        <div class="card" style="display:flex;gap:8px;align-items:flex-start;font-size:11.5px"><span class="toggle" style="margin-top:2px"></span><span>J'accepte les conditions d'utilisation et le traitement de mes données par la coopérative.</span></div>
+        <div style="flex:1"></div>
+        <div class="form2"><div class="btn ghost">Passer</div><div class="btn">Envoyer la demande</div></div>
+      </div>
+    </div>
+    <div class="note">Erreurs : téléphone ou CIN déjà utilisés (409) · conditions non acceptées → bouton désactivé.</div>
+  </div>
+
+  <!-- AU4 demande envoyée -->
+  <div>
+    <div class="cap">AU4 · Inscription envoyée — en attente <span>— Visiteur (UC03, RG09)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="body" style="padding:26px 16px;gap:12px;text-align:center">
+        <div style="margin:20px auto 0;width:78px;height:78px;border-radius:50%;background:#e8f0d8;border:3px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--acc)">✔</div>
+        <b style="font-size:18px">Demande envoyée !</b>
+        <div class="muted" style="font-size:12.5px">Merci Ali. La coopérative va vérifier vos informations, généralement sous 48 h.</div>
+        <div class="card" style="text-align:left;display:flex;flex-direction:column;gap:8px">
+          <div class="timeline" style="margin:4px 4px 2px"><div class="done"><i></i>Envoyée</div><div class="cur"><i></i>Vérification</div><div><i></i>Compte actif</div></div>
+          <div class="muted" style="font-size:11.5px">📱 Vous recevrez un SMS au +216 98 ••• 412 dès l'activation de votre compte et de votre n° d'adhérent.</div>
+        </div>
+        <div class="card muted" style="text-align:left;font-size:11.5px;background:#f6f9ef">En attendant, vous pouvez consulter la carte publique des vergers et les informations de la coopérative.</div>
+        <div style="flex:1"></div>
+        <div class="btn ghost">Voir la carte des vergers</div>
+        <div class="btn">Retour à l'accueil</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P3 Notifications -->
+  <div>
+    <div class="cap">P3 · Notifications <span>— Tous les profils (UC05)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Notifications</span><span class="muted" style="color:#e8f0d8;font-size:11px">Tout marquer lu</span></div>
+      <div class="body" style="gap:2px">
+        <div class="chips" style="margin-bottom:6px"><span class="chip on">Toutes</span><span class="chip">Non lues (3)</span><span class="chip">Collectes</span><span class="chip">Alertes</span></div>
+        <div class="item unread"><i style="background:#dde7f3"></i><div><b>Tournée planifiée</b><div class="muted">Demande #D-118 planifiée le 02/12 avec l'équipe de Karim T.</div><div class="muted" style="font-size:10px">il y a 5 min</div></div></div>
+        <div class="item unread"><i style="background:#e3f1d0"></i><div><b>Avancement de la collecte</b><div class="muted">Verger Sud : 2 100 kg récoltés (70 %).</div><div class="muted" style="font-size:10px">il y a 1 h</div></div></div>
+        <div class="item unread"><i style="background:#f6dddd"></i><div><b>Alerte prise en charge</b><div class="muted">Ravageur — Verger Sud : équipe envoyée.</div><div class="muted" style="font-size:10px">il y a 3 h</div></div></div>
+        <div class="item"><i style="background:#f6e6e1"></i><div><b>Réception au pressoir</b><div class="muted">2 840 kg reçus · acidité 0,6 % · Extra.</div><div class="muted" style="font-size:10px">hier</div></div></div>
+        <div class="item"><i></i><div><b>Demande rejetée</b><div class="muted">#D-102 : verger non mûr (maturité 45 %).</div><div class="muted" style="font-size:10px">20/11</div></div></div>
+        <div class="item"><i></i><div><b>Bienvenue sur OliveConnect</b><div class="muted">Votre compte a été activé.</div><div class="muted" style="font-size:10px">15/11</div></div></div>
+      </div>
+      <div class="nav"><div><i></i>Accueil</div><div><i></i>Vergers</div><div><i></i>Collectes</div><div><i></i>Alertes</div><div><i></i>Aide</div></div>
+    </div>
+  </div>
+
+  <!-- P4 Profil -->
+  <div>
+    <div class="cap">P4 · Mon profil <span>— Tous les profils (UC07)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Mon profil</span><span class="dot">?</span></div>
+      <div class="body">
+        <div class="between" style="justify-content:flex-start;gap:12px"><div style="width:54px;height:54px;border-radius:50%;background:var(--fill)"></div><div><b style="font-size:15px">Ali Ben Salah</b><div class="muted">Agriculteur · ADH-0042</div><span class="st g">COMPTE ACTIF</span></div></div>
+        <div><div class="lbl">Téléphone</div><div class="inp"><span style="color:#333">+216 98 ••• 412</span>✎</div></div>
+        <div><div class="lbl">E-mail</div><div class="inp"><span style="color:#333">ali@exemple.tn</span>✎</div></div>
+        <div><div class="lbl">Adresse</div><div class="inp"><span style="color:#333">Sakiet Ezzit, Sfax</span>✎</div></div>
+        <div class="lbl" style="margin-top:4px">Préférences de notification</div>
+        <div class="card" style="display:flex;flex-direction:column;gap:8px">
+          <div class="between"><span>Notifications dans l'application</span><span class="toggle"></span></div>
+          <div class="between"><span>SMS pour les collectes</span><span class="toggle"></span></div>
+          <div class="between"><span>E-mail récapitulatif</span><span class="toggle off"></span></div>
+        </div>
+        <div class="btn ghost">Changer le mot de passe</div>
+        <div class="btn ghost">Revoir la visite guidée</div>
+        <div style="flex:1"></div>
+        <div class="btn red">Se déconnecter</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P5 Centre d'aide -->
+  <div>
+    <div class="cap">P5 · Centre d'aide <span>— Tous les profils (UC06)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>Aide</span><span class="dot">✕</span></div>
+      <div class="body">
+        <div class="inp">🔍 Rechercher dans l'aide…</div>
+        <div class="card" style="border-color:var(--acc);background:#f6f9ef"><b>Aide pour cet écran</b><div class="muted">Vous étiez sur « Déclarer une récolte ». Voir les 3 conseils →</div></div>
+        <div class="lbl">Guides rapides (pour votre profil)</div>
+        <div class="card between"><span>Déclarer une récolte en 1 minute</span>›</div>
+        <div class="card between"><span>Signaler la maturité avec le GPS</span>›</div>
+        <div class="card between"><span>Modifier ou annuler une collecte</span>›</div>
+        <div class="card between"><span>Comprendre les statuts</span>›</div>
+        <div class="lbl">Questions fréquentes</div>
+        <div class="card"><div class="between"><b>Pourquoi je ne peux plus annuler ?</b>▾</div><div class="muted" style="margin-top:4px">Une collecte démarrée ne peut plus être modifiée. Contactez le responsable de collecte.</div></div>
+        <div class="card between"><b>Le GPS ne fonctionne pas</b>▸</div>
+        <div style="flex:1"></div>
+        <div class="btn ghost">▶ Relancer la visite guidée</div>
+        <div class="btn">📞 Contacter la coopérative</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P6 Visite guidée -->
+  <div>
+    <div class="cap">P6 · Visite guidée (1re connexion) <span>— UC06</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>Bonjour, Ali</span><span class="ic"><span class="dot">🔔</span><span class="dot">👤</span></span></div>
+      <div class="body">
+        <div class="tiles">
+          <div class="tile primary"><i></i>Déclarer une récolte</div>
+          <div class="tile alert"><i></i>Signaler maturité / problème</div>
+          <div class="tile"><i></i>Mes vergers (3)</div>
+          <div class="tile"><i></i>Mes collectes</div>
+        </div>
+        <div class="card" style="height:80px"></div><div class="card" style="height:60px"></div>
+      </div>
+      <div class="nav"><div class="on"><i></i>Accueil</div><div><i></i>Vergers</div><div><i></i>Collectes</div><div><i></i>Alertes</div><div><i></i>Aide</div></div>
+      <div class="overlay"></div>
+      <div class="spot" style="left:18px;top:94px;width:160px;height:90px"></div>
+      <div class="bubble" style="left:24px;top:200px;width:300px">
+        <div class="muted" style="font-size:10.5px">Étape 2 / 5</div>
+        <b>Déclarer une récolte</b>
+        <div class="muted" style="margin:4px 0 8px">Appuyez ici quand vos olives sont prêtes. Choisissez « Urgente » si la maturité est critique.</div>
+        <div class="between"><span class="muted">Passer la visite</span><span class="chips"><span class="btn sm ghost">Précédent</span><span class="btn sm">Suivant</span></span></div>
+        <div class="chips" style="justify-content:center;margin-top:6px;font-size:10px;color:#999">○ ● ○ ○ ○</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P7 Erreurs -->
+  <div>
+    <div class="cap">P7 · Accès refusé / hors connexion <span>— États d'erreur</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>OliveConnect</span><span class="dot">?</span></div>
+      <div class="body" style="gap:12px">
+        <div class="card" style="background:#fbefd3;border-color:#c58b1c;font-size:11.5px">📶 <b>Hors connexion</b> — vos saisies sont gardées sur le téléphone et seront envoyées dès le retour du réseau (2 en attente).</div>
+        <div style="text-align:center;margin-top:24px"><div style="font-size:40px">🔒</div><b style="font-size:17px">Accès refusé (403)</b>
+          <div class="muted" style="margin:6px 20px">Cette page est réservée au profil « Responsable de collecte ». Vos données restent visibles uniquement par les profils autorisés.</div></div>
+        <div class="btn ghost">Retour à l'accueil</div>
+        <div style="text-align:center;margin-top:18px"><div style="font-size:34px">🧭</div><b style="font-size:15px">Page introuvable (404)</b><div class="muted">Le lien est peut-être expiré.</div></div>
+        <div style="flex:1"></div>
+        <div class="card" style="background:#f6dddd;border-color:#b23a3a;font-size:11.5px">⏱ Session expirée — reconnectez-vous pour continuer.</div>
+        <div class="btn">Se reconnecter</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M2 Accueil agriculteur -->
+  <div>
+    <div class="cap">M2 · Accueil agriculteur <span>— UC10/11/13/14</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>Bonjour, Ali</span><span class="ic"><span class="dot badge">🔔</span><span class="dot">👤</span></span></div>
+      <div class="body">
+        <div class="tiles">
+          <div class="tile primary"><i></i>Déclarer une récolte</div>
+          <div class="tile alert"><i></i>Signaler maturité / problème</div>
+          <div class="tile"><i></i>Mes vergers (3)</div>
+          <div class="tile"><i></i>Mes collectes</div>
+        </div>
+        <div class="lbl" style="margin-top:4px">Prochaine collecte</div>
+        <div class="card">
+          <div class="between"><b>Verger Nord</b><span class="st b">PLANIFIÉE</span></div>
+          <div class="muted">Mar. 02/12 · équipe de Karim T. · Pressoir El Amra</div>
+        </div>
+        <div class="lbl">Notifications récentes</div>
+        <div class="card"><b>Tournée planifiée</b><div class="muted">Votre demande #D-118 a été planifiée pour le 02/12.</div></div>
+        <div class="card"><b>Alerte prise en charge</b><div class="muted">Ravageur — Verger Sud : équipe envoyée.</div></div>
+      </div>
+      <div class="nav"><div class="on"><i></i>Accueil</div><div><i></i>Vergers</div><div><i></i>Collectes</div><div><i></i>Alertes</div><div><i></i>Aide</div></div>
+      <div class="help">?</div>
+    </div>
+  </div>
+
+  <!-- M3 Nouvelle récolte -->
+  <div>
+    <div class="cap">M3 · Déclarer une récolte <span>— UC11 (4 saisies)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Nouvelle récolte</span><span class="dot">?</span></div>
+      <div class="body">
+        <div><div class="lbl">1. Verger</div><div class="inp"><span style="color:#333">Verger Nord (pré-sélectionné)</span>▾</div></div>
+        <div><div class="lbl">2. Type de récolte</div><div class="seg"><div class="on">Planifiée</div><div>Urgente ⚠</div></div></div>
+        <div><div class="lbl">3. Date souhaitée</div><div class="inp"><span style="color:#333">02/12/2026</span>📅</div></div>
+        <div><div class="lbl">4. Quantité estimée (kg)</div><div class="inp"><span style="color:#333">3 500</span><span class="muted">suggestion : 3 400 kg</span></div></div>
+        <div><div class="lbl">Commentaire (optionnel)</div><div class="inp area">Accès par la piste est…</div></div>
+        <div class="card muted" style="background:#f6f9ef">ℹ Une demande urgente est traitée en priorité. Vous pourrez la modifier ou l'annuler jusqu'au démarrage de la tournée.</div>
+        <div style="flex:1"></div>
+        <div class="btn">Envoyer la demande</div>
+      </div>
+    </div>
+    <div class="note">Erreurs : date passée → message sous le champ (400) · demande déjà active pour ce verger/date → bandeau rouge (409).</div>
+  </div>
+
+  <!-- M4 Signaler -->
+  <div>
+    <div class="cap">M4 · Signaler maturité / problème <span>— UC13</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Signalement</span><span class="dot">?</span></div>
+      <div class="body">
+        <div><div class="lbl">Type</div><div class="chips"><span class="chip on">● Maturité</span><span class="chip">🌧 Pluie</span><span class="chip">🐛 Ravageur</span><span class="chip">Autre</span></div></div>
+        <div><div class="lbl">Position (GPS automatique)</div>
+          <div class="map" style="height:170px"><span class="pin p3" style="left:160px;top:70px"></span>
+            <div class="card" style="position:absolute;left:8px;bottom:8px;font-size:10.5px;padding:4px 8px">📍 34.7921, 10.7613 · précision 8 m</div>
+            <div class="btn sm ghost" style="position:absolute;right:8px;top:8px;background:#fff">Ajuster</div>
+          </div></div>
+        <div><div class="lbl">Verger détecté</div><div class="inp"><span style="color:#333">Verger Nord</span>▾</div></div>
+        <div><div class="lbl">Description</div><div class="inp area">Olives noires à 80 %…</div></div>
+        <div class="btn ghost">📷 Ajouter une photo</div>
+        <div style="flex:1"></div>
+        <div class="btn">Envoyer le signalement</div>
+      </div>
+    </div>
+    <div class="note">GPS refusé → épingle à placer sur la carte · position &gt; 500 m du verger → avertissement.</div>
+  </div>
+
+  <!-- M5 Mes collectes -->
+  <div>
+    <div class="cap">M5 · Mes collectes <span>— UC12/14</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>Mes collectes</span><span class="ic"><span class="dot badge">🔔</span></span></div>
+      <div class="body">
+        <div class="seg"><div class="on">En cours</div><div>Historique</div></div>
+        <div class="card">
+          <div class="between"><b>#D-118 · Verger Nord</b><span class="st a">URGENTE</span></div>
+          <div class="muted">02/12 · 3 500 kg estimés</div>
+          <div class="timeline"><div class="done"><i></i>Soumise</div><div class="done"><i></i>Validée</div><div class="cur"><i></i>Planifiée</div><div><i></i>En cours</div><div><i></i>Terminée</div></div>
+          <div class="between" style="margin-top:8px"><span class="btn sm ghost">Modifier</span><span class="btn sm red">Annuler</span></div>
+        </div>
+        <div class="card">
+          <div class="between"><b>#D-109 · Verger Sud</b><span class="st g">EN COURS</span></div>
+          <div class="muted">Récolté : 2 100 / 3 000 kg</div>
+          <div class="bar"><b style="width:70%"></b></div>
+          <div class="muted" style="margin-top:4px">🔒 Collecte démarrée : modification impossible</div>
+        </div>
+        <div class="card">
+          <div class="between"><b>#D-097 · Verger Est</b><span class="st grey">TERMINÉE</span></div>
+          <div class="muted">2 840 kg reçus · acidité 0,6 % · Extra</div>
+        </div>
+      </div>
+      <div class="nav"><div><i></i>Accueil</div><div><i></i>Vergers</div><div class="on"><i></i>Collectes</div><div><i></i>Alertes</div><div><i></i>Aide</div></div>
+      <div class="help">?</div>
+    </div>
+  </div>
+
+  <!-- A1 Mes vergers -->
+  <div>
+    <div class="cap">A1 · Mes vergers <span>— UC10</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>Mes vergers</span><span class="btn sm ghost" style="background:#fff">+ Ajouter</span></div>
+      <div class="body">
+        <div class="seg"><div class="on">Liste</div><div>Carte</div></div>
+        <div class="card">
+          <div class="between"><b>Verger Nord</b><span class="st a">MÛR</span></div>
+          <div class="muted">Chemlali · 4,5 ha · 380 arbres · 2 parcelles</div>
+          <div class="lbl" style="margin-top:6px">Maturité 72 % <span class="muted">(capteur, il y a 2 h)</span></div><div class="bar"><b style="width:72%;background:#c58b1c"></b></div>
+          <div class="between" style="margin-top:8px"><span class="btn sm">Déclarer une récolte</span><span class="btn sm ghost">Détails</span></div>
+        </div>
+        <div class="card">
+          <div class="between"><b>Verger Sud</b><span class="st g">EN RÉCOLTE</span></div>
+          <div class="muted">Chetoui · 3,0 ha · 240 arbres</div>
+          <div class="lbl" style="margin-top:6px">Maturité 81 %</div><div class="bar"><b style="width:81%"></b></div>
+          <div class="muted" style="margin-top:4px">⚠ 1 alerte ouverte (ravageur)</div>
+        </div>
+        <div class="card">
+          <div class="between"><b>Verger Est</b><span class="st grey">NON MÛR</span></div>
+          <div class="muted">Chemlali · 2,2 ha · 190 arbres</div>
+          <div class="lbl" style="margin-top:6px">Maturité 48 %</div><div class="bar"><b style="width:48%;background:#999"></b></div>
+        </div>
+      </div>
+      <div class="nav"><div><i></i>Accueil</div><div class="on"><i></i>Vergers</div><div><i></i>Collectes</div><div><i></i>Alertes</div><div><i></i>Aide</div></div>
+      <div class="help">?</div>
+    </div>
+  </div>
+
+  <!-- A2 Ajouter verger -->
+  <div>
+    <div class="cap">A2 · Ajouter / modifier un verger <span>— UC10</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Nouveau verger</span><span class="dot">?</span></div>
+      <div class="body">
+        <div><div class="lbl">Nom du verger</div><div class="inp"><span style="color:#333">Verger Ouest</span></div></div>
+        <div><div class="lbl">Emplacement — touchez la carte pour tracer le contour</div>
+          <div class="map" style="height:150px">
+            <svg width="100%" height="100%" style="position:absolute;inset:0"><polygon points="90,40 210,30 240,110 120,125" fill="rgba(91,122,30,.25)" stroke="#5b7a1e" stroke-width="2"/></svg>
+            <div class="btn sm ghost" style="position:absolute;right:8px;top:8px;background:#fff">📍 Ma position</div>
+            <div class="card" style="position:absolute;left:8px;bottom:8px;font-size:10.5px;padding:3px 8px">Surface calculée : 3,8 ha</div>
+          </div></div>
+        <div class="form2"><div><div class="lbl">Variété principale</div><div class="inp"><span style="color:#333">Chemlali</span>▾</div></div><div><div class="lbl">Nombre d'arbres</div><div class="inp"><span style="color:#333">320</span></div></div></div>
+        <div class="lbl">Parcelles</div>
+        <div class="card between" style="font-size:11.5px"><span>P1 · 2,0 ha · Chemlali · 1998</span><span class="muted">✎ ✕</span></div>
+        <div class="card between" style="font-size:11.5px"><span>P2 · 1,8 ha · Chetoui · 2010</span><span class="muted">✎ ✕</span></div>
+        <div class="btn ghost sm" style="display:flex">+ Ajouter une parcelle</div>
+        <div style="flex:1"></div>
+        <div class="btn">Enregistrer le verger</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A3 Détail demande -->
+  <div>
+    <div class="cap">A3 · Détail d'une demande <span>— UC12/14</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>← Demande #D-118</span><span class="st a" style="background:#fff">URGENTE</span></div>
+      <div class="body">
+        <div class="card">
+          <div class="between"><b>Verger Nord</b><span class="st b">PLANIFIÉE</span></div>
+          <div class="timeline"><div class="done"><i></i>Soumise</div><div class="done"><i></i>Validée</div><div class="cur"><i></i>Planifiée</div><div><i></i>En cours</div><div><i></i>Terminée</div></div>
+        </div>
+        <div class="card" style="font-size:12px;display:flex;flex-direction:column;gap:4px">
+          <div class="between"><span class="muted">Date de collecte</span><b>Mar. 02/12/2026</b></div>
+          <div class="between"><span class="muted">Quantité estimée</span><b>3 500 kg</b></div>
+          <div class="between"><span class="muted">Chef d'équipe</span><b>Karim T. · 📞</b></div>
+          <div class="between"><span class="muted">Pressoir</span><b>El Amra</b></div>
+          <div class="between"><span class="muted">Moyens</span><b>TR-03 · 2 bennes · 8 ouvriers</b></div>
+        </div>
+        <div class="lbl">Historique</div>
+        <div class="card muted" style="font-size:11px;line-height:1.6">
+          24/11 18:02 — Planifiée par S. Chaabane (tournée T-42)<br>24/11 09:40 — Validée par S. Chaabane<br>24/11 08:15 — Soumise par vous
+        </div>
+        <div style="flex:1"></div>
+        <div class="card muted" style="background:#f6f9ef;font-size:11px">Modifiable jusqu'au démarrage de la tournée (RG03).</div>
+        <div class="form2"><div class="btn ghost">Modifier</div><div class="btn red">Annuler</div></div>
+      </div>
+      <div class="shade" style="border-radius:27px;display:none"></div>
+    </div>
+    <div class="note">« Annuler » ouvre une confirmation (motif facultatif) ; la place est libérée dans la tournée et le responsable est notifié.</div>
+  </div>
+
+  <!-- A4 Mes alertes -->
+  <div>
+    <div class="cap">A4 · Mes alertes <span>— UC13</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top"><span>Mes signalements</span><span class="btn sm ghost" style="background:#fff;color:#b23a3a;border-color:#b23a3a">+ Signaler</span></div>
+      <div class="body">
+        <div class="chips"><span class="chip on">Toutes</span><span class="chip">Ouvertes (1)</span><span class="chip">Résolues</span></div>
+        <div class="card">
+          <div class="between"><b>🐛 Ravageur · Verger Sud</b><span class="st a">PRISE EN CHARGE</span></div>
+          <div class="muted">22/11 · « Mouche de l'olive sur la rangée est »</div>
+          <div class="imgph" style="height:60px;margin:6px 0">photo</div>
+          <div class="muted" style="font-size:11px">💬 S. Chaabane : équipe de traitement envoyée le 23/11.</div>
+        </div>
+        <div class="card">
+          <div class="between"><b>● Maturité · Verger Nord</b><span class="st g">RÉSOLUE</span></div>
+          <div class="muted">20/11 · Récolte planifiée suite au signalement (#D-118)</div>
+        </div>
+        <div class="card">
+          <div class="between"><b>🌧 Pluie · Verger Est</b><span class="st g">RÉSOLUE</span></div>
+          <div class="muted">12/11 · Collecte reportée au 18/11</div>
+        </div>
+        <div class="card">
+          <div class="between"><b>Auto · Verger Nord</b><span class="st grey">INFO</span></div>
+          <div class="muted">Capteur : maturité &gt; 70 % — alerte créée automatiquement</div>
+        </div>
+      </div>
+      <div class="nav"><div><i></i>Accueil</div><div><i></i>Vergers</div><div><i></i>Collectes</div><div class="on"><i></i>Alertes</div><div><i></i>Aide</div></div>
+      <div class="help">?</div>
+    </div>
+  </div>
+
+  <!-- C1 Mes tournées -->
+  <div>
+    <div class="cap">C1 · Mes tournées <span>— Chef d'équipe (UC30)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top" style="background:#2a7d6b"><span>Mes tournées</span><span class="ic"><span class="dot badge">🔔</span></span></div>
+      <div class="body">
+        <div class="seg"><div class="on" style="background:#2a7d6b">Aujourd'hui</div><div>À venir</div><div>Terminées</div></div>
+        <div class="card" style="border-color:#2a7d6b">
+          <div class="between"><b>T-42 · Mar. 02/12</b><span class="st b">PLANIFIÉE</span></div>
+          <div class="muted">2 vergers · 4 700 kg estimés · Pressoir El Amra</div>
+          <div class="muted">🚜 TR-03 · 🧺 BN-12, BN-14 · 👷 8</div>
+          <div class="map" style="height:90px;margin:6px 0"><span class="pin p2" style="left:70px;top:30px"></span><span class="pin p2" style="left:190px;top:45px"></span></div>
+          <div class="btn" style="background:#2a7d6b">▶ Démarrer la tournée</div>
+        </div>
+        <div class="card">
+          <div class="between"><b>T-45 · Ven. 04/12</b><span class="st b">PLANIFIÉE</span></div>
+          <div class="muted">3 vergers · 6 200 kg · Pressoir Agareb</div>
+        </div>
+        <div class="card">
+          <div class="between"><b>T-38 · Mar. 01/12</b><span class="st grey">CLÔTURÉE</span></div>
+          <div class="muted">3 980 kg récoltés · remplissage 91 %</div>
+        </div>
+      </div>
+      <div class="nav"><div class="on" style="color:#2a7d6b"><i style="background:#2a7d6b"></i>Tournées</div><div><i></i>Carte</div><div><i></i>Notifs</div><div><i></i>Aide</div></div>
+      <div class="help" style="border-color:#2a7d6b;color:#2a7d6b">?</div>
+    </div>
+  </div>
+
+  <!-- M6 Chef tournée -->
+  <div>
+    <div class="cap">M6 · Tournée sur le terrain <span>— Chef d'équipe (UC31–34)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top" style="background:#2a7d6b"><span>Tournée T-42 · 02/12</span><span class="st g">EN COURS</span></div>
+      <div class="body">
+        <div class="card muted">🚜 TR-03 · 🧺 BN-12, BN-14 · 👷 8 ouvriers · → Pressoir El Amra</div>
+        <div class="card" style="border-color:#2a7d6b">
+          <div class="between"><b>1. Verger Nord</b><span class="st a">EN RÉCOLTE</span></div>
+          <div class="lbl" style="margin-top:6px">Avancement : 60 %</div><div class="bar"><b style="width:60%;background:#2a7d6b"></b></div>
+          <div class="lbl" style="margin-top:6px">Quantité récoltée (kg)</div>
+          <div class="between" style="gap:6px"><div class="inp" style="flex:1"><span style="color:#333">2 100</span></div><span class="btn sm" style="background:#2a7d6b">+ 250</span></div>
+          <div class="lbl" style="margin-top:6px">Statut du verger</div>
+          <div class="chips"><span class="chip">Mûr</span><span class="chip on">En récolte</span><span class="chip">Récolté</span></div>
+        </div>
+        <div class="card"><div class="between"><b>2. Verger Est</b><span class="st grey">À VENIR</span></div><div class="muted">1 200 kg estimés · 3,2 km</div></div>
+        <div style="flex:1"></div>
+        <div class="btn" style="background:#2a7d6b">Enregistrer (notifie l'agriculteur)</div>
+        <div class="btn ghost" style="color:#2a7d6b;border-color:#2a7d6b">Livrer au pressoir</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C2 Livraison -->
+  <div>
+    <div class="cap">C2 · Livraison au pressoir <span>— Chef d'équipe (UC34)</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top" style="background:#2a7d6b"><span>← Livrer T-42</span><span class="dot">?</span></div>
+      <div class="body">
+        <div class="card"><b>Récapitulatif de la tournée</b>
+          <table style="margin-top:6px"><tr><th>Verger</th><th>Estimé</th><th>Récolté</th></tr>
+            <tr><td>Verger Nord</td><td>3 500</td><td>3 380 kg</td></tr>
+            <tr><td>Verger Est</td><td>1 200</td><td>1 150 kg</td></tr>
+            <tr><td><b>Total</b></td><td>4 700</td><td><b>4 530 kg</b></td></tr></table>
+        </div>
+        <div class="lbl">Bennes chargées</div>
+        <div class="card between"><span>🧺 BN-12 (2 t)</span><span class="muted">≈ 1 900 kg</span></div>
+        <div class="card between"><span>🧺 BN-14 (2 t)</span><span class="muted">≈ 1 950 kg</span></div>
+        <div class="card" style="border-color:#c58b1c;background:#fffaf0;font-size:11px">⚠ ~680 kg dépassent la capacité des bennes : prévoir un 2e voyage.</div>
+        <div><div class="lbl">Pressoir de destination</div><div class="inp"><span style="color:#333">El Amra — 12,4 t libres</span>▾</div></div>
+        <div style="flex:1"></div>
+        <div class="btn" style="background:#2a7d6b">Confirmer le départ vers le pressoir</div>
+        <div class="muted" style="text-align:center;font-size:11px">Statut → LIVRÉE · le pressoir est notifié</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- M7 Pressoir réception -->
+  <div>
+    <div class="cap">M7 · Réception au pressoir <span>— UC50/51</span></div>
+    <div class="phone"><div class="notch"></div>
+      <div class="top" style="background:#a14a35"><span>Pressoir El Amra</span><span class="dot">?</span></div>
+      <div class="body">
+        <div class="card"><div class="lbl">Capacité restante aujourd'hui</div><div class="between"><b style="font-size:18px">12 400 kg</b><span class="btn sm ghost" style="color:#a14a35;border-color:#a14a35">Mettre à jour</span></div><div class="bar"><b style="width:38%;background:#a14a35"></b></div></div>
+        <div><div class="lbl">Tournée livrée</div><div class="inp"><span style="color:#333">T-42 · Karim T. · 2 bennes</span>▾</div></div>
+        <div><div class="lbl">Benne</div><div class="seg"><div class="on">BN-12 (2 t)</div><div>BN-14 (2 t)</div></div></div>
+        <div><div class="lbl">Poids net (kg)</div><div class="inp"><span style="color:#333">1 860</span><span class="muted">remplissage 93 %</span></div></div>
+        <div class="between" style="gap:8px"><div style="flex:1"><div class="lbl">Acidité (%)</div><div class="inp"><span style="color:#333">0,6</span></div></div><div style="flex:1"><div class="lbl">Catégorie</div><div class="inp"><span style="color:#333">Extra</span>▾</div></div></div>
+        <div style="flex:1"></div>
+        <div class="btn" style="background:#a14a35">Confirmer la réception</div>
+      </div>
+    </div>
+    <div class="note">Poids &gt; 110 % de la capacité de la benne → refus (RG07). Dernière benne reçue → tournée CLÔTURÉE.</div>
+  </div>
+</div>
+
+<h2>B. Écrans bureau — encadrement (18 écrans)</h2>
+<div class="sec-note">Authentification, accueil public, responsable de collecte, logistique, pressoir et administrateur.</div>
+<div class="row">
+  <!-- P1 Accueil public -->
+  <div>
+    <div class="cap">P1 · Accueil public <span>— Visiteur (UC02)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn</span></div>
+      <div class="main" style="padding:0">
+        <div class="between" style="padding:10px 16px;border-bottom:1.5px solid var(--line);background:#fff">
+          <b style="font-size:15px"><span style="color:#9bbb59">●</span> OliveConnect</b>
+          <div class="chips" style="align-items:center"><span class="muted">Accueil</span><span class="muted">Carte des vergers</span><span class="muted">La coopérative</span><span class="muted">Aide</span><span class="btn sm ghost">Se connecter</span><span class="btn sm">Devenir adhérent</span></div>
+        </div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:12px;flex:1">
+          <div class="hero">
+            <div style="flex:1.2">
+              <div style="font-size:21px;font-weight:800;color:#2f3e12">La collecte des olives, coordonnée en temps réel</div>
+              <div class="muted" style="margin:6px 0 10px;font-size:12.5px">Déclarez vos récoltes, signalez la maturité de vos vergers et suivez la collecte jusqu'au pressoir.</div>
+              <div class="chips"><span class="btn sm">Voir la carte des vergers</span><span class="btn sm ghost">Demander mon inscription</span></div>
+            </div>
+            <div class="imgph" style="flex:1;height:130px">illustration / photo de verger</div>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="muted">Adhérents</div><div class="v">412</div></div>
+            <div class="kpi"><div class="muted">Vergers suivis</div><div class="v">1 180</div></div>
+            <div class="kpi"><div class="muted">Olives collectées (saison)</div><div class="v">486 t</div></div>
+            <div class="kpi"><div class="muted">Pressoirs partenaires</div><div class="v">4</div></div>
+          </div>
+          <div class="cols">
+            <div class="card" style="flex:1"><b>1. Je déclare</b><div class="muted">Récolte planifiée ou urgente en 4 saisies, depuis mon téléphone.</div></div>
+            <div class="card" style="flex:1"><b>2. La coopérative planifie</b><div class="muted">Tournée, équipe, tracteurs et bennes affectés selon la maturité.</div></div>
+            <div class="card" style="flex:1"><b>3. Je suis la collecte</b><div class="muted">Notifications à chaque étape, pesée et qualité au pressoir.</div></div>
+          </div>
+          <div class="card" style="font-size:11.5px"><b>Actualités</b> — Ouverture de la campagne 2026-2027 le 15/11 · Alerte météo : pluies prévues le 05/12 sur Agareb.</div>
+          <div class="muted" style="text-align:center;font-size:11px">Coopérative oléicole de Sfax · Contact · Mentions légales</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AU5 connexion bureau -->
+  <div>
+    <div class="cap">AU5 · Connexion (version bureau) <span>— Tous les profils (UC04)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/connexion</span></div>
+      <div class="app">
+        <div style="flex:1;background:linear-gradient(150deg,#2f3e12,#5b7a1e);color:#eef3e3;padding:34px 30px;display:flex;flex-direction:column;gap:14px">
+          <b style="font-size:22px;color:#fff"><span style="color:#b9d47a">●</span> OliveConnect</b>
+          <div style="font-size:19px;font-weight:700;color:#fff;line-height:1.3">Une seule plateforme pour les vergers, les tournées et les pressoirs.</div>
+          <div style="font-size:12.5px;opacity:.85">Coopérative oléicole de Sfax · campagne 2026-2027</div>
+          <div style="flex:1"></div>
+          <div style="display:flex;gap:10px;font-size:11px">
+            <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 10px;flex:1"><b style="font-size:16px;color:#fff">412</b><br>adhérents</div>
+            <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 10px;flex:1"><b style="font-size:16px;color:#fff">486 t</b><br>collectées</div>
+            <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 10px;flex:1"><b style="font-size:16px;color:#fff">4</b><br>pressoirs</div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#fff">
+          <div style="width:300px;display:flex;flex-direction:column;gap:10px;font-size:12px">
+            <b style="font-size:20px">Connexion</b>
+            <div class="muted">Accédez à votre espace selon votre profil.</div>
+            <div><div class="lbl">E-mail ou téléphone</div><div class="inp">s.chaabane@oliveconnect.tn</div></div>
+            <div><div class="lbl">Mot de passe</div><div class="inp">•••••••• <span>👁</span></div></div>
+            <div class="between"><span class="muted"><span class="toggle" style="display:inline-block;vertical-align:middle;margin-right:5px"></span>Rester connecté (8 h)</span><b style="color:var(--acc);font-size:11.5px">Mot de passe oublié ?</b></div>
+            <div class="btn">Se connecter</div>
+            <div class="between" style="gap:8px;color:#aaa;font-size:11px"><span style="flex:1;height:1px;background:#ddd"></span>ou<span style="flex:1;height:1px;background:#ddd"></span></div>
+            <div class="btn ghost">Demander une inscription (agriculteur)</div>
+            <div class="muted" style="font-size:10.5px;text-align:center">Les comptes du personnel sont créés par l'administrateur. Après connexion, chaque profil est redirigé vers son espace (Accueil agriculteur, Demandes, Tournées, Calendrier, Pressoir, Admin).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AU6 inscription bureau -->
+  <div>
+    <div class="cap">AU6 · Inscription agriculteur (version bureau) <span>— Visiteur (UC03)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/inscription</span></div>
+      <div class="main" style="padding:0">
+        <div class="between" style="padding:10px 16px;border-bottom:1.5px solid var(--line);background:#fff">
+          <b style="font-size:15px"><span style="color:#9bbb59">●</span> OliveConnect</b>
+          <span class="muted">Déjà adhérent ? <b style="color:var(--acc)">Se connecter</b></span>
+        </div>
+        <div style="padding:12px 18px;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div class="between"><b style="font-size:17px">Devenir adhérent de la coopérative</b>
+            <div class="chips" style="align-items:center"><span class="st g">1 · Vos informations ✔</span><span class="muted">—</span><span class="st b">2 · Votre verger</span><span class="muted">—</span><span class="st grey">3 · Validation</span></div></div>
+          <div class="cols">
+            <div class="card" style="flex:1;display:flex;flex-direction:column;gap:7px">
+              <b>Vos informations</b>
+              <div class="form2"><div><div class="lbl">Nom</div><div class="inp">Ben Salah</div></div><div><div class="lbl">Prénom</div><div class="inp">Ali</div></div></div>
+              <div class="form2"><div><div class="lbl">CIN</div><div class="inp">0123 4567</div></div><div><div class="lbl">Téléphone</div><div class="inp">+216 98 123 412</div></div></div>
+              <div class="form2"><div><div class="lbl">E-mail (optionnel)</div><div class="inp">ali@exemple.tn</div></div><div><div class="lbl">Délégation</div><div class="inp">Sakiet Ezzit ▾</div></div></div>
+              <div class="form2"><div><div class="lbl">Mot de passe</div><div class="inp">•••••••••</div></div><div><div class="lbl">Confirmation</div><div class="inp" style="border-color:#b23a3a">••••••••</div><div class="muted" style="color:#b23a3a;font-size:10.5px">Les mots de passe ne correspondent pas</div></div></div>
+            </div>
+            <div class="card" style="flex:1;display:flex;flex-direction:column;gap:7px">
+              <b>Votre premier verger <span class="muted" style="font-weight:400">(facultatif)</span></b>
+              <div class="form2"><div><div class="lbl">Nom du verger</div><div class="inp">Verger Nord</div></div><div><div class="lbl">Variété</div><div class="inp">Chemlali ▾</div></div></div>
+              <div class="map" style="flex:1;min-height:120px"><svg width="100%" height="100%" style="position:absolute;inset:0"><polygon points="110,25 230,20 250,95 125,105" fill="rgba(91,122,30,.25)" stroke="#5b7a1e" stroke-width="2"/></svg><div class="card" style="position:absolute;left:8px;bottom:8px;font-size:10.5px;padding:3px 8px">Tracez le contour · 4,5 ha</div></div>
+            </div>
+          </div>
+          <div class="between">
+            <span class="muted" style="font-size:11.5px"><span class="toggle" style="display:inline-block;vertical-align:middle;margin-right:6px"></span>J'accepte les conditions d'utilisation et le traitement de mes données.</span>
+            <div class="chips"><span class="btn sm ghost">← Retour</span><span class="btn sm">Envoyer ma demande d'inscription</span></div>
+          </div>
+          <div class="card muted" style="font-size:11px;background:#f6f9ef">ℹ Le compte reste inactif jusqu'à sa validation par l'administrateur (RG09) — voir l'écran AD2.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D1 Planification -->
+  <div>
+    <div class="cap">D1 · File des demandes &amp; planification d'une tournée <span>— Responsable de collecte (UC20/21)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/collecte/planifier</span></div>
+      <div class="app">
+        <div class="side"><b><span style="color:#9bbb59">●</span> OliveConnect</b><div class="on">Demandes</div><div>Tournées</div><div>Alertes (4)</div><div>Carte</div><div>Tableau de bord</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Planifier une tournée</h3><div class="chips"><span class="chip on">Validées</span><span class="chip">Soumises (6)</span><span class="chip">Urgentes d'abord</span></div></div>
+          <div class="cols">
+            <div style="flex:1.3;display:flex;flex-direction:column;gap:8px;min-width:0">
+              <table>
+                <tr><th></th><th>Demande</th><th>Verger</th><th>Type</th><th>Mat.</th><th>kg</th></tr>
+                <tr><td>☑</td><td>#D-118</td><td>Verger Nord</td><td><span class="st a">URGENTE</span></td><td>82 %</td><td>3 500</td></tr>
+                <tr><td>☑</td><td>#D-121</td><td>Verger Est</td><td><span class="st grey">PLANIF.</span></td><td>74 %</td><td>1 200</td></tr>
+                <tr><td>☐</td><td>#D-124</td><td>El Hencha 2</td><td><span class="st grey">PLANIF.</span></td><td>68 %</td><td>4 100</td></tr>
+                <tr><td>☐</td><td>#D-125</td><td>Agareb 1</td><td><span class="st grey">PLANIF.</span></td><td>61 %</td><td>2 300</td></tr>
+              </table>
+              <div class="map" style="flex:1"><span class="pin p2" style="left:90px;top:40px"></span><span class="pin p2" style="left:180px;top:70px"></span><span class="pin p4" style="left:280px;top:50px"></span><span class="pin p1" style="left:330px;top:90px"></span></div>
+            </div>
+            <div class="card" style="flex:1;display:flex;flex-direction:column;gap:5px;min-width:0;font-size:11.5px">
+              <b>Nouvelle tournée — 2 demandes · 4 700 kg</b>
+              <div class="between" style="gap:8px"><div style="flex:1"><div class="lbl">Date</div><div class="inp">02/12/2026</div></div><div style="flex:1"><div class="lbl">Pressoir</div><div class="inp">El Amra (12,4 t libres)</div></div></div>
+              <div><div class="lbl">Chef d'équipe</div><div class="inp">Karim T. ▾</div></div>
+              <div class="lbl">Ressources disponibles le 02/12</div>
+              <div class="chips"><span class="chip on">🚜 TR-03</span><span class="chip">🚜 TR-05</span><span class="chip on">🧺 BN-12 (2 t)</span><span class="chip on">🧺 BN-14 (2 t)</span><span class="chip">🧺 BN-15 (3 t)</span><span class="chip on">👷 8 ouvriers</span></div>
+              <div class="card" style="border-color:#c58b1c;background:#fffaf0;font-size:11px">⚠ Capacité bennes 4 000 kg &lt; 4 700 kg estimés — ajoutez une benne (RG05).</div>
+              <div class="card" style="border-color:#b23a3a;background:#fdf3f3;font-size:11px">✖ TR-05 déjà affecté à la tournée T-40 ce jour (RG04).</div>
+              <div style="flex:1"></div>
+              <div class="btn">Créer la tournée et notifier</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RC1 Examen demande -->
+  <div>
+    <div class="cap">RC1 · Examen d'une demande : valider / rejeter <span>— UC20</span></div>
+    <div class="desk" style="position:relative"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/collecte/demandes/D-124</span></div>
+      <div class="app">
+        <div class="side"><b><span style="color:#9bbb59">●</span> OliveConnect</b><div class="on">Demandes</div><div>Tournées</div><div>Alertes (4)</div><div>Carte</div><div>Tableau de bord</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Demande #D-124 — El Hencha 2</h3><div class="chips"><span class="st grey">SOUMISE</span><span class="chip">Type : planifiée</span></div></div>
+          <div class="cols">
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+              <div class="card" style="display:flex;flex-direction:column;gap:4px">
+                <div class="between"><span class="muted">Agriculteur</span><b>Mounir K. · ADH-0118 · 📞</b></div>
+                <div class="between"><span class="muted">Date souhaitée</span><b>04/12/2026</b></div>
+                <div class="between"><span class="muted">Quantité estimée</span><b>4 100 kg</b></div>
+                <div class="between"><span class="muted">Verger</span><b>Chemlali · 5,2 ha · 410 arbres</b></div>
+                <div class="between"><span class="muted">Soumise le</span><b>24/11 07:52</b></div>
+              </div>
+              <div class="card"><b>Maturité (capteurs)</b><div class="line-chart" style="height:70px;margin-top:6px">
+                <svg width="100%" height="100%" style="position:absolute;inset:0" preserveAspectRatio="none" viewBox="0 0 100 40"><polyline points="0,34 15,30 30,27 45,22 60,18 75,14 100,12" fill="none" stroke="#5b7a1e" stroke-width="1.5"/><line x1="0" y1="12" x2="100" y2="12" stroke="#c58b1c" stroke-dasharray="3 2" stroke-width=".8"/></svg></div>
+                <div class="muted" style="font-size:11px">68 % aujourd'hui · seuil de récolte 70 % · météo : sec 5 jours</div></div>
+              <div class="card muted" style="font-size:11px">Historique du verger : 3 collectes · rendement moyen 4,8 t/ha · dernière acidité 0,7 %</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+              <div class="map" style="height:170px"><span class="pin p2" style="left:150px;top:70px"></span><div class="card" style="position:absolute;left:8px;bottom:8px;font-size:10.5px;padding:3px 8px">12 km du pressoir Agareb</div></div>
+              <div><div class="lbl">Commentaire interne</div><div class="inp area">Prévoir accès par la piste nord…</div></div>
+              <div style="flex:1"></div>
+              <div class="form2"><div class="btn red">Rejeter…</div><div class="btn">Valider la demande</div></div>
+              <div class="btn ghost">Valider et planifier directement →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="shade" style="top:26px"></div>
+      <div class="modal" style="left:230px;top:150px;width:330px">
+        <b>Rejeter la demande #D-124</b>
+        <div class="lbl">Motif (envoyé à l'agriculteur)</div>
+        <div class="chips"><span class="chip on">Verger non mûr</span><span class="chip">Doublon</span><span class="chip">Hors zone</span><span class="chip">Autre</span></div>
+        <div class="inp area">Maturité 68 %, renouvelez la demande dans ~5 jours.</div>
+        <div class="between"><span class="btn sm ghost">Annuler</span><span class="btn sm red" style="background:#b23a3a;color:#fff">Confirmer le rejet</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RC2 Suivi tournées -->
+  <div>
+    <div class="cap">RC2 · Suivi des tournées en temps réel <span>— UC21/23</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/collecte/tournees</span></div>
+      <div class="app">
+        <div class="side"><b><span style="color:#9bbb59">●</span> OliveConnect</b><div>Demandes</div><div class="on">Tournées</div><div>Alertes (4)</div><div>Carte</div><div>Tableau de bord</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Tournées du 02/12/2026</h3><div class="chips"><span class="chip">◀</span><span class="chip on">Aujourd'hui</span><span class="chip">▶</span><span class="chip">Statut : tous ▾</span><span class="st g">● en direct</span></div></div>
+          <table>
+            <tr><th>Tournée</th><th>Chef</th><th>Vergers</th><th>Avancement</th><th>Récolté / estimé</th><th>Pressoir</th><th>Statut</th><th></th></tr>
+            <tr><td>T-40</td><td>Sami B.</td><td>3</td><td><div class="bar" style="width:90px"><b style="width:100%"></b></div></td><td>6 900 / 7 000</td><td>El Amra</td><td><span class="st grey">CLÔTURÉE</span></td><td>›</td></tr>
+            <tr><td>T-41</td><td>Nizar M.</td><td>2</td><td><div class="bar" style="width:90px"><b style="width:100%"></b></div></td><td>3 040 / 3 200</td><td>Agareb</td><td><span class="st a">LIVRÉE</span></td><td>›</td></tr>
+            <tr><td>T-42</td><td>Karim T.</td><td>2</td><td><div class="bar" style="width:90px"><b style="width:60%"></b></div></td><td>2 100 / 4 700</td><td>El Amra</td><td><span class="st g">EN COURS</span></td><td>›</td></tr>
+            <tr><td>T-43</td><td>Hedi S.</td><td>4</td><td><div class="bar" style="width:90px"><b style="width:0%"></b></div></td><td>0 / 8 300</td><td>Agareb</td><td><span class="st b">PLANIFIÉE</span></td><td>›</td></tr>
+          </table>
+          <div class="cols">
+            <div class="card" style="flex:1"><b>T-42 — détail</b>
+              <div class="muted" style="margin:4px 0">Démarrée 07:30 · TR-03 · BN-12, BN-14 · 8 ouvriers</div>
+              <div class="between" style="font-size:11.5px"><span>1. Verger Nord</span><span class="st g">EN RÉCOLTE · 60 %</span></div>
+              <div class="between" style="font-size:11.5px;margin-top:4px"><span>2. Verger Est</span><span class="st grey">À VENIR</span></div>
+              <div class="between" style="margin-top:10px"><span class="btn sm ghost">Contacter le chef</span><span class="btn sm red">Annuler la tournée</span></div>
+            </div>
+            <div class="map" style="flex:1"><span class="pin p1" style="left:60px;top:40px"></span><span class="pin p2" style="left:150px;top:80px"></span><span class="pin p2" style="left:230px;top:50px"></span><span class="pin p4" style="left:300px;top:110px"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RC3 Alertes -->
+  <div>
+    <div class="cap">RC3 · Gestion des alertes terrain <span>— UC22 (F2)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/collecte/alertes</span></div>
+      <div class="app">
+        <div class="side"><b><span style="color:#9bbb59">●</span> OliveConnect</b><div>Demandes</div><div>Tournées</div><div class="on">Alertes (4)</div><div>Carte</div><div>Tableau de bord</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Alertes terrain</h3><div class="chips"><span class="chip on">Ouvertes (4)</span><span class="chip">Prises en charge</span><span class="chip">Résolues</span><span class="chip">Type ▾</span></div></div>
+          <div class="cols">
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
+              <div class="card" style="border-color:#b23a3a;background:#fdf6f6"><div class="between"><b>🐛 Ravageur · Verger Sud</b><span class="st r">NOUVELLE</span></div><div class="muted">Ali B. S. · il y a 12 min · 📍 précision 8 m · 📷</div></div>
+              <div class="card"><div class="between"><b>● Maturité · Agareb 1</b><span class="st a">OUVERTE</span></div><div class="muted">Mounir K. · il y a 2 h</div></div>
+              <div class="card"><div class="between"><b>Auto · El Hencha 2</b><span class="st a">OUVERTE</span></div><div class="muted">Capteur : maturité 71 % (seuil 70 %)</div></div>
+              <div class="card"><div class="between"><b>🌧 Pluie · zone Agareb</b><span class="st a">OUVERTE</span></div><div class="muted">Import météo : 18 mm prévus le 05/12</div></div>
+            </div>
+            <div class="card" style="flex:1.1;display:flex;flex-direction:column;gap:7px;min-width:0">
+              <div class="between"><b>Ravageur — Verger Sud</b><span class="st r">NOUVELLE</span></div>
+              <div class="cols" style="flex:none;height:110px"><div class="map" style="flex:1"><span class="pin p3" style="left:70px;top:40px"></span></div><div class="imgph" style="flex:1">photo envoyée</div></div>
+              <div class="muted">« Mouche de l'olive sur la rangée est, environ 30 arbres. »</div>
+              <div><div class="lbl">Action / commentaire</div><div class="inp area">Équipe de traitement envoyée demain matin…</div></div>
+              <div class="chips"><span class="btn sm ghost">Prendre en charge</span><span class="btn sm ghost">Créer une demande urgente</span><span class="btn sm">Marquer résolue</span></div>
+              <div class="muted" style="font-size:11px">L'agriculteur est notifié à chaque changement de statut.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RC4 Carte interne -->
+  <div>
+    <div class="cap">RC4 · Carte interactive vergers / rendements <span>— UC23 (F4)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/carte</span></div>
+      <div class="app">
+        <div class="side"><b><span style="color:#9bbb59">●</span> OliveConnect</b><div>Demandes</div><div>Tournées</div><div>Alertes (4)</div><div class="on">Carte</div><div>Tableau de bord</div><div>Aide</div></div>
+        <div class="main" style="flex-direction:row;gap:10px">
+          <div class="card" style="width:170px;display:flex;flex-direction:column;gap:7px;flex:none">
+            <b>Filtres</b>
+            <div class="lbl">Couche</div><div class="seg" style="font-size:10.5px"><div class="on">Maturité</div><div>Rendement</div></div>
+            <div class="lbl">Statut de récolte</div>
+            <div class="chips"><span class="chip on">Mûr</span><span class="chip on">En récolte</span><span class="chip">Récolté</span><span class="chip">Non mûr</span></div>
+            <div class="lbl">Variété</div><div class="inp">Toutes ▾</div>
+            <div class="lbl">Afficher</div>
+            <div class="between"><span>Alertes</span><span class="toggle"></span></div>
+            <div class="between"><span>Tournées du jour</span><span class="toggle"></span></div>
+            <div class="between"><span>Pressoirs</span><span class="toggle off"></span></div>
+            <div style="flex:1"></div>
+            <div class="muted" style="font-size:10.5px">Requête $geoWithin sur la zone visible (index 2dsphere)</div>
+          </div>
+          <div class="map" style="flex:1">
+            <span class="pin p1" style="left:80px;top:60px"></span><span class="pin p1" style="left:120px;top:150px"></span><span class="pin p2" style="left:210px;top:90px"></span><span class="pin p2" style="left:260px;top:200px"></span><span class="pin p3" style="left:320px;top:130px"></span><span class="pin p4" style="left:400px;top:70px"></span><span class="pin p2" style="left:430px;top:250px"></span><span class="pin p1" style="left:180px;top:300px"></span>
+            <div class="card" style="position:absolute;right:12px;top:12px;width:210px;font-size:11.5px">
+              <div class="between"><b>El Hencha 2</b><span class="st a">MÛR</span></div>
+              <div class="muted">Mounir K. · Chemlali · 5,2 ha</div>
+              <div class="lbl" style="margin-top:5px">Maturité 71 %</div><div class="bar"><b style="width:71%;background:#c58b1c"></b></div>
+              <div class="muted" style="margin-top:4px">Rendement N-1 : 4,8 t/ha · 1 demande soumise</div>
+              <div class="between" style="margin-top:6px"><span class="btn sm ghost">Fiche verger</span><span class="btn sm">Planifier</span></div>
+            </div>
+            <div class="card" style="position:absolute;left:12px;bottom:12px;font-size:10.5px;display:flex;gap:10px"><span style="color:#2e7d32">● récolté</span><span style="color:#c58b1c">● mûr</span><span style="color:#b23a3a">● alerte</span><span style="color:#777">● non mûr</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D3 Tableau de bord -->
+  <div>
+    <div class="cap">D3 · Tableau de bord des performances <span>— Collecte / Pressoir / Admin (F5)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/tableau-de-bord</span></div>
+      <div class="app">
+        <div class="side"><b><span style="color:#9bbb59">●</span> OliveConnect</b><div>Demandes</div><div>Tournées</div><div>Alertes</div><div>Carte</div><div class="on">Tableau de bord</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Saison 2026-2027</h3><div class="chips"><span class="chip on">30 derniers jours</span><span class="chip">Saison</span><span class="chip">Pressoir : tous ▾</span><span class="chip">Variété : toutes ▾</span></div></div>
+          <div class="kpis">
+            <div class="kpi"><div class="muted">Olives reçues</div><div class="v">486 t</div><div class="t">▲ 12 % vs N-1</div></div>
+            <div class="kpi"><div class="muted">Rendement moyen</div><div class="v">3,9 t/ha</div><div class="t">▲ 4 %</div></div>
+            <div class="kpi"><div class="muted">Délai moyen de collecte</div><div class="v">2,4 j</div><div class="t">urgentes : 0,8 j</div></div>
+            <div class="kpi"><div class="muted">Remplissage des bennes</div><div class="v">87 %</div><div class="t">objectif 90 %</div></div>
+          </div>
+          <div class="cols">
+            <div class="chart" style="flex:1.4"><b>Volume reçu par jour et par pressoir</b><div class="bars"><i style="height:40%"></i><i style="height:55%"></i><i style="height:62%"></i><i style="height:48%"></i><i style="height:75%"></i><i style="height:82%"></i><i style="height:70%"></i><i style="height:90%"></i><i style="height:66%"></i><i style="height:58%"></i><i style="height:77%"></i><i style="height:85%"></i></div></div>
+            <div class="chart" style="flex:1"><b>Top rendements par verger</b>
+              <table style="margin-top:6px"><tr><th>Verger</th><th>t/ha</th><th>Acid.</th></tr><tr><td>Verger Nord</td><td>5,1</td><td>0,5</td></tr><tr><td>El Hencha 2</td><td>4,8</td><td>0,7</td></tr><tr><td>Agareb 1</td><td>4,4</td><td>0,6</td></tr><tr><td>Verger Est</td><td>3,9</td><td>0,9</td></tr><tr><td>Verger Sud</td><td>3,1</td><td>1,2</td></tr></table>
+            </div>
+          </div>
+          <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+            <div class="kpi"><div class="muted">Alertes ouvertes / délai de prise en charge</div><div class="v">4 · 3 h</div></div>
+            <div class="kpi"><div class="muted">Tournées en cours</div><div class="v">6</div></div>
+            <div class="kpi"><div class="muted">Capacité pressoirs restante</div><div class="v">31 t</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">Chaque indicateur est calculé côté MongoDB par un pipeline d'agrégation ($match → $group → $lookup → $project).</div>
+  </div>
+
+  <!-- D2 Calendrier -->
+  <div>
+    <div class="cap">D2 · Calendrier des ressources <span>— Responsable logistique (UC40–42)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/logistique/calendrier</span></div>
+      <div class="app">
+        <div class="side"><b><span style="color:#9bbb59">●</span> OliveConnect</b><div>Ressources</div><div class="on">Calendrier</div><div>Approvisionnements</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Semaine du 30/11 au 06/12</h3><div class="chips"><span class="chip on">Tous</span><span class="chip">Tracteurs</span><span class="chip">Bennes</span><span class="chip">Ouvriers</span><span class="btn sm">+ Ressource</span></div></div>
+          <div class="cal">
+            <div class="h">Ressource</div><div class="h">Lun 30</div><div class="h">Mar 1</div><div class="h">Mer 2</div><div class="h">Jeu 3</div><div class="h">Ven 4</div><div class="h">Sam 5</div><div class="h">Dim 6</div>
+            <div>🚜 TR-03</div><div></div><div><span class="ev">T-38</span></div><div><span class="ev">T-42</span></div><div></div><div><span class="ev">T-45</span></div><div></div><div></div>
+            <div>🚜 TR-05</div><div><span class="ev">T-36</span></div><div></div><div><span class="ev">T-40</span></div><div><span class="ev x">Panne</span></div><div><span class="ev x">Panne</span></div><div></div><div></div>
+            <div>🧺 BN-12 (2 t)</div><div></div><div><span class="ev">T-38</span></div><div><span class="ev">T-42</span></div><div></div><div></div><div><span class="ev">T-47</span></div><div></div>
+            <div>🧺 BN-14 (2 t)</div><div></div><div></div><div><span class="ev">T-42</span></div><div><span class="ev">T-43</span></div><div></div><div></div><div></div>
+            <div>🧺 BN-15 (3 t)</div><div><span class="ev">T-36</span></div><div></div><div></div><div></div><div><span class="ev">T-45</span></div><div></div><div></div>
+            <div>👷 Équipe A (8)</div><div><span class="ev">T-36</span></div><div><span class="ev">T-38</span></div><div><span class="ev">T-42</span></div><div></div><div><span class="ev">T-45</span></div><div></div><div></div>
+            <div>👷 Équipe B (6)</div><div></div><div></div><div><span class="ev">T-40</span></div><div><span class="ev">T-43</span></div><div></div><div><span class="ev">T-47</span></div><div></div>
+            <div>🪢 Filets (40)</div><div><span class="ev m">Livr. 20</span></div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div>📳 Vibreurs (6)</div><div></div><div></div><div><span class="ev m">Révision 1</span></div><div></div><div></div><div></div><div></div>
+          </div>
+          <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+            <div class="kpi"><div class="muted">Taux d'utilisation tracteurs</div><div class="v">71 %</div></div>
+            <div class="kpi"><div class="muted">Bennes libres demain</div><div class="v">5 / 9</div></div>
+            <div class="kpi"><div class="muted">Approvisionnements en attente</div><div class="v">2</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- L1 Ressources -->
+  <div>
+    <div class="cap">L1 · Ressources : liste et fiche <span>— UC40 (F3)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/logistique/ressources</span></div>
+      <div class="app">
+        <div class="side" style="background:#45285a"><b><span style="color:#9bbb59">●</span> Logistique</b><div class="on">Ressources</div><div>Calendrier</div><div>Approvisionnements</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Ressources</h3><div class="chips"><span class="chip on">Toutes (52)</span><span class="chip">🚜 Tracteurs (6)</span><span class="chip">🧺 Bennes (9)</span><span class="chip">👷 Ouvriers (31)</span><span class="chip">Matériel (6)</span></div></div>
+          <div class="cols">
+            <div style="flex:1.5;display:flex;flex-direction:column;gap:6px;min-width:0">
+              <div class="inp">🔍 Rechercher (matricule, nom)…</div>
+              <table>
+                <tr><th></th><th>Nom</th><th>Capacité</th><th>État</th><th>Affect.</th></tr>
+                <tr><td>🚜</td><td>TR-03</td><td>—</td><td><span class="st g">DISPONIBLE</span></td><td>T-42 · 02/12</td></tr>
+                <tr><td>🚜</td><td>TR-05</td><td>—</td><td><span class="st r">EN PANNE</span></td><td>—</td></tr>
+                <tr style="background:#f6f9ef"><td>🧺</td><td><b>BN-15</b></td><td>3 000 kg</td><td><span class="st g">DISPONIBLE</span></td><td>T-45 · 04/12</td></tr>
+                <tr><td>👷</td><td>Équipe A (8)</td><td>—</td><td><span class="st g">DISPONIBLE</span></td><td>T-42 · 02/12</td></tr>
+                <tr><td>👷</td><td>Youssef H.</td><td>saisonnier</td><td><span class="st grey">CONGÉ</span></td><td>—</td></tr>
+                <tr><td>📳</td><td>Vibreur V-02</td><td>—</td><td><span class="st a">RÉVISION</span></td><td>—</td></tr>
+              </table>
+            </div>
+            <div class="card" style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
+              <div class="between"><b>Fiche ressource — BN-15</b><span class="muted">✕</span></div>
+              <div class="form2"><div><div class="lbl">Type</div><div class="inp">Benne ▾</div></div><div><div class="lbl">Matricule</div><div class="inp">BN-15</div></div></div>
+              <div class="form2"><div><div class="lbl">Capacité (kg)</div><div class="inp">3 000</div></div><div><div class="lbl">État</div><div class="inp">Disponible ▾</div></div></div>
+              <div><div class="lbl">Indisponibilités</div><div class="card muted" style="font-size:11px">10/12 → 12/12 : réparation hayon</div><span class="btn sm ghost" style="margin-top:4px">+ Période</span></div>
+              <div class="muted" style="font-size:11px">Utilisation saison : 14 tournées · remplissage moyen 88 %</div>
+              <div style="flex:1"></div>
+              <div class="form2"><div class="btn red">Désactiver</div><div class="btn" style="background:#7a4d93">Enregistrer</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- L2 Approvisionnements -->
+  <div>
+    <div class="cap">L2 · Approvisionnements (filets, vibreurs…) <span>— UC42 (F3)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/logistique/approvisionnements</span></div>
+      <div class="app">
+        <div class="side" style="background:#45285a"><b><span style="color:#9bbb59">●</span> Logistique</b><div>Ressources</div><div>Calendrier</div><div class="on">Approvisionnements</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Stock de matériel et approvisionnements</h3><span class="btn sm" style="background:#7a4d93">+ Nouvelle commande</span></div>
+          <div class="kpis">
+            <div class="kpi"><div class="muted">Filets disponibles</div><div class="v">40</div><div class="t">besoin semaine : 48</div></div>
+            <div class="kpi"><div class="muted">Vibreurs opérationnels</div><div class="v">5 / 6</div></div>
+            <div class="kpi"><div class="muted">Caisses</div><div class="v">320</div></div>
+            <div class="kpi" style="border-color:#b23a3a"><div class="muted">Sous le seuil</div><div class="v" style="color:#b23a3a">1</div><div class="t" style="color:#b23a3a">filets</div></div>
+          </div>
+          <table>
+            <tr><th>N°</th><th>Matériel</th><th>Quantité</th><th>Fournisseur</th><th>Demandé le</th><th>Livraison prévue</th><th>Statut</th></tr>
+            <tr><td>AP-21</td><td>Filets de récolte 10×8 m</td><td>20</td><td>AgriSfax</td><td>25/11</td><td>30/11</td><td><span class="st g">LIVRÉ</span></td></tr>
+            <tr><td>AP-22</td><td>Filets de récolte 10×8 m</td><td>10</td><td>AgriSfax</td><td>01/12</td><td>05/12</td><td><span class="st b">COMMANDÉ</span></td></tr>
+            <tr><td>AP-23</td><td>Peigne vibreur électrique</td><td>2</td><td>OliTech</td><td>01/12</td><td>—</td><td><span class="st a">EN ATTENTE</span></td></tr>
+            <tr><td>AP-24</td><td>Révision vibreur V-02</td><td>1</td><td>Atelier coop.</td><td>02/12</td><td>03/12</td><td><span class="st a">EN COURS</span></td></tr>
+          </table>
+          <div class="card muted" style="font-size:11.5px">ℹ Le besoin en filets est calculé à partir des tournées planifiées de la semaine (≈ 6 filets par équipe et par jour).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PR1 Historique pressoir -->
+  <div>
+    <div class="cap">PR1 · Réceptions &amp; capacité du pressoir <span>— Responsable du pressoir (UC50–52)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/pressoir/receptions</span></div>
+      <div class="app">
+        <div class="side" style="background:#5e2a1e"><b><span style="color:#9bbb59">●</span> Pressoir</b><div>Réception</div><div class="on">Historique</div><div>Capacité</div><div>Tableau de bord</div><div>Aide</div></div>
+        <div class="main">
+          <div class="head"><h3>Pressoir El Amra — 02/12/2026</h3><div class="chips"><span class="chip on">Aujourd'hui</span><span class="chip">7 jours</span><span class="btn sm" style="background:#a14a35">Exporter CSV</span></div></div>
+          <div class="kpis">
+            <div class="kpi"><div class="muted">Capacité journalière</div><div class="v">20 t</div></div>
+            <div class="kpi"><div class="muted">Reçu aujourd'hui</div><div class="v">7,6 t</div></div>
+            <div class="kpi"><div class="muted">Capacité restante</div><div class="v" style="color:#a14a35">12,4 t</div></div>
+            <div class="kpi"><div class="muted">Acidité moyenne</div><div class="v">0,7 %</div></div>
+          </div>
+          <div class="cols">
+            <div style="flex:1.6;display:flex;flex-direction:column;gap:6px">
+              <b>Livraisons attendues</b>
+              <table><tr><th>Tournée</th><th>Chef</th><th>Bennes</th><th>Estimé</th><th>Statut</th></tr>
+                <tr><td>T-42</td><td>Karim T.</td><td>2</td><td>4 530 kg</td><td><span class="st a">EN ROUTE</span></td></tr>
+                <tr><td>T-44</td><td>Sami B.</td><td>3</td><td>5 800 kg</td><td><span class="st grey">PLANIFIÉE</span></td></tr></table>
+              <b>Réceptions du jour</b>
+              <table><tr><th>Heure</th><th>Tournée</th><th>Benne</th><th>Poids</th><th>Rempl.</th><th>Acid.</th><th>Cat.</th></tr>
+                <tr><td>08:40</td><td>T-40</td><td>BN-11</td><td>1 920 kg</td><td>96 %</td><td>0,5</td><td>Extra</td></tr>
+                <tr><td>09:15</td><td>T-40</td><td>BN-15</td><td>2 640 kg</td><td>88 %</td><td>0,8</td><td>Vierge</td></tr>
+                <tr><td>11:05</td><td>T-41</td><td>BN-09</td><td>3 040 kg</td><td>101 %</td><td>0,7</td><td>Extra</td></tr></table>
+            </div>
+            <div class="card" style="flex:1;display:flex;flex-direction:column;gap:7px">
+              <b>Publier la capacité</b>
+              <div><div class="lbl">Capacité restante aujourd'hui (kg)</div><div class="inp"><span style="color:#333">12 400</span></div></div>
+              <div><div class="lbl">Capacité demain (kg)</div><div class="inp"><span style="color:#333">20 000</span></div></div>
+              <div><div class="lbl">Motif (optionnel)</div><div class="inp">Maintenance broyeur 2…</div></div>
+              <div class="muted" style="font-size:11px">Également mise à jour automatiquement par le système du pressoir (import toutes les 15 min).</div>
+              <div style="flex:1"></div>
+              <div class="btn" style="background:#a14a35">Publier</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D4 Admin imports -->
+  <div>
+    <div class="cap">D4 · Administration : comptes &amp; imports <span>— Administrateur (UC60–63)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/admin/imports</span></div>
+      <div class="app">
+        <div class="side" style="background:#333"><b><span style="color:#9bbb59">●</span> Admin</b><div>Utilisateurs</div><div>Inscriptions (3)</div><div class="on">Imports</div><div>Paramètres</div><div>Supervision ↗</div></div>
+        <div class="main">
+          <div class="head"><h3>Imports des données externes</h3><div class="chips"><span class="chip">Fréquence dynamiques : 15 min ▾</span><span class="btn sm">Lancer maintenant</span></div></div>
+          <table>
+            <tr><th>Date</th><th>Source</th><th>Fichier</th><th>OK</th><th>Rejets</th><th>Statut</th><th></th></tr>
+            <tr><td>24/11 10:15</td><td>Météo</td><td>meteo_20261124.csv</td><td>96</td><td>0</td><td><span class="st g">SUCCÈS</span></td><td>Détails</td></tr>
+            <tr><td>24/11 10:15</td><td>Maturité</td><td>maturite_20261124.csv</td><td>412</td><td>7</td><td><span class="st a">PARTIEL</span></td><td>Détails</td></tr>
+            <tr><td>24/11 10:00</td><td>Pressoirs</td><td>capacite.json</td><td>4</td><td>0</td><td><span class="st g">SUCCÈS</span></td><td>Détails</td></tr>
+            <tr><td>24/11 02:00</td><td>Référentiels</td><td>vergers.json</td><td>0</td><td>1</td><td><span class="st r">ÉCHEC</span></td><td>Détails</td></tr>
+          </table>
+          <div class="card" style="font-size:11px">
+            <b>Rejets — maturite_20261124.csv</b>
+            <table style="margin-top:6px"><tr><th>Ligne</th><th>Champ</th><th>Erreur</th></tr>
+              <tr><td>18</td><td>vergerId</td><td>Verger inconnu « V-9981 »</td></tr>
+              <tr><td>57</td><td>indiceMaturite</td><td>Valeur 130 hors bornes [0–100]</td></tr>
+              <tr><td>203</td><td>timestamp</td><td>Format de date invalide</td></tr></table>
+          </div>
+          <div class="kpis" style="grid-template-columns:repeat(4,1fr)">
+            <div class="kpi"><div class="muted">Comptes actifs</div><div class="v">418</div></div>
+            <div class="kpi"><div class="muted">Connexions en cours</div><div class="v">73</div></div>
+            <div class="kpi"><div class="muted">Disponibilité 30 j</div><div class="v">99,7 %</div></div>
+            <div class="kpi"><div class="muted">Dernière sauvegarde</div><div class="v" style="font-size:15px">24/11 03:00 ✔</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AD1 Utilisateurs -->
+  <div>
+    <div class="cap">AD1 · Utilisateurs et rôles <span>— UC60</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/admin/utilisateurs</span></div>
+      <div class="app">
+        <div class="side" style="background:#333"><b><span style="color:#9bbb59">●</span> Admin</b><div class="on">Utilisateurs</div><div>Inscriptions (3)</div><div>Imports</div><div>Paramètres</div><div>Supervision ↗</div></div>
+        <div class="main">
+          <div class="head"><h3>Utilisateurs (436)</h3><div class="chips"><span class="chip">Rôle : tous ▾</span><span class="chip">Actifs ▾</span><span class="btn sm">+ Créer un compte</span></div></div>
+          <div class="cols">
+            <div style="flex:1.5;display:flex;flex-direction:column;gap:6px;min-width:0">
+              <div class="inp">🔍 Nom, e-mail, n° adhérent…</div>
+              <table>
+                <tr><th>Nom</th><th>Rôle</th><th>Connexion</th><th>État</th></tr>
+                <tr><td>Salma Chaabane</td><td>RESP_COLLECTE</td><td>aujourd'hui</td><td><span class="st g">ACTIF</span></td></tr>
+                <tr style="background:#f6f9ef"><td><b>Karim Trabelsi</b></td><td>CHEF_EQUIPE</td><td>aujourd'hui</td><td><span class="st g">ACTIF</span></td></tr>
+                <tr><td>Rim Gharbi</td><td>RESP_LOGISTIQUE</td><td>hier</td><td><span class="st g">ACTIF</span></td></tr>
+                <tr><td>Fethi Ayadi</td><td>RESP_PRESSOIR</td><td>aujourd'hui</td><td><span class="st g">ACTIF</span></td></tr>
+                <tr><td>Ali Ben Salah</td><td>AGRICULTEUR</td><td>il y a 2 h</td><td><span class="st g">ACTIF</span></td></tr>
+                <tr><td>Hamza Jlassi</td><td>AGRICULTEUR</td><td>—</td><td><span class="st grey">DÉSACTIVÉ</span></td></tr>
+              </table>
+            </div>
+            <div class="card" style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
+              <b>Compte — Karim Trabelsi</b>
+              <div class="form2"><div><div class="lbl">Nom</div><div class="inp">Trabelsi</div></div><div><div class="lbl">Prénom</div><div class="inp">Karim</div></div></div>
+              <div><div class="lbl">Rôle</div><div class="inp">Chef d'équipe de récolte ▾</div></div>
+              <div class="lbl">Droits associés (lecture seule)</div>
+              <div class="chips" style="font-size:10.5px"><span class="chip">Voir ses tournées</span><span class="chip">Mettre à jour l'avancement</span><span class="chip">Livrer au pressoir</span></div>
+              <div class="between"><span>Compte actif</span><span class="toggle"></span></div>
+              <div style="flex:1"></div>
+              <div class="form2"><div class="btn ghost">Réinit. mot de passe</div><div class="btn">Enregistrer</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AD2 Inscriptions -->
+  <div>
+    <div class="cap">AD2 · Inscriptions à valider <span>— UC61 (RG09)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/admin/inscriptions</span></div>
+      <div class="app">
+        <div class="side" style="background:#333"><b><span style="color:#9bbb59">●</span> Admin</b><div>Utilisateurs</div><div class="on">Inscriptions (3)</div><div>Imports</div><div>Paramètres</div><div>Supervision ↗</div></div>
+        <div class="main">
+          <div class="head"><h3>Demandes d'inscription en attente</h3><div class="chips"><span class="chip on">En attente (3)</span><span class="chip">Acceptées</span><span class="chip">Refusées</span></div></div>
+          <div class="cols">
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
+              <div class="card" style="border-color:var(--acc);background:#f6f9ef"><div class="between"><b>Nadia Kammoun</b><span class="muted">24/11</span></div><div class="muted">Agareb · 1 verger déclaré</div></div>
+              <div class="card"><div class="between"><b>Omar Fourati</b><span class="muted">23/11</span></div><div class="muted">El Hencha · 2 vergers</div></div>
+              <div class="card"><div class="between"><b>Leila Masmoudi</b><span class="muted">22/11</span></div><div class="muted">Sakiet Eddaier · 0 verger</div><div class="muted" style="color:#b23a3a">⚠ CIN déjà utilisée</div></div>
+            </div>
+            <div class="card" style="flex:1.4;display:flex;flex-direction:column;gap:6px;min-width:0">
+              <b>Nadia Kammoun</b>
+              <div class="between"><span class="muted">CIN</span><b>0987 6543</b></div>
+              <div class="between"><span class="muted">Téléphone</span><b>+216 55 … 210</b></div>
+              <div class="between"><span class="muted">Adresse</span><b>Agareb, Sfax</b></div>
+              <div class="between"><span class="muted">Verger déclaré</span><b>« Oliveraie Kammoun » · 2,8 ha · Chemlali</b></div>
+              <div class="map" style="height:110px"><svg width="100%" height="100%" style="position:absolute;inset:0"><polygon points="120,25 230,30 220,85 130,90" fill="rgba(91,122,30,.25)" stroke="#5b7a1e" stroke-width="2"/></svg></div>
+              <div class="between"><span>Attribuer le n° d'adhérent</span><b>ADH-0419</b></div>
+              <div style="flex:1"></div>
+              <div class="form2"><div class="btn red">Refuser (motif)</div><div class="btn">Activer le compte</div></div>
+              <div class="muted" style="font-size:11px;text-align:center">Un SMS est envoyé à l'agriculteur dans les deux cas.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AD3 Paramètres -->
+  <div>
+    <div class="cap">AD3 · Paramètres du système <span>— UC62</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/admin/parametres</span></div>
+      <div class="app">
+        <div class="side" style="background:#333"><b><span style="color:#9bbb59">●</span> Admin</b><div>Utilisateurs</div><div>Inscriptions (3)</div><div>Imports</div><div class="on">Paramètres</div><div>Supervision ↗</div></div>
+        <div class="main">
+          <div class="head"><h3>Paramètres</h3><span class="btn sm">Enregistrer les modifications</span></div>
+          <div class="cols">
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0">
+              <div class="card" style="display:flex;flex-direction:column;gap:6px"><b>Campagne de récolte</b>
+                <div class="form2"><div><div class="lbl">Début</div><div class="inp">15/11/2026</div></div><div><div class="lbl">Fin</div><div class="inp">28/02/2027</div></div></div></div>
+              <div class="card" style="display:flex;flex-direction:column;gap:6px"><b>Règles métier</b>
+                <div class="form2"><div><div class="lbl">Seuil alerte maturité (%)</div><div class="inp">70</div></div><div><div class="lbl">Tolérance pesée (RG07)</div><div class="inp">110 %</div></div></div>
+                <div class="form2"><div><div class="lbl">Distance max. signalement</div><div class="inp">500 m</div></div><div><div class="lbl">Délai cible urgentes</div><div class="inp">24 h</div></div></div></div>
+              <div class="card" style="display:flex;flex-direction:column;gap:6px"><b>Référentiels</b>
+                <div class="chips"><span class="chip">Variétés (6) ✎</span><span class="chip">Pressoirs (4) ✎</span><span class="chip">Zones (8) ✎</span><span class="chip">Catégories qualité ✎</span></div></div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0">
+              <div class="card" style="display:flex;flex-direction:column;gap:6px"><b>Imports automatiques</b>
+                <div class="between"><span>Référentiels</span><div class="inp" style="width:150px;height:28px">chaque jour 02:00 ▾</div></div>
+                <div class="between"><span>Météo / maturité</span><div class="inp" style="width:150px;height:28px">toutes les 15 min ▾</div></div>
+                <div class="between"><span>Capacité pressoirs</span><div class="inp" style="width:150px;height:28px">toutes les 15 min ▾</div></div></div>
+              <div class="card" style="display:flex;flex-direction:column;gap:6px"><b>Notifications</b>
+                <div class="between"><span>SMS aux agriculteurs</span><span class="toggle"></span></div>
+                <div class="between"><span>E-mail récapitulatif quotidien</span><span class="toggle off"></span></div></div>
+              <div class="card" style="display:flex;flex-direction:column;gap:6px"><b>Sécurité</b>
+                <div class="form2"><div><div class="lbl">Durée de session (JWT)</div><div class="inp">8 h</div></div><div><div class="lbl">Tentatives avant blocage</div><div class="inp">5</div></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AD4 Supervision -->
+  <div>
+    <div class="cap">AD4 · Supervision du serveur <span>— Administrateur (hébergement, Grafana intégré)</span></div>
+    <div class="desk"><div class="chrome"><i></i><i></i><i></i><span>oliveconnect.tn/admin/supervision</span></div>
+      <div class="app">
+        <div class="side" style="background:#333"><b><span style="color:#9bbb59">●</span> Admin</b><div>Utilisateurs</div><div>Inscriptions (3)</div><div>Imports</div><div>Paramètres</div><div class="on">Supervision</div></div>
+        <div class="main">
+          <div class="head"><h3>État du serveur</h3><div class="chips"><span class="st g">● Tous les services OK</span><span class="chip on">24 h</span><span class="chip">7 j</span><span class="chip">Ouvrir Grafana ↗</span></div></div>
+          <div class="kpis">
+            <div class="kpi"><div class="muted">Disponibilité 30 j</div><div class="v">99,7 %</div></div>
+            <div class="kpi"><div class="muted">Temps de réponse p95</div><div class="v">320 ms</div></div>
+            <div class="kpi"><div class="muted">Utilisateurs connectés</div><div class="v">73</div></div>
+            <div class="kpi"><div class="muted">Taux de succès cache Nginx</div><div class="v">86 %</div></div>
+          </div>
+          <div class="cols">
+            <div class="chart" style="flex:1"><b>CPU / RAM</b><div class="line-chart" style="margin-top:6px"><svg width="100%" height="100%" style="position:absolute;inset:0" preserveAspectRatio="none" viewBox="0 0 100 40"><polyline points="0,30 10,28 20,25 30,27 40,18 50,15 60,20 70,22 80,16 90,19 100,21" fill="none" stroke="#5b7a1e" stroke-width="1.2"/><polyline points="0,20 20,19 40,17 60,16 80,15 100,15" fill="none" stroke="#7a4d93" stroke-width="1.2"/></svg></div></div>
+            <div class="chart" style="flex:1"><b>Requêtes HTTP / min</b><div class="bars"><i style="height:30%"></i><i style="height:45%"></i><i style="height:70%"></i><i style="height:85%"></i><i style="height:60%"></i><i style="height:52%"></i><i style="height:75%"></i><i style="height:40%"></i></div></div>
+          </div>
+          <div class="cols" style="flex:none">
+            <table style="flex:1.2"><tr><th>Service</th><th>État</th><th>Mémoire</th></tr>
+              <tr><td>nginx</td><td><span class="st g">UP</span></td><td>24 Mo</td></tr>
+              <tr><td>backend (Spring Boot)</td><td><span class="st g">UP</span></td><td>612 Mo</td></tr>
+              <tr><td>mongo</td><td><span class="st g">UP</span></td><td>1,1 Go</td></tr></table>
+            <div class="card" style="flex:1;font-size:11.5px;display:flex;flex-direction:column;gap:3px"><b>Sauvegardes</b>
+              <div class="between"><span>24/11 03:00 · 182 Mo</span><span class="st g">OK</span></div>
+              <div class="between"><span>23/11 03:00 · 179 Mo</span><span class="st g">OK</span></div>
+              <div class="between"><span class="btn sm ghost">Sauvegarder</span><span class="muted">rotation 7 j</span></div></div>
+            <div class="card" style="flex:1;font-size:11px"><b>Derniers logs (ERROR)</b><div class="muted" style="font-family:Consolas,monospace;font-size:10px;margin-top:3px">10:15 ImportJob maturite : 7 rejets<br>02:00 ImportJob vergers : JSON invalide</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

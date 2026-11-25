@@ -1,0 +1,12 @@
+# Profil de développement (poste local). Valeurs de démonstration uniquement, jamais utilisées sur le serveur.
+oliveconnect:
+  securite:
+    secret-jeton: developpement-secret-oliveconnect-a-changer-en-production
+  premier-administrateur:
+    email: administrateur@oliveconnect.tn
+    telephone: "+21670000000"
+    mot-de-passe: Administrateur2026!
+
+logging:
+  level:
+    tn.oliveconnect: DEBUG

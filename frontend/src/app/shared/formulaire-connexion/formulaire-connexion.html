@@ -1,0 +1,51 @@
+<form [formGroup]="formulaire" (ngSubmit)="envoyer()" novalidate class="flex flex-col gap-4">
+  <div class="flex flex-col gap-1">
+    <label for="identifiant" class="etiquette">E-mail ou téléphone</label>
+    <input
+      id="identifiant"
+      type="text"
+      formControlName="identifiant"
+      autocomplete="username"
+      placeholder="Votre e-mail ou votre numéro de téléphone"
+      class="champ-saisie"
+      [class.en-erreur]="champManquant('identifiant')"
+    />
+    @if (champManquant('identifiant')) {
+      <p class="message-champ">Saisissez votre e-mail ou votre téléphone.</p>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="motDePasse" class="etiquette">Mot de passe</label>
+    <div class="flex gap-2">
+      <input
+        id="motDePasse"
+        [type]="motDePasseVisible() ? 'text' : 'password'"
+        formControlName="motDePasse"
+        autocomplete="current-password"
+        class="champ-saisie min-w-0 flex-1"
+        [class.en-erreur]="champManquant('motDePasse')"
+      />
+      <button
+        type="button"
+        (click)="basculerVisibiliteMotDePasse()"
+        class="rounded-lg border border-gray-300 px-3 text-sm text-gray-700 hover:bg-gray-50"
+      >
+        {{ motDePasseVisible() ? 'Masquer' : 'Afficher' }}
+      </button>
+    </div>
+    @if (champManquant('motDePasse')) {
+      <p class="message-champ">Saisissez votre mot de passe.</p>
+    }
+  </div>
+
+  @if (messageErreur(); as message) {
+    <p role="alert" class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-800">
+      {{ message }}
+    </p>
+  }
+
+  <button type="submit" [disabled]="envoiEnCours()" class="bouton-principal w-full">
+    {{ envoiEnCours() ? 'Connexion…' : 'Se connecter' }}
+  </button>
+</form>

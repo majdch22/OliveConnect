@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+/* Thème OliveConnect (couleurs des maquettes) */
+@theme {
+  --color-olive-50: #f6f8f0;
+  --color-olive-100: #e8f0d8;
+  --color-olive-500: #7a9a35;
+  --color-olive-700: #5b7a1e;
+  --color-olive-900: #2f3e12;
+  --font-sans: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Éléments de formulaire communs à toutes les pages */
+@layer components {
+  .etiquette {
+    @apply text-sm font-semibold text-gray-700;
+  }
+
+  .champ-saisie {
+    @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-base text-gray-900
+      focus:border-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-100;
+  }
+
+  .champ-saisie.en-erreur {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-100;
+  }
+
+  .message-champ {
+    @apply text-sm text-red-700;
+  }
+
+  .bouton-principal {
+    @apply inline-flex items-center justify-center rounded-lg bg-olive-700 px-6 py-3 text-base font-semibold text-white
+      hover:bg-olive-900 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .bouton-secondaire {
+    @apply inline-flex items-center justify-center rounded-lg border border-olive-700 bg-white px-6 py-3 text-base
+      font-semibold text-olive-700 hover:bg-olive-50;
+  }
+}

@@ -1,0 +1,47 @@
+<div class="flex min-h-screen flex-col lg:flex-row">
+  <!-- Présentation : panneau à gauche sur ordinateur, bandeau sur téléphone -->
+  <aside class="bg-gradient-to-br from-olive-900 to-olive-700 px-6 py-6 text-white lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:px-16 lg:py-14">
+    <a routerLink="/" aria-label="Accueil OliveConnect"><app-logo [clair]="true" /></a>
+
+    <div class="hidden lg:block">
+      <h2 class="max-w-md text-4xl font-extrabold leading-tight">
+        Une seule plateforme pour les vergers, les tournées et les pressoirs.
+      </h2>
+      <ul class="mt-10 space-y-4">
+        @for (avantage of avantages; track avantage) {
+          <li class="flex items-center gap-3 text-lg text-olive-100">
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/15 text-sm text-white">✓</span>
+            {{ avantage }}
+          </li>
+        }
+      </ul>
+    </div>
+
+    <p class="hidden text-sm text-olive-100 lg:block">Coopérative oléicole de Sfax · Campagne 2026-2027</p>
+  </aside>
+
+  <!-- Formulaire -->
+  <main class="flex flex-1 flex-col bg-white px-6 py-8 lg:px-16">
+    <a routerLink="/" class="self-start text-sm font-medium text-olive-700 hover:underline">← Retour à l'accueil</a>
+
+    <div class="flex flex-1 justify-center py-8 lg:items-center">
+      <div class="w-full max-w-md">
+        <h1 class="text-3xl font-bold text-olive-900">Connexion</h1>
+        <p class="mt-2 text-gray-600">Accédez à votre espace selon votre profil.</p>
+
+        <div class="mt-8">
+          <app-formulaire-connexion espace="UTILISATEURS" />
+        </div>
+
+        <div class="my-8 flex items-center gap-4 text-sm text-gray-400">
+          <span class="h-px flex-1 bg-gray-200"></span>ou<span class="h-px flex-1 bg-gray-200"></span>
+        </div>
+
+        <a routerLink="/inscription" class="bouton-secondaire w-full">Créer un compte agriculteur</a>
+        <p class="mt-4 text-center text-sm text-gray-500">
+          Les comptes du personnel sont créés par la coopérative.
+        </p>
+      </div>
+    </div>
+  </main>
+</div>

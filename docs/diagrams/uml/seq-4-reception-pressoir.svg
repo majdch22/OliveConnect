@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2170" height="1064" viewBox="0 0 2170 1064" font-family="Segoe UI, Arial, sans-serif">
+<defs>
+<marker id="fill" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b2b"/></marker>
+<marker id="open" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10" fill="none" stroke="#2b2b2b" stroke-width="1.4"/></marker>
+<marker id="tri" viewBox="0 0 12 12" refX="12" refY="6" markerWidth="14" markerHeight="14" orient="auto-start-reverse"><path d="M0,0 L12,6 L0,12 z" fill="#fff" stroke="#2b2b2b" stroke-width="1.3"/></marker>
+<filter id="sh" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.6" flood-opacity="0.15"/></filter>
+</defs>
+<rect width="2170" height="1064" fill="#fff"/>
+<text x="30" y="42" font-size="26" font-weight="700" fill="#2f3e12">Diagramme de séquence — Réceptionner une benne au pressoir (UC50)</text>
+<text x="30" y="68" font-size="14" fill="#666">Contrôle de pesée (RG07), taux de remplissage, capacité du pressoir et clôture automatique de la tournée</text>
+<line x1="140" y1="170" x2="140" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<circle cx="140" cy="108" r="11" fill="#fff" stroke="#5b7a1e" stroke-width="2.2"/>
+<path d="M140,119 V142 M122,127 H158 M140,142 L126,160 M140,142 L154,160" stroke="#5b7a1e" stroke-width="2.2" fill="none"/>
+<text x="140.0" y="178.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#2b2b2b">Responsable du pressoir</text>
+<line x1="345" y1="170" x2="345" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<rect x="254.5" y="100" width="181" height="60" rx="6" fill="#e8f0d8" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="345.0" y="120.0" font-size="11" text-anchor="middle" font-weight="400" fill="#555" font-style="italic">«frontend»</text>
+<text x="345.0" y="138.0" font-size="13" text-anchor="middle" font-weight="700" fill="#2f3e12">Application Angular</text>
+<line x1="550" y1="170" x2="550" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<rect x="459.5" y="100" width="181" height="60" rx="6" fill="#dde7f3" stroke="#3d5a80" stroke-width="1.8" filter="url(#sh)"/>
+<text x="550.0" y="120.0" font-size="11" text-anchor="middle" font-weight="400" fill="#555" font-style="italic">«controller»</text>
+<text x="550.0" y="138.0" font-size="13" text-anchor="middle" font-weight="700" fill="#2f3e12">ReceptionController</text>
+<line x1="755" y1="170" x2="755" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<rect x="664.5" y="100" width="181" height="60" rx="6" fill="#f1e9f5" stroke="#7a4d93" stroke-width="1.8" filter="url(#sh)"/>
+<text x="755.0" y="120.0" font-size="11" text-anchor="middle" font-weight="400" fill="#555" font-style="italic">«service»</text>
+<text x="755.0" y="138.0" font-size="13" text-anchor="middle" font-weight="700" fill="#2f3e12">ReceptionService</text>
+<line x1="960" y1="170" x2="960" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<rect x="869.5" y="100" width="181" height="60" rx="6" fill="#fbf3df" stroke="#a8741a" stroke-width="1.8" filter="url(#sh)"/>
+<text x="960.0" y="120.0" font-size="11" text-anchor="middle" font-weight="400" fill="#555" font-style="italic">«repository»</text>
+<text x="960.0" y="138.0" font-size="13" text-anchor="middle" font-weight="700" fill="#2f3e12">RessourceRepository</text>
+<line x1="1165" y1="170" x2="1165" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<rect x="1074.5" y="100" width="181" height="60" rx="6" fill="#fbf3df" stroke="#a8741a" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1165.0" y="120.0" font-size="11" text-anchor="middle" font-weight="400" fill="#555" font-style="italic">«repository»</text>
+<text x="1165.0" y="138.0" font-size="13" text-anchor="middle" font-weight="700" fill="#2f3e12">ReceptionRepository</text>
+<line x1="1370" y1="170" x2="1370" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<rect x="1279.5" y="100" width="181" height="60" rx="6" fill="#fbf3df" stroke="#a8741a" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1370.0" y="120.0" font-size="11" text-anchor="middle" font-weight="400" fill="#555" font-style="italic">«repository»</text>
+<text x="1370.0" y="138.0" font-size="13" text-anchor="middle" font-weight="700" fill="#2f3e12">PressoirRepository</text>
+<line x1="1575" y1="170" x2="1575" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<rect x="1484.5" y="100" width="181" height="60" rx="6" fill="#fbf3df" stroke="#a8741a" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1575.0" y="120.0" font-size="11" text-anchor="middle" font-weight="400" fill="#555" font-style="italic">«repository»</text>
+<text x="1575.0" y="138.0" font-size="13" text-anchor="middle" font-weight="700" fill="#2f3e12">TourneeRepository</text>
+<line x1="1780" y1="170" x2="1780" y2="994" stroke="#999" stroke-width="1.3" stroke-dasharray="6 5"/>
+<rect x="1689.5" y="100" width="181" height="60" rx="6" fill="#f1e9f5" stroke="#7a4d93" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1780.0" y="120.0" font-size="11" text-anchor="middle" font-weight="400" fill="#555" font-style="italic">«service»</text>
+<text x="1780.0" y="138.0" font-size="13" text-anchor="middle" font-weight="700" fill="#2f3e12">NotificationService</text>
+<rect x="70" y="410" width="1800" height="554" fill="none" stroke="#a8741a" stroke-width="1.6"/>
+<rect x="82" y="738" width="1776" height="128" fill="none" stroke="#3d5a80" stroke-width="1.6"/>
+<path d="M140,236 L345,236" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="101.0" y="216" width="283.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="242.5" y="229" font-size="12.5" text-anchor="middle" fill="#2b2b2b">1: saisit benne, poids, acidité, catégorie</text>
+<path d="M345,276 L550,276" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="367.8" y="256" width="159.5" height="17" fill="#fff" opacity="0.93"/>
+<text x="447.5" y="269" font-size="12.5" text-anchor="middle" fill="#2b2b2b">2: POST /api/receptions</text>
+<path d="M550,316 L755,316" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="543.5" y="296" width="218.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="652.5" y="309" font-size="12.5" text-anchor="middle" fill="#2b2b2b">3: enregistrer(ReceptionRequest)</text>
+<path d="M755,356 L960,356" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="787.5" y="336" width="140.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="857.5" y="349" font-size="12.5" text-anchor="middle" fill="#2b2b2b">4: findById(benneId)</text>
+<path d="M960,396 L755,396" stroke="#2b2b2b" stroke-width="1.5" fill="none" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="771.2" y="376" width="172.5" height="17" fill="#fff" opacity="0.93"/>
+<text x="857.5" y="389" font-size="12.5" text-anchor="middle" fill="#555" font-style="italic">5: Ressource (capaciteKg)</text>
+<path d="M755,476 L550,476" stroke="#2b2b2b" stroke-width="1.5" fill="none" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="582.5" y="456" width="140.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="652.5" y="469" font-size="12.5" text-anchor="middle" fill="#555" font-style="italic">6: BusinessException</text>
+<path d="M550,516 L345,516" stroke="#2b2b2b" stroke-width="1.5" fill="none" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="351.5" y="496" width="192.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="447.5" y="509" font-size="12.5" text-anchor="middle" fill="#555" font-style="italic">7: 422 « pesée incohérente »</text>
+<path d="M755,586 h40 v22 h-40" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="799" y="588" width="250.5" height="17" fill="#fff" opacity="0.93"/>
+<text x="803" y="601" font-size="12.5" fill="#2b2b2b">8: tauxRemplissage = poids / capacité</text>
+<path d="M755,644 L1165,644" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="896.5" y="624" width="127.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="960.0" y="637" font-size="12.5" text-anchor="middle" fill="#2b2b2b">9: save(reception)</text>
+<path d="M755,684 L1370,684" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="921.0" y="664" width="283.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="1062.5" y="677" font-size="12.5" text-anchor="middle" fill="#2b2b2b">10: decrementerCapacite(pressoirId, poids)</text>
+<path d="M755,724 L1165,724" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="854.2" y="704" width="211.5" height="17" fill="#fff" opacity="0.93"/>
+<text x="960.0" y="717" font-size="12.5" text-anchor="middle" fill="#2b2b2b">11: countByTourneeId(tourneeId)</text>
+<path d="M755,804 L1575,804" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="1033.2" y="784" width="263.5" height="17" fill="#fff" opacity="0.93"/>
+<text x="1165.0" y="797" font-size="12.5" text-anchor="middle" fill="#2b2b2b">12: statut CLOTUREE + demandes TERMINEE</text>
+<path d="M755,844 L1780,844" stroke="#2b2b2b" stroke-width="1.5" fill="none" marker-end="url(#fill)"/>
+<rect x="1126.0" y="824" width="283.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="1267.5" y="837" font-size="12.5" text-anchor="middle" fill="#2b2b2b">13: notifier agriculteurs (poids, qualité)</text>
+<path d="M82,738 h46 v14 l-8,8 h-38 z" fill="#3d5a80"/>
+<text x="88" y="753" font-size="12" font-weight="700" fill="#fff">opt</text>
+<rect x="134" y="741" width="258" height="17" fill="#fff" opacity="0.93"/>
+<text x="138" y="754" font-size="12.5" font-weight="700" fill="#3d5a80">[dernière benne de la tournée reçue]</text>
+<path d="M755,902 L550,902" stroke="#2b2b2b" stroke-width="1.5" fill="none" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="595.5" y="882" width="114.0" height="17" fill="#fff" opacity="0.93"/>
+<text x="652.5" y="895" font-size="12.5" text-anchor="middle" fill="#555" font-style="italic">14: ReceptionDto</text>
+<path d="M550,942 L345,942" stroke="#2b2b2b" stroke-width="1.5" fill="none" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="393.8" y="922" width="107.5" height="17" fill="#fff" opacity="0.93"/>
+<text x="447.5" y="935" font-size="12.5" text-anchor="middle" fill="#555" font-style="italic">15: 201 Created</text>
+<path d="M70,410 h46 v14 l-8,8 h-38 z" fill="#a8741a"/>
+<text x="76" y="425" font-size="12" font-weight="700" fill="#fff">alt</text>
+<rect x="122" y="413" width="349" height="17" fill="#fff" opacity="0.93"/>
+<text x="126" y="426" font-size="12.5" font-weight="700" fill="#a8741a">[poids &gt; 110 % de la capacité de la benne (RG07)]</text>
+<line x1="70" y1="534" x2="1870" y2="534" stroke="#a8741a" stroke-width="1.3" stroke-dasharray="8 5"/>
+<rect x="76" y="539" width="97" height="17" fill="#fff" opacity="0.93"/>
+<text x="80" y="552" font-size="12.5" font-weight="700" fill="#a8741a">[cas nominal]</text>
+<text x="30.0" y="1036.0" font-size="13" text-anchor="start" font-weight="700" fill="#2b2b2b">Légende :</text>
+<path d="M120.0,1032.0 L175.0,1032.0" fill="none" stroke="#2b2b2b" stroke-width="1.5" marker-end="url(#fill)"/>
+<text x="183.0" y="1036.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">appel synchrone</text>
+<path d="M320.0,1032.0 L375.0,1032.0" fill="none" stroke="#2b2b2b" stroke-width="1.5" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<text x="383.0" y="1036.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">réponse</text>
+<rect x="500" y="1021" width="26" height="16" fill="#e8f0d8" stroke="#5b7a1e" stroke-width="1.5"/>
+<text x="534.0" y="1036.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">frontend Angular</text>
+<rect x="700" y="1021" width="26" height="16" fill="#dde7f3" stroke="#3d5a80" stroke-width="1.5"/>
+<text x="734.0" y="1036.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">@RestController</text>
+<rect x="900" y="1021" width="26" height="16" fill="#f1e9f5" stroke="#7a4d93" stroke-width="1.5"/>
+<text x="934.0" y="1036.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">@Service</text>
+<rect x="1100" y="1021" width="26" height="16" fill="#fbf3df" stroke="#a8741a" stroke-width="1.5"/>
+<text x="1134.0" y="1036.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">Spring Data Repository</text>
+</svg>

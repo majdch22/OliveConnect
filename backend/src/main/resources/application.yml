@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: oliveconnect
+  profiles:
+    default: dev
+  jackson:
+    time-zone: Africa/Tunis
+  mongodb:
+    uri: ${MONGO_URI:mongodb://localhost:27017/oliveconnect}
+  data:
+    mongodb:
+      # Crée les index déclarés dans les classes (@Indexed) au démarrage
+      auto-index-creation: true
+
+server:
+  port: 8081  # 8080 est déjà utilisé par Oracle sur le poste
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+oliveconnect:
+  securite:
+    secret-jeton: ${SECRET_JETON}
+    duree-jeton: 8h
+    tentatives-avant-blocage: 5
+    duree-blocage: 15m
+  premier-administrateur:
+    nom: ${ADMINISTRATEUR_NOM:Administrateur}
+    prenom: ${ADMINISTRATEUR_PRENOM:OliveConnect}
+    email: ${ADMINISTRATEUR_EMAIL}
+    telephone: ${ADMINISTRATEUR_TELEPHONE}
+    mot-de-passe: ${ADMINISTRATEUR_MOT_DE_PASSE}

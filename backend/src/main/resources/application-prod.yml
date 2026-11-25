@@ -1,0 +1,9 @@
+# Profil de production (serveur). Toutes les valeurs sensibles viennent des variables d'environnement :
+# MONGO_URI, SECRET_JETON, ADMINISTRATEUR_EMAIL, ADMINISTRATEUR_TELEPHONE, ADMINISTRATEUR_MOT_DE_PASSE
+spring:
+  mongodb:
+    uri: ${MONGO_URI}
+
+logging:
+  level:
+    root: INFO

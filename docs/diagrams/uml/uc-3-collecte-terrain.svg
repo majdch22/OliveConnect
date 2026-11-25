@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1300" viewBox="0 0 1900 1300" font-family="Segoe UI, Arial, sans-serif">
+<defs>
+<marker id="fill" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b2b"/></marker>
+<marker id="open" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10" fill="none" stroke="#2b2b2b" stroke-width="1.4"/></marker>
+<marker id="tri" viewBox="0 0 12 12" refX="12" refY="6" markerWidth="14" markerHeight="14" orient="auto-start-reverse"><path d="M0,0 L12,6 L0,12 z" fill="#fff" stroke="#2b2b2b" stroke-width="1.3"/></marker>
+<filter id="sh" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.6" flood-opacity="0.15"/></filter>
+</defs>
+<rect width="1900" height="1300" fill="#fff"/>
+<text x="30" y="42" font-size="26" font-weight="700" fill="#2f3e12">Diagramme de cas d'utilisation — responsable de collecte et chef d'équipe</text>
+<text x="30" y="68" font-size="14" fill="#666">Planification et exécution des tournées</text>
+<rect x="400" y="100" width="1180" height="1160" rx="14" fill="#f8faf3" stroke="#5b7a1e" stroke-width="2"/>
+<text x="418.0" y="128.0" font-size="16" text-anchor="start" font-weight="700" fill="#2f3e12">Système OliveConnect</text>
+<path d="M230.0,382.3 L644.8,217.5" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M230.0,392.1 L603.5,334.1" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M230.0,401.9 L604.1,435.6" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M230.0,411.7 L645.3,552.4" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M230.0,932.3 L644.8,767.5" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M230.0,940.6 L610.1,867.4" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M230.0,948.9 L594.1,953.8" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M230.0,957.2 L627.9,1046.4" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M230.0,965.5 L656.4,1150.5" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M848.0,320.0 L1162.0,320.0" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="971.0" y="309.0" width="68" height="16" fill="#fff" opacity="0.9"/>
+<text x="1005.0" y="321.0" font-size="11.5" text-anchor="middle" font-weight="400" fill="#444" font-style="italic">«include»</text>
+<path d="M1162.0,190.0 L848.0,190.0" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="971.0" y="179.0" width="68" height="16" fill="#fff" opacity="0.9"/>
+<text x="1005.0" y="191.0" font-size="11.5" text-anchor="middle" font-weight="400" fill="#444" font-style="italic">«extend»</text>
+<path d="M1176.8,514.1 L833.2,465.9" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="971.0" y="479.0" width="68" height="16" fill="#fff" opacity="0.9"/>
+<text x="1005.0" y="491.0" font-size="11.5" text-anchor="middle" font-weight="400" fill="#444" font-style="italic">«extend»</text>
+<path d="M1183.2,401.3 L826.8,338.7" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="971.0" y="359.0" width="68" height="16" fill="#fff" opacity="0.9"/>
+<text x="1005.0" y="371.0" font-size="11.5" text-anchor="middle" font-weight="400" fill="#444" font-style="italic">«extend»</text>
+<path d="M1162.0,1180.0 L848.0,1180.0" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="971.0" y="1169.0" width="68" height="16" fill="#fff" opacity="0.9"/>
+<text x="1005.0" y="1181.0" font-size="11.5" text-anchor="middle" font-weight="400" fill="#444" font-style="italic">«extend»</text>
+<path d="M830.0,832.6 L1180.0,777.4" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="971.0" y="794.0" width="68" height="16" fill="#fff" opacity="0.9"/>
+<text x="1005.0" y="806.0" font-size="11.5" text-anchor="middle" font-weight="400" fill="#444" font-style="italic">«include»</text>
+<path d="M797.3,932.9 L1212.7,787.1" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="971.0" y="849.0" width="68" height="16" fill="#fff" opacity="0.9"/>
+<text x="1005.0" y="861.0" font-size="11.5" text-anchor="middle" font-weight="400" fill="#444" font-style="italic">«include»</text>
+<path d="M763.4,1148.0 L1246.6,792.0" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<rect x="971.0" y="959.0" width="68" height="16" fill="#fff" opacity="0.9"/>
+<text x="1005.0" y="971.0" font-size="11.5" text-anchor="middle" font-weight="400" fill="#444" font-style="italic">«include»</text>
+<path d="M1700.0,336.4 L1417.9,321.1" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M1700.0,776.4 L1417.9,761.1" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<path d="M1700.0,1095.3 L1330.9,792.2" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<circle cx="190" cy="344" r="12" fill="#fff" stroke="#5b7a1e" stroke-width="2.2"/>
+<path d="M190,356 V388 M168,366 H212 M190,388 L173,416 M190,388 L207,416" stroke="#5b7a1e" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<text x="190.0" y="436.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#2b2b2b">Responsable de</text>
+<text x="190.0" y="452.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#2b2b2b">collecte</text>
+<ellipse cx="720" cy="190" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="170.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC20</text>
+<text x="720.0" y="191.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Valider / rejeter une</text>
+<text x="720.0" y="207.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">demande</text>
+<ellipse cx="720" cy="320" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="300.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC21</text>
+<text x="720.0" y="329.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Planifier une tournée</text>
+<ellipse cx="720" cy="450" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="430.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC22</text>
+<text x="720.0" y="459.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Traiter une alerte</text>
+<ellipse cx="720" cy="580" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="560.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC23</text>
+<text x="720.0" y="581.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Consulter la carte et le</text>
+<text x="720.0" y="597.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">tableau de bord</text>
+<circle cx="190" cy="894" r="12" fill="#fff" stroke="#5b7a1e" stroke-width="2.2"/>
+<path d="M190,906 V938 M168,916 H212 M190,938 L173,966 M190,938 L207,966" stroke="#5b7a1e" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<text x="190.0" y="986.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#2b2b2b">Chef d'équipe de</text>
+<text x="190.0" y="1002.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#2b2b2b">récolte</text>
+<ellipse cx="720" cy="740" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="720.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC30</text>
+<text x="720.0" y="749.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Consulter ses tournées</text>
+<ellipse cx="720" cy="850" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="830.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC31</text>
+<text x="720.0" y="859.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Démarrer une tournée</text>
+<ellipse cx="720" cy="960" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="940.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC32</text>
+<text x="720.0" y="961.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Mettre à jour l'avancement</text>
+<text x="720.0" y="977.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">et les quantités</text>
+<ellipse cx="720" cy="1070" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="1050.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC33</text>
+<text x="720.0" y="1071.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Mettre à jour le statut du</text>
+<text x="720.0" y="1087.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">verger</text>
+<ellipse cx="720" cy="1180" rx="128" ry="34" fill="#ffffff" stroke="#5b7a1e" stroke-width="1.8" filter="url(#sh)"/>
+<text x="720.0" y="1160.0" font-size="10.5" text-anchor="middle" font-weight="700" fill="#5b7a1e">UC34</text>
+<text x="720.0" y="1189.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Livrer au pressoir</text>
+<ellipse cx="1290" cy="320" rx="128" ry="34" fill="#f3f3f3" stroke="#888" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1290.0" y="316.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Vérifier la disponibilité</text>
+<text x="1290.0" y="332.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">des ressources (RG04)</text>
+<ellipse cx="1290" cy="190" rx="128" ry="34" fill="#f3f3f3" stroke="#888" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1290.0" y="194.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Saisir le motif du rejet</text>
+<ellipse cx="1290" cy="530" rx="128" ry="34" fill="#f3f3f3" stroke="#888" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1290.0" y="534.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Créer une demande urgente</text>
+<ellipse cx="1290" cy="760" rx="128" ry="34" fill="#f3f3f3" stroke="#888" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1290.0" y="756.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Notifier les acteurs</text>
+<text x="1290.0" y="772.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">concernés</text>
+<ellipse cx="1290" cy="1180" rx="128" ry="34" fill="#f3f3f3" stroke="#888" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1290.0" y="1184.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Clôturer la tournée</text>
+<ellipse cx="1290" cy="420" rx="128" ry="34" fill="#f3f3f3" stroke="#888" stroke-width="1.8" filter="url(#sh)"/>
+<text x="1290.0" y="424.0" font-size="12.5" text-anchor="middle" font-weight="400" fill="#2b2b2b">Annuler une tournée</text>
+<circle cx="1740" cy="284" r="12" fill="#fff" stroke="#777" stroke-width="2.2"/>
+<path d="M1740,296 V328 M1718,306 H1762 M1740,328 L1723,356 M1740,328 L1757,356" stroke="#777" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<text x="1740.0" y="376.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#777">Responsable</text>
+<text x="1740.0" y="392.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#777">logistique</text>
+<circle cx="1740" cy="724" r="12" fill="#fff" stroke="#777" stroke-width="2.2"/>
+<path d="M1740,736 V768 M1718,746 H1762 M1740,768 L1723,796 M1740,768 L1757,796" stroke="#777" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<text x="1740.0" y="816.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#777">Agriculteur</text>
+<circle cx="1740" cy="1074" r="12" fill="#fff" stroke="#777" stroke-width="2.2"/>
+<path d="M1740,1086 V1118 M1718,1096 H1762 M1740,1118 L1723,1146 M1740,1118 L1757,1146" stroke="#777" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<text x="1740.0" y="1166.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#777">Responsable du</text>
+<text x="1740.0" y="1182.0" font-size="13.5" text-anchor="middle" font-weight="700" fill="#777">pressoir</text>
+<text x="30.0" y="1278.0" font-size="13" text-anchor="start" font-weight="700" fill="#2b2b2b">Légende :</text>
+<path d="M110.0,1274.0 L160.0,1274.0" fill="none" stroke="#2b2b2b" stroke-width="1.4"/>
+<text x="168.0" y="1278.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">association acteur ↔ cas</text>
+<path d="M350.0,1274.0 L400.0,1274.0" fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<text x="408.0" y="1278.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">«include» / «extend»</text>
+<path d="M570.0,1274.0 L620.0,1274.0" fill="none" stroke="#2b2b2b" stroke-width="1.4" marker-end="url(#tri)"/>
+<text x="628.0" y="1278.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">généralisation</text>
+<ellipse cx="790" cy="1274" rx="30" ry="11" fill="#f3f3f3" stroke="#888" stroke-width="1.5"/>
+<text x="828.0" y="1278.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#2b2b2b">cas inclus / d'extension</text>
+<path d="M1020,1258 m0,0" />
+<text x="1020.0" y="1278.0" font-size="12.5" text-anchor="start" font-weight="400" fill="#777">Acteur gris = acteur secondaire</text>
+</svg>
