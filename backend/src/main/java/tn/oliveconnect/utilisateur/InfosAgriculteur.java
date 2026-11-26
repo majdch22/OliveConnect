@@ -28,4 +28,13 @@ public class InfosAgriculteur {
 
     /** Date à laquelle l'agriculteur a accepté les conditions d'utilisation. */
     private Instant dateAcceptationConditions;
+
+    /** Date à laquelle l'administrateur a accepté ou refusé l'inscription. */
+    private Instant dateTraitementInscription;
+
+    /** Identifiant de l'administrateur qui a traité l'inscription. */
+    private String inscriptionTraiteePar;
+
+    /** Raison donnée à l'agriculteur quand l'inscription est refusée. */
+    private String motifRefus;
 }

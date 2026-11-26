@@ -1,0 +1,208 @@
+<header class="flex flex-col gap-1">
+  <h1 class="text-3xl font-bold text-olive-900">Inscriptions des agriculteurs</h1>
+  <p class="text-gray-600">Vérifiez chaque demande, puis acceptez-la (le numéro d'adhérent est attribué automatiquement) ou refusez-la avec un motif.</p>
+</header>
+
+@if (messageSucces(); as message) {
+  <div role="status" class="mt-6 flex items-start justify-between gap-4 rounded-xl border border-olive-100 bg-olive-50 px-4 py-3 text-olive-900">
+    <p>{{ message }}</p>
+    <button type="button" (click)="messageSucces.set(null)" class="text-sm font-semibold hover:underline">Fermer</button>
+  </div>
+}
+
+<!-- Onglets par état -->
+<nav class="mt-6 flex gap-2 border-b border-gray-200" aria-label="État des inscriptions">
+  @for (onglet of onglets; track onglet.etat) {
+    <button
+      type="button"
+      (click)="changerFiltres({ etat: onglet.etat })"
+      class="-mb-px flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold"
+      [class]="filtres().etat === onglet.etat ? 'border-olive-700 text-olive-900' : 'border-transparent text-gray-500 hover:text-gray-800'"
+    >
+      {{ onglet.libelle }}
+      @if (onglet.etat === 'EN_ATTENTE' && administration.statistiques(); as statistiques) {
+        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">{{ statistiques.inscriptionsEnAttente }}</span>
+      }
+      @if (onglet.etat === 'REFUSEE' && administration.statistiques(); as statistiques) {
+        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{{ statistiques.inscriptionsRefusees }}</span>
+      }
+    </button>
+  }
+</nav>
+
+<!-- Barre de filtres -->
+<div class="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center">
+  <div class="relative flex-1">
+    <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+    </svg>
+    <input
+      type="search"
+      class="champ-filtre w-full pl-10"
+      placeholder="Rechercher un nom, une carte d'identité, un téléphone…"
+      aria-label="Rechercher"
+      [value]="filtres().texte"
+      (input)="changerFiltres({ texte: $any($event.target).value })"
+    />
+  </div>
+  <select class="champ-filtre lg:w-56" aria-label="Délégation" [value]="filtres().delegation" (change)="changerFiltres({ delegation: $any($event.target).value })">
+    <option value="">Toutes les délégations</option>
+    @for (delegation of delegations(); track delegation.code) {
+      <option [value]="delegation.code">{{ delegation.libelle }}</option>
+    }
+  </select>
+  <label class="flex items-center gap-2 text-sm text-gray-600">
+    Trier par
+    <select class="champ-filtre" [value]="ordreChoisi()" (change)="changerOrdre($any($event.target).value)">
+      @for (ordre of ordres; track ordre.code) {
+        <option [value]="ordre.code">{{ ordre.libelle }}</option>
+      }
+    </select>
+  </label>
+  @if (filtresActifs()) {
+    <button type="button" (click)="effacerFiltres()" class="text-sm font-semibold text-olive-700 hover:underline">Effacer les filtres</button>
+  }
+</div>
+
+<!-- Liste -->
+<section class="mt-5 overflow-hidden rounded-2xl border border-gray-200 bg-white" [class.opacity-60]="chargement()">
+  @if (resultat(); as page) {
+    @if (page.elements.length === 0) {
+      <p class="px-6 py-16 text-center text-gray-500">
+        {{ filtresActifs() ? 'Aucune inscription ne correspond à ces filtres.' : 'Aucune inscription dans cet onglet.' }}
+      </p>
+    } @else {
+      <!-- Tableau sur ordinateur -->
+      <table class="hidden w-full text-left text-sm md:table">
+        <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+          <tr>
+            <th class="px-6 py-3 font-semibold">Agriculteur</th>
+            <th class="px-4 py-3 font-semibold">Carte d'identité</th>
+            <th class="px-4 py-3 font-semibold">Téléphone</th>
+            <th class="px-4 py-3 font-semibold">Délégation</th>
+            <th class="px-4 py-3 font-semibold">Inscrit le</th>
+            <th class="px-4 py-3 font-semibold">{{ filtres().etat === 'ACCEPTEE' ? 'N° adhérent' : 'État' }}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          @for (inscription of page.elements; track inscription.id) {
+            <tr (click)="ouvrir(inscription)" class="cursor-pointer hover:bg-olive-50">
+              <td class="px-6 py-4">
+                <p class="font-semibold text-gray-900">{{ inscription.prenom }} {{ inscription.nom }}</p>
+                <p class="text-gray-500">{{ inscription.email ?? 'Pas d’e-mail' }}</p>
+              </td>
+              <td class="px-4 py-4 font-mono text-gray-700">{{ inscription.cin }}</td>
+              <td class="px-4 py-4 text-gray-700">{{ inscription.telephone | telephone }}</td>
+              <td class="px-4 py-4 text-gray-700">{{ inscription.libelleDelegation }}</td>
+              <td class="px-4 py-4 text-gray-700">{{ inscription.dateCreation | date: 'dd/MM/yyyy' }}</td>
+              <td class="px-4 py-4">
+                @if (filtres().etat === 'ACCEPTEE') {
+                  <span class="font-mono font-semibold text-olive-900">{{ inscription.numeroAdherent }}</span>
+                } @else {
+                  <app-badge-statut [statut]="inscription.statut" />
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Cartes sur téléphone -->
+      <ul class="divide-y divide-gray-100 md:hidden">
+        @for (inscription of page.elements; track inscription.id) {
+          <li (click)="ouvrir(inscription)" class="cursor-pointer px-4 py-4 hover:bg-olive-50">
+            <div class="flex items-center justify-between gap-3">
+              <p class="font-semibold text-gray-900">{{ inscription.prenom }} {{ inscription.nom }}</p>
+              <app-badge-statut [statut]="inscription.statut" />
+            </div>
+            <p class="mt-1 text-sm text-gray-500">{{ inscription.libelleDelegation }} · {{ inscription.telephone | telephone }}</p>
+            <p class="text-sm text-gray-500">Inscrit le {{ inscription.dateCreation | date: 'dd/MM/yyyy' }}</p>
+          </li>
+        }
+      </ul>
+
+      <app-pagination
+        [page]="page.page"
+        [taille]="page.taille"
+        [totalElements]="page.totalElements"
+        [totalPages]="page.totalPages"
+        (changerPage)="changerFiltres({ page: $event })"
+        (changerTaille)="changerFiltres({ taille: $event })"
+      />
+    }
+  } @else {
+    <p class="px-6 py-16 text-center text-gray-500">Chargement…</p>
+  }
+</section>
+
+<!-- Fiche de l'inscription -->
+@if (selection(); as inscription) {
+  <app-panneau-lateral [titre]="inscription.prenom + ' ' + inscription.nom" [sousTitre]="'Inscrit le ' + (inscription.dateCreation | date: 'dd/MM/yyyy à HH:mm')" (fermer)="fermer()">
+    <div class="flex items-center gap-3">
+      <app-badge-statut [statut]="inscription.statut" />
+      @if (inscription.numeroAdherent) {
+        <span class="font-mono text-sm font-semibold text-olive-900">{{ inscription.numeroAdherent }}</span>
+      }
+    </div>
+
+    <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 text-sm">
+      <div><dt class="text-gray-500">Carte d'identité</dt><dd class="mt-1 font-mono font-medium text-gray-900">{{ inscription.cin }}</dd></div>
+      <div><dt class="text-gray-500">Délégation</dt><dd class="mt-1 font-medium text-gray-900">{{ inscription.libelleDelegation }}</dd></div>
+      <div><dt class="text-gray-500">Téléphone</dt><dd class="mt-1 font-medium text-gray-900">{{ inscription.telephone | telephone }}</dd></div>
+      <div><dt class="text-gray-500">E-mail</dt><dd class="mt-1 font-medium break-all text-gray-900">{{ inscription.email ?? 'Non renseigné' }}</dd></div>
+      @if (inscription.dateTraitementInscription) {
+        <div class="col-span-2"><dt class="text-gray-500">Traitée le</dt><dd class="mt-1 font-medium text-gray-900">{{ inscription.dateTraitementInscription | date: 'dd/MM/yyyy à HH:mm' }}</dd></div>
+      }
+    </dl>
+
+    @if (inscription.motifRefus) {
+      <div class="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-900">
+        <p class="font-semibold">Motif du refus</p>
+        <p class="mt-1">{{ inscription.motifRefus }}</p>
+      </div>
+    }
+
+    @if (messageErreur(); as message) {
+      <p role="alert" class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+    }
+
+    <!-- Actions selon l'état -->
+    @if (inscription.statut === 'EN_ATTENTE_VALIDATION' || inscription.statut === 'REFUSE') {
+      <div class="mt-8 border-t border-gray-200 pt-6">
+        @if (!refusEnCours()) {
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <button type="button" class="bouton-principal flex-1" [disabled]="actionEnCours()" (click)="accepter(inscription)">
+              {{ inscription.statut === 'REFUSE' ? 'Accepter finalement' : "Accepter l'inscription" }}
+            </button>
+            @if (inscription.statut === 'EN_ATTENTE_VALIDATION') {
+              <button type="button" class="inline-flex flex-1 items-center justify-center rounded-lg border border-red-300 px-6 py-3 font-semibold text-red-700 hover:bg-red-50" (click)="refusEnCours.set(true)">
+                Refuser…
+              </button>
+            }
+          </div>
+          <p class="mt-3 text-sm text-gray-500">L'acceptation active le compte et attribue le prochain numéro d'adhérent.</p>
+        } @else {
+          <h3 class="font-semibold text-gray-900">Motif du refus</h3>
+          <p class="mt-1 text-sm text-gray-500">Ce motif sera communiqué à l'agriculteur.</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            @for (motifRapide of motifsRapides; track motifRapide) {
+              <button type="button" (click)="motif.setValue(motifRapide)" class="rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:border-olive-700 hover:text-olive-900">
+                {{ motifRapide }}
+              </button>
+            }
+          </div>
+          <textarea [formControl]="motif" rows="3" class="champ-saisie mt-3" [class.en-erreur]="motif.touched && motif.invalid" placeholder="Précisez le motif…"></textarea>
+          @if (motif.touched && motif.invalid) {
+            <p class="message-champ mt-1">Indiquez le motif du refus.</p>
+          }
+          <div class="mt-4 flex gap-3">
+            <button type="button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-red-700 px-6 py-3 font-semibold text-white hover:bg-red-800 disabled:opacity-60" [disabled]="actionEnCours()" (click)="confirmerRefus(inscription)">
+              Confirmer le refus
+            </button>
+            <button type="button" class="bouton-secondaire flex-1" (click)="refusEnCours.set(false)">Annuler</button>
+          </div>
+        }
+      </div>
+    }
+  </app-panneau-lateral>
+}

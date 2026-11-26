@@ -5,6 +5,7 @@ import java.time.Instant;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,8 +16,10 @@ import lombok.Setter;
 /**
  * Compte d'une personne qui utilise la plateforme (agriculteur ou membre du personnel).
  * Collection MongoDB : « utilisateurs ».
+ * L'index composé (rôle, statut) sert les filtres de la liste des utilisateurs de l'administration.
  */
 @Document(collection = "utilisateurs")
+@CompoundIndex(name = "role_statut", def = "{'role': 1, 'statut': 1}")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,11 +42,18 @@ public class Utilisateur {
     /** Mot de passe chiffré avec BCrypt, jamais en clair. */
     private String motDePasse;
 
+    /** Vrai si le mot de passe a été donné par l'administrateur (création ou réinitialisation) et doit être changé. */
+    private boolean motDePasseProvisoire;
+
     private Role role;
     private StatutCompte statut;
 
     /** Renseigné uniquement pour les agriculteurs. */
     private InfosAgriculteur agriculteur;
+
+    /** Pressoir d'un responsable du pressoir : il n'agit que sur ce pressoir. Vide pour les autres rôles. */
+    @Indexed(sparse = true)
+    private String pressoirId;
 
     /** Échecs de mot de passe consécutifs depuis la dernière connexion réussie. */
     private int tentativesEchouees;
@@ -58,6 +68,10 @@ public class Utilisateur {
 
     public String getNomComplet() {
         return prenom + " " + nom;
+    }
+
+    public boolean estActif() {
+        return statut == StatutCompte.ACTIF;
     }
 
     public boolean estBloque(Instant maintenant) {

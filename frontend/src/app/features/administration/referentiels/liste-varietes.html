@@ -1,0 +1,79 @@
+<div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+  <input
+    type="search"
+    class="champ-filtre flex-1"
+    placeholder="Rechercher un nom ou un code…"
+    aria-label="Rechercher une variété"
+    [value]="filtres().texte"
+    (input)="changerFiltres({ texte: $any($event.target).value })"
+  />
+  <label class="flex items-center gap-2 text-sm text-gray-700">
+    <input type="checkbox" class="h-4 w-4 accent-olive-700" [checked]="filtres().avecArchives" (change)="changerFiltres({ avecArchives: $any($event.target).checked })" />
+    Afficher les variétés archivées
+  </label>
+  <button type="button" class="bouton-principal" (click)="panneau.set('nouvelle')">+ Ajouter une variété</button>
+</div>
+
+@if (messageSucces(); as message) {
+  <p role="status" class="mt-4 rounded-lg bg-olive-50 px-4 py-3 text-sm text-olive-900">{{ message }}</p>
+}
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+<div class="mt-4 overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+  <table class="w-full min-w-[640px] text-left text-sm">
+    <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+      <tr>
+        @for (colonne of colonnes; track colonne.tri) {
+          <th class="px-4 py-3 font-semibold first:pl-6">
+            <button type="button" (click)="trierPar(colonne.tri)" class="inline-flex items-center gap-1 uppercase hover:text-olive-900" [class.text-olive-900]="filtres().tri === colonne.tri">
+              {{ colonne.libelle }} <span class="w-3 text-olive-700">{{ indicateurTri(colonne.tri) }}</span>
+            </button>
+          </th>
+        }
+        <th class="px-4 py-3 font-semibold">Saison de récolte</th>
+        <th class="px-6 py-3 font-semibold">État</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      @for (variete of varietes() ?? []; track variete.id) {
+        <tr (click)="panneau.set(variete)" class="cursor-pointer hover:bg-olive-50" [class.text-gray-400]="variete.archivee">
+          <td class="py-4 pl-6 pr-4 font-mono">{{ variete.code }}</td>
+          <td class="px-4 py-4 font-semibold" [class.text-gray-900]="!variete.archivee">{{ variete.nom }}</td>
+          <td class="px-4 py-4 tabular-nums">{{ variete.rendementMoyenKgParHectare | number }} kg/ha</td>
+          <td class="px-4 py-4">{{ variete.saison }}</td>
+          <td class="px-6 py-4">
+            <span class="rounded-full px-2.5 py-1 text-xs font-semibold" [class]="variete.archivee ? 'bg-gray-100 text-gray-600' : 'bg-olive-100 text-olive-900'">
+              {{ variete.archivee ? 'Archivée' : 'Active' }}
+            </span>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5" class="px-6 py-12 text-center text-gray-500">Aucune variété ne correspond.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (panneau()) {
+  <app-panneau-lateral
+    [titre]="varieteModifiee() ? varieteModifiee()!.nom : 'Ajouter une variété'"
+    [sousTitre]="varieteModifiee() ? 'Code ' + varieteModifiee()!.code : 'Le code est attribué automatiquement'"
+    (fermer)="panneau.set(null)"
+  >
+    <app-formulaire-variete [variete]="varieteModifiee()" (enregistre)="apresEnregistrement($event)" (annule)="panneau.set(null)" />
+    @if (varieteModifiee(); as variete) {
+      <div class="mt-8 border-t border-gray-200 pt-6">
+        <p class="text-sm text-gray-600">
+          {{ variete.archivee
+            ? 'Cette variété est archivée : elle n’est plus proposée pour les nouveaux vergers.'
+            : 'Archiver retire la variété des choix proposés, sans effacer les vergers et l’historique qui la citent.' }}
+        </p>
+        <button type="button" class="bouton-secondaire mt-3 w-full" (click)="changerArchivage(variete)">
+          {{ variete.archivee ? 'Restaurer la variété' : 'Archiver la variété' }}
+        </button>
+      </div>
+    }
+  </app-panneau-lateral>
+}

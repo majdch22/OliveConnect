@@ -1,0 +1,83 @@
+<form [formGroup]="formulaire" (ngSubmit)="envoyer()" novalidate class="flex flex-col gap-5">
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div class="flex flex-col gap-1">
+      <label for="ressource-type" class="etiquette">Type</label>
+      <select id="ressource-type" formControlName="type" class="champ-saisie">
+        @for (type of types; track type.code) { <option [value]="type.code">{{ type.singulier }}</option> }
+      </select>
+      @if (erreur('type'); as message) {
+        <p class="message-champ">{{ message }}</p>
+      } @else if (ressource()) {
+        <p class="text-sm text-gray-500">Le type ne change pas après l'ajout.</p>
+      }
+    </div>
+    <div class="flex flex-col gap-1">
+      <label for="ressource-etat" class="etiquette">État</label>
+      <select id="ressource-etat" formControlName="etat" class="champ-saisie">
+        @for (etat of etats; track etat.code) { <option [value]="etat.code">{{ etat.libelle }}</option> }
+      </select>
+      <p class="text-sm text-gray-500">Seule une ressource disponible peut partir en tournée.</p>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="ressource-nom" class="etiquette">{{ libelleNom() }}</label>
+    <input id="ressource-nom" formControlName="nom" class="champ-saisie" [class.en-erreur]="erreur('nom')" />
+    @if (erreur('nom'); as message) { <p class="message-champ">{{ message }}</p> }
+  </div>
+
+  @if (estVehicule()) {
+    <div class="flex flex-col gap-1">
+      <label for="ressource-matricule" class="etiquette">Immatriculation <span class="font-normal text-gray-500">(facultative)</span></label>
+      <input id="ressource-matricule" formControlName="matricule" placeholder="4521 TU 210" class="champ-saisie" />
+    </div>
+  }
+
+  @if (type() === 'BENNE') {
+    <div class="flex flex-col gap-1">
+      <label for="ressource-capacite" class="etiquette">Capacité (kg)</label>
+      <input id="ressource-capacite" type="number" formControlName="capaciteKg" class="champ-saisie" [class.en-erreur]="erreur('capaciteKg')" />
+      @if (erreur('capaciteKg'); as message) {
+        <p class="message-champ">{{ message }}</p>
+      } @else {
+        <p class="text-sm text-gray-500">Sert à vérifier que les bennes d'une tournée peuvent contenir la récolte prévue.</p>
+      }
+    </div>
+  }
+
+  @if (type() === 'MATERIEL') {
+    <div class="flex flex-col gap-1">
+      <label for="ressource-quantite" class="etiquette">Quantité disponible</label>
+      <input id="ressource-quantite" type="number" formControlName="quantite" class="champ-saisie" [class.en-erreur]="erreur('quantite')" />
+      @if (erreur('quantite'); as message) { <p class="message-champ">{{ message }}</p> }
+    </div>
+  }
+
+  @if (type() === 'OUVRIER') {
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div class="flex flex-col gap-1">
+        <label for="ressource-equipe" class="etiquette">Équipe <span class="font-normal text-gray-500">(facultative)</span></label>
+        <select id="ressource-equipe" formControlName="equipeId" class="champ-saisie" [class.en-erreur]="erreur('equipeId')">
+          <option value="">Sans équipe</option>
+          @for (equipe of equipes(); track equipe.id) { <option [value]="equipe.id">{{ equipe.nom }}</option> }
+        </select>
+        @if (erreur('equipeId'); as message) { <p class="message-champ">{{ message }}</p> }
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="ressource-telephone" class="etiquette">Téléphone <span class="font-normal text-gray-500">(facultatif)</span></label>
+        <input id="ressource-telephone" type="tel" formControlName="telephone" class="champ-saisie" />
+      </div>
+    </div>
+  }
+
+  @if (messageErreur(); as message) {
+    <p role="alert" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+  }
+
+  <div class="flex gap-3 border-t border-gray-200 pt-5">
+    <button type="submit" class="bouton-principal flex-1" [disabled]="envoiEnCours()">
+      {{ ressource() ? 'Enregistrer les modifications' : 'Ajouter la ressource' }}
+    </button>
+    <button type="button" class="bouton-secondaire" (click)="annule.emit()">Annuler</button>
+  </div>
+</form>

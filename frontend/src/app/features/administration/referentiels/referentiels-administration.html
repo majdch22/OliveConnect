@@ -1,0 +1,63 @@
+<header>
+  <h1 class="text-3xl font-bold text-olive-900">Référentiels</h1>
+  <p class="mt-1 text-gray-600">Les données de référence utilisées par toute la plateforme.</p>
+</header>
+
+<nav class="mt-6 flex gap-2 overflow-x-auto border-b border-gray-200" aria-label="Référentiels">
+  @for (onglet of onglets; track onglet.code) {
+    <button
+      type="button"
+      (click)="ongletActif.set(onglet.code)"
+      class="-mb-px shrink-0 border-b-2 px-4 py-3 text-sm font-semibold"
+      [class]="ongletActif() === onglet.code ? 'border-olive-700 text-olive-900' : 'border-transparent text-gray-500 hover:text-gray-800'"
+    >
+      {{ onglet.libelle }}
+    </button>
+  }
+</nav>
+
+<!-- Ce qu'est l'élément, et s'il est modifiable -->
+<div class="mt-5 flex items-start gap-3 rounded-xl bg-olive-50 p-4">
+  <p class="flex-1 text-sm text-gray-700">{{ ongletCourant().explication }}</p>
+  <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold" [class]="ongletCourant().modifiable ? 'bg-olive-100 text-olive-900' : 'bg-gray-200 text-gray-700'">
+    {{ ongletCourant().modifiable ? 'Modifiable' : 'Liste fixe, en lecture seule' }}
+  </span>
+</div>
+
+<div class="mt-5">
+  @switch (ongletActif()) {
+    @case ('varietes') {
+      <app-liste-varietes />
+    }
+    @case ('pressoirs') {
+      <app-liste-pressoirs [delegations]="delegations()" />
+    }
+    @case ('delegations') {
+      <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        @for (delegation of delegations(); track delegation.code) {
+          <li class="rounded-xl border border-gray-200 bg-white px-4 py-3">
+            <p class="font-medium text-gray-900">{{ delegation.libelle }}</p>
+            <p class="font-mono text-xs text-gray-500">{{ delegation.code }}</p>
+          </li>
+        }
+      </ul>
+    }
+    @case ('categories') {
+      <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+            <tr><th class="px-6 py-3 font-semibold">Catégorie</th><th class="px-6 py-3 font-semibold">Règle</th></tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (categorie of categories(); track categorie.code) {
+              <tr>
+                <td class="px-6 py-4 font-semibold text-gray-900">{{ categorie.libelle }}</td>
+                <td class="px-6 py-4 text-gray-700">{{ categorie.description }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

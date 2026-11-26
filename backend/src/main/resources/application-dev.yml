@@ -6,6 +6,9 @@ oliveconnect:
     email: administrateur@oliveconnect.tn
     telephone: "+21670000000"
     mot-de-passe: Administrateur2026!
+  sauvegarde:
+    # Outil de sauvegarde installé avec MongoDB sur le poste de développement
+    outil-mongodump: "C:/Program Files/MongoDB/Tools/100/bin/mongodump.exe"
 
 logging:
   level:

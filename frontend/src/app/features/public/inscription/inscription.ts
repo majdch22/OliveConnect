@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { ReponseErreur } from '../../../core/authentification/modeles';
+import { erreursParChamp, texteErreur } from '../../../core/erreurs/message-erreur';
 import { Logo } from '../../../shared/logo/logo';
 import { InscriptionService } from './inscription.service';
 
@@ -122,13 +122,8 @@ export class Inscription {
 
   private afficherErreur(erreur: HttpErrorResponse): void {
     this.envoiEnCours.set(false);
-    if (erreur.status === 0) {
-      this.messageErreur.set('Le serveur ne répond pas. Vérifiez votre connexion puis réessayez.');
-      return;
-    }
-    const corps = erreur.error as Partial<ReponseErreur> | null;
-    this.erreursServeur.set((corps?.champs ?? {}) as Partial<Record<NomChamp, string>>);
-    this.messageErreur.set(corps?.message ?? 'Une erreur inattendue est survenue. Réessayez dans un instant.');
+    this.erreursServeur.set(erreursParChamp(erreur) as Partial<Record<NomChamp, string>>);
+    this.messageErreur.set(texteErreur(erreur));
   }
 }
 

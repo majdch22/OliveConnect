@@ -17,6 +17,7 @@ import tn.oliveconnect.utilisateur.Role;
 import tn.oliveconnect.utilisateur.StatutCompte;
 import tn.oliveconnect.utilisateur.Utilisateur;
 import tn.oliveconnect.utilisateur.UtilisateurRepository;
+import tn.oliveconnect.utilisateur.VerificationIdentifiants;
 
 /**
  * Inscription d'un agriculteur depuis le site public.
@@ -28,6 +29,7 @@ import tn.oliveconnect.utilisateur.UtilisateurRepository;
 public class InscriptionService {
 
     private final UtilisateurRepository utilisateurRepository;
+    private final VerificationIdentifiants verificationIdentifiants;
     private final PasswordEncoder encodeurMotDePasse;
     private final Clock horloge;
 
@@ -38,7 +40,7 @@ public class InscriptionService {
                 : Identifiants.normaliserEmail(requete.email());
 
         verifierSaisie(requete, telephone);
-        verifierDisponibilite(telephone, email, requete.cin());
+        verificationIdentifiants.verifierDisponibles(telephone, email, requete.cin(), null);
 
         InfosAgriculteur infos = new InfosAgriculteur();
         infos.setCin(requete.cin());
@@ -68,7 +70,7 @@ public class InscriptionService {
     /** Contrôles qui dépendent de plusieurs champs ou d'une mise en forme. */
     private void verifierSaisie(InscriptionRequete requete, String telephone) {
         Map<String, String> erreurs = new LinkedHashMap<>();
-        if (!telephone.matches("\\+216\\d{8}")) {
+        if (!VerificationIdentifiants.estTelephoneTunisien(telephone)) {
             erreurs.put("telephone", "Saisissez un numéro tunisien à 8 chiffres.");
         }
         if (!requete.motDePasse().equals(requete.confirmationMotDePasse())) {
@@ -77,24 +79,6 @@ public class InscriptionService {
         if (!erreurs.isEmpty()) {
             throw new ErreurMetierException(HttpStatus.BAD_REQUEST, "DONNEES_INVALIDES",
                     "Certains champs sont manquants ou incorrects.", erreurs);
-        }
-    }
-
-    /** Téléphone, e-mail et carte d'identité ne peuvent appartenir qu'à un seul compte. */
-    private void verifierDisponibilite(String telephone, String email, String cin) {
-        Map<String, String> erreurs = new LinkedHashMap<>();
-        if (utilisateurRepository.existsByTelephone(telephone)) {
-            erreurs.put("telephone", "Ce numéro est déjà utilisé par un autre compte.");
-        }
-        if (email != null && utilisateurRepository.existsByEmail(email)) {
-            erreurs.put("email", "Cette adresse e-mail est déjà utilisée par un autre compte.");
-        }
-        if (utilisateurRepository.existsByAgriculteurCin(cin)) {
-            erreurs.put("cin", "Cette carte d'identité est déjà enregistrée.");
-        }
-        if (!erreurs.isEmpty()) {
-            throw new ErreurMetierException(HttpStatus.CONFLICT, "DONNEES_DEJA_UTILISEES",
-                    "Un compte existe déjà avec certaines de ces informations.", erreurs);
         }
     }
 

@@ -1,0 +1,178 @@
+<header>
+  <h1 class="text-3xl font-bold text-olive-900">Paramètres</h1>
+  <p class="mt-1 text-gray-600">Réglages de la plateforme. Ils s'appliquent dès l'enregistrement, sans redémarrer le serveur.</p>
+</header>
+
+@if (messageSucces(); as message) {
+  <p role="status" class="mt-6 rounded-xl border border-olive-100 bg-olive-50 px-4 py-3 text-olive-900">{{ message }}</p>
+}
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">{{ message }}</p>
+}
+
+@if (chargement()) {
+  <p class="mt-10 text-center text-gray-500">Chargement des paramètres…</p>
+} @else {
+  <form [formGroup]="formulaire" (ngSubmit)="enregistrer()" novalidate class="mt-6 grid gap-6 pb-28 xl:grid-cols-2">
+    <!-- Campagne -->
+    <fieldset formGroupName="campagne" class="rounded-2xl border border-gray-200 bg-white p-6">
+      <legend class="sr-only">Campagne de récolte</legend>
+      <h2 class="text-lg font-semibold text-olive-900">Campagne de récolte</h2>
+      <p class="mt-1 text-sm text-gray-500">Période pendant laquelle les récoltes sont déclarées et collectées.</p>
+      <div class="mt-5 grid gap-5 sm:grid-cols-2">
+        <div class="flex flex-col gap-1">
+          <label for="debut" class="etiquette">Début</label>
+          <input id="debut" type="date" formControlName="debut" class="champ-saisie" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="fin" class="etiquette">Fin</label>
+          <input id="fin" type="date" formControlName="fin" class="champ-saisie" [class.en-erreur]="erreur('campagne.fin')" />
+          @if (erreur('campagne.fin'); as message) { <p class="message-champ">{{ message }}</p> }
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Règles métier -->
+    <fieldset formGroupName="regles" class="rounded-2xl border border-gray-200 bg-white p-6">
+      <legend class="sr-only">Règles métier</legend>
+      <h2 class="text-lg font-semibold text-olive-900">Règles métier</h2>
+      <p class="mt-1 text-sm text-gray-500">Seuils utilisés par les alertes, la planification et la réception au pressoir.</p>
+      <div class="mt-5 grid gap-5 sm:grid-cols-2">
+        <div class="flex flex-col gap-1">
+          <label for="seuil" class="etiquette">Seuil d'alerte de maturité (%)</label>
+          <input id="seuil" type="number" formControlName="seuilAlerteMaturite" class="champ-saisie" [class.en-erreur]="erreur('regles.seuilAlerteMaturite')" />
+          @if (erreur('regles.seuilAlerteMaturite'); as message) {
+            <p class="message-champ">{{ message }}</p>
+          } @else {
+            <p class="text-sm text-gray-500">Au-delà, une alerte de maturité est créée automatiquement.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="tolerance" class="etiquette">Tolérance de pesée (%)</label>
+          <input id="tolerance" type="number" formControlName="tolerancePesee" class="champ-saisie" [class.en-erreur]="erreur('regles.tolerancePesee')" />
+          @if (erreur('regles.tolerancePesee'); as message) {
+            <p class="message-champ">{{ message }}</p>
+          } @else {
+            <p class="text-sm text-gray-500">Poids maximal accepté, en % de la capacité de la benne.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="distance" class="etiquette">Distance maximale d'un signalement (m)</label>
+          <input id="distance" type="number" formControlName="distanceMaximaleSignalement" class="champ-saisie" [class.en-erreur]="erreur('regles.distanceMaximaleSignalement')" />
+          @if (erreur('regles.distanceMaximaleSignalement'); as message) {
+            <p class="message-champ">{{ message }}</p>
+          } @else {
+            <p class="text-sm text-gray-500">Au-delà, le signalement est jugé loin de son verger.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="delai" class="etiquette">Délai visé pour les urgences (h)</label>
+          <input id="delai" type="number" formControlName="delaiCibleUrgences" class="champ-saisie" [class.en-erreur]="erreur('regles.delaiCibleUrgences')" />
+          @if (erreur('regles.delaiCibleUrgences'); as message) {
+            <p class="message-champ">{{ message }}</p>
+          } @else {
+            <p class="text-sm text-gray-500">Entre une demande urgente et sa collecte.</p>
+          }
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Imports -->
+    <fieldset formGroupName="imports" class="rounded-2xl border border-gray-200 bg-white p-6">
+      <legend class="sr-only">Imports automatiques</legend>
+      <h2 class="text-lg font-semibold text-olive-900">Imports automatiques</h2>
+      <p class="mt-1 text-sm text-gray-500">Fréquence de chargement des données externes (fichiers JSON et CSV).</p>
+      <div class="mt-5 flex flex-col gap-5">
+        @for (importation of imports; track importation.nom) {
+          <div class="grid items-center gap-2 sm:grid-cols-2">
+            <label [for]="importation.nom">
+              <span class="etiquette">{{ importation.libelle }}</span>
+              <span class="block text-sm text-gray-500">{{ importation.aide }}</span>
+            </label>
+            <select [id]="importation.nom" [formControlName]="importation.nom" class="champ-saisie">
+              @for (frequence of frequences(); track frequence.code) {
+                <option [value]="frequence.code">{{ frequence.libelle }}</option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+    </fieldset>
+
+    <!-- Notifications -->
+    <fieldset formGroupName="notifications" class="rounded-2xl border border-gray-200 bg-white p-6">
+      <legend class="sr-only">Notifications</legend>
+      <h2 class="text-lg font-semibold text-olive-900">Notifications</h2>
+      <p class="mt-1 text-sm text-gray-500">Canaux utilisés en plus des notifications dans l'application.</p>
+      <div class="mt-5 flex flex-col gap-4">
+        <label class="flex cursor-pointer items-start gap-3">
+          <input type="checkbox" formControlName="smsAgriculteurs" class="mt-1 h-5 w-5 accent-olive-700" />
+          <span>
+            <span class="etiquette">SMS aux agriculteurs</span>
+            <span class="block text-sm text-gray-500">Collecte planifiée, activation du compte, pesée au pressoir.</span>
+          </span>
+        </label>
+        <label class="flex cursor-pointer items-start gap-3">
+          <input type="checkbox" formControlName="emailRecapitulatifQuotidien" class="mt-1 h-5 w-5 accent-olive-700" />
+          <span>
+            <span class="etiquette">E-mail récapitulatif quotidien</span>
+            <span class="block text-sm text-gray-500">Résumé de la journée envoyé au personnel de la coopérative.</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- Sécurité -->
+    <fieldset formGroupName="securite" class="rounded-2xl border border-gray-200 bg-white p-6 xl:col-span-2">
+      <legend class="sr-only">Sécurité</legend>
+      <h2 class="text-lg font-semibold text-olive-900">Sécurité des connexions</h2>
+      <p class="mt-1 text-sm text-gray-500">S'applique aux prochaines connexions.</p>
+      <div class="mt-5 grid gap-5 md:grid-cols-3">
+        <div class="flex flex-col gap-1">
+          <label for="session" class="etiquette">Durée d'une session (h)</label>
+          <input id="session" type="number" formControlName="dureeSessionHeures" class="champ-saisie" [class.en-erreur]="erreur('securite.dureeSessionHeures')" />
+          @if (erreur('securite.dureeSessionHeures'); as message) {
+            <p class="message-champ">{{ message }}</p>
+          } @else {
+            <p class="text-sm text-gray-500">Après ce délai, il faut se reconnecter.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="tentatives" class="etiquette">Tentatives avant blocage</label>
+          <input id="tentatives" type="number" formControlName="tentativesAvantBlocage" class="champ-saisie" [class.en-erreur]="erreur('securite.tentativesAvantBlocage')" />
+          @if (erreur('securite.tentativesAvantBlocage'); as message) {
+            <p class="message-champ">{{ message }}</p>
+          } @else {
+            <p class="text-sm text-gray-500">Mots de passe incorrects tolérés à la suite.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="blocage" class="etiquette">Durée du blocage (min)</label>
+          <input id="blocage" type="number" formControlName="dureeBlocageMinutes" class="champ-saisie" [class.en-erreur]="erreur('securite.dureeBlocageMinutes')" />
+          @if (erreur('securite.dureeBlocageMinutes'); as message) {
+            <p class="message-champ">{{ message }}</p>
+          } @else {
+            <p class="text-sm text-gray-500">Le compte se débloque ensuite tout seul.</p>
+          }
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Barre d'enregistrement fixée en bas de l'écran -->
+    <div class="fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white/95 backdrop-blur lg:left-64">
+      <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-4 sm:flex-row sm:px-8">
+        <p class="text-sm text-gray-500">
+          @if (derniereModification().le) {
+            Dernière modification le {{ derniereModification().le | date: 'dd/MM/yyyy à HH:mm' }} par {{ derniereModification().par }}
+          }
+        </p>
+        <div class="flex gap-3">
+          <button type="button" class="bouton-secondaire" [disabled]="!aDesChangements()" (click)="annulerChangements()">Annuler les changements</button>
+          <button type="submit" class="bouton-principal" [disabled]="!aDesChangements() || envoiEnCours()">
+            {{ envoiEnCours() ? 'Enregistrement…' : 'Enregistrer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+}

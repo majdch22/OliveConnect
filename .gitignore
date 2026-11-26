@@ -25,3 +25,6 @@ data/**/archive/
 .DS_Store
 Thumbs.db
 ~$*
+
+# Sauvegardes de la base (mongodump)
+sauvegardes/

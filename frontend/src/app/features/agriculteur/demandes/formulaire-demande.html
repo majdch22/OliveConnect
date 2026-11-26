@@ -1,0 +1,75 @@
+<form [formGroup]="formulaire" (ngSubmit)="envoyer()" novalidate class="flex flex-col gap-6">
+  <!-- 1. Verger -->
+  <div class="flex flex-col gap-1">
+    <label for="demande-verger" class="etiquette">1. Verger</label>
+    <select id="demande-verger" formControlName="vergerId" class="champ-saisie" [class.en-erreur]="erreur('vergerId')">
+      <option value="" disabled>Choisissez le verger…</option>
+      @for (verger of vergersActifs(); track verger.id) {
+        <option [value]="verger.id">{{ verger.nom }} · {{ verger.nomVariete }} · {{ verger.superficieHa | number: '1.0-1' }} ha</option>
+      }
+    </select>
+    @if (erreur('vergerId'); as message) { <p class="message-champ">{{ message }}</p> }
+  </div>
+
+  <!-- 2. Type : deux gros boutons, faciles à toucher -->
+  <fieldset>
+    <legend class="etiquette">2. Type de récolte</legend>
+    <div class="mt-1 grid grid-cols-2 gap-3">
+      <button type="button" (click)="choisirType('PLANIFIEE')" class="rounded-xl border-2 px-4 py-3 text-left"
+        [class]="formulaire.controls.type.value === 'PLANIFIEE' ? 'border-olive-700 bg-olive-50' : 'border-gray-200 bg-white'"
+        [attr.aria-pressed]="formulaire.controls.type.value === 'PLANIFIEE'">
+        <span class="block font-semibold text-gray-900">Planifiée</span>
+        <span class="text-sm text-gray-600">À partir de demain</span>
+      </button>
+      <button type="button" (click)="choisirType('URGENTE')" class="rounded-xl border-2 px-4 py-3 text-left"
+        [class]="formulaire.controls.type.value === 'URGENTE' ? 'border-amber-500 bg-amber-50' : 'border-gray-200 bg-white'"
+        [attr.aria-pressed]="formulaire.controls.type.value === 'URGENTE'">
+        <span class="block font-semibold text-gray-900">Urgente ⚠</span>
+        <span class="text-sm text-gray-600">Possible dès aujourd'hui, traitée en priorité</span>
+      </button>
+    </div>
+  </fieldset>
+
+  <div class="grid gap-6 sm:grid-cols-2">
+    <!-- 3. Date -->
+    <div class="flex flex-col gap-1">
+      <label for="demande-date" class="etiquette">3. Date souhaitée</label>
+      <input id="demande-date" type="date" formControlName="dateSouhaitee" [min]="datePlusTot()" class="champ-saisie" [class.en-erreur]="erreur('dateSouhaitee')" />
+      @if (erreur('dateSouhaitee'); as message) { <p class="message-champ">{{ message }}</p> }
+    </div>
+
+    <!-- 4. Quantité, avec l'estimation proposée -->
+    <div class="flex flex-col gap-1">
+      <label for="demande-quantite" class="etiquette">4. Quantité estimée (kg)</label>
+      <input id="demande-quantite" type="number" formControlName="quantiteEstimeeKg" class="champ-saisie" [class.en-erreur]="erreur('quantiteEstimeeKg')" />
+      @if (erreur('quantiteEstimeeKg'); as message) {
+        <p class="message-champ">{{ message }}</p>
+      } @else if (estimation(); as estime) {
+        @if (estime.quantiteKg > 0) {
+          <button type="button" (click)="utiliserEstimation(estime.quantiteKg)" class="self-start text-sm font-semibold text-olive-700 hover:underline">
+            Suggestion : {{ estime.quantiteKg | number }} kg (superficie × rendement de la variété)
+          </button>
+        }
+      }
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="demande-commentaire" class="etiquette">Commentaire <span class="font-normal text-gray-500">(facultatif)</span></label>
+    <textarea id="demande-commentaire" rows="2" formControlName="commentaire" placeholder="Accès par la piste nord…" class="champ-saisie"></textarea>
+  </div>
+
+  <p class="rounded-lg bg-olive-50 px-4 py-3 text-sm text-gray-700">
+    Vous pourrez modifier ou annuler cette demande jusqu'au démarrage de la collecte.
+  </p>
+
+  @if (messageErreur(); as message) {
+    <p role="alert" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+  }
+  <div class="flex gap-3">
+    <button type="submit" class="bouton-principal flex-1" [disabled]="envoiEnCours()">
+      {{ envoiEnCours() ? 'Envoi…' : demande() ? 'Enregistrer les modifications' : 'Envoyer la demande' }}
+    </button>
+    <button type="button" class="bouton-secondaire" (click)="annule.emit()">Annuler</button>
+  </div>
+</form>

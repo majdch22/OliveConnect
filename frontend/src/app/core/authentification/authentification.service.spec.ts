@@ -9,12 +9,14 @@ import { ConnexionReponse } from './modeles';
 /** Réponse du serveur simulée, valable une heure. */
 function reponseAgriculteur(): ConnexionReponse {
   return {
+    id: 'compte-1',
     jeton: 'jeton-signe',
     expiration: new Date(Date.now() + 3_600_000).toISOString(),
     role: 'AGRICULTEUR',
     libelleRole: 'Agriculteur',
     prenom: 'Ali',
     nom: 'Ben Salah',
+    motDePasseProvisoire: false,
   };
 }
 

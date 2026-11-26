@@ -18,11 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import tn.oliveconnect.common.exception.ErreurMetierException;
-import tn.oliveconnect.configuration.OliveConnectProperties;
+import tn.oliveconnect.parametres.ParametresService;
 import tn.oliveconnect.security.JetonService;
 import tn.oliveconnect.security.JetonService.JetonGenere;
 import tn.oliveconnect.utilisateur.Role;
@@ -32,6 +34,7 @@ import tn.oliveconnect.utilisateur.UtilisateurRepository;
 
 /** Tests unitaires du service de connexion : la base et le jeton sont simulés (Mockito). */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ConnexionServiceTest {
 
     private static final String MOT_DE_PASSE = "Olive2026!";
@@ -44,18 +47,19 @@ class ConnexionServiceTest {
     @Mock
     private JetonService jetonService;
 
+    @Mock
+    private ParametresService parametresService;
+
     private final PasswordEncoder encodeurMotDePasse = new BCryptPasswordEncoder();
     private ConnexionService connexionService;
 
     @BeforeEach
     void preparer() {
-        OliveConnectProperties proprietes = new OliveConnectProperties(
-                new OliveConnectProperties.Securite("secret-inutilise-dans-ce-test-unitaire",
-                        Duration.ofHours(8), 5, Duration.ofMinutes(15)),
-                null);
+        when(parametresService.tentativesAvantBlocage()).thenReturn(5);
+        when(parametresService.dureeBlocage()).thenReturn(Duration.ofMinutes(15));
         Clock horlogeFixe = Clock.fixed(MAINTENANT, ZoneId.of("Africa/Tunis"));
         connexionService = new ConnexionService(utilisateurRepository, encodeurMotDePasse, jetonService,
-                proprietes, horlogeFixe);
+                parametresService, horlogeFixe);
     }
 
     @Test

@@ -28,8 +28,16 @@ oliveconnect:
     tentatives-avant-blocage: 5
     duree-blocage: 15m
   premier-administrateur:
-    nom: ${ADMINISTRATEUR_NOM:Administrateur}
-    prenom: ${ADMINISTRATEUR_PRENOM:OliveConnect}
+    nom: ${ADMINISTRATEUR_NOM:Principal}
+    prenom: ${ADMINISTRATEUR_PRENOM:Administrateur}
     email: ${ADMINISTRATEUR_EMAIL}
     telephone: ${ADMINISTRATEUR_TELEPHONE}
     mot-de-passe: ${ADMINISTRATEUR_MOT_DE_PASSE}
+  sauvegarde:
+    dossier: ${DOSSIER_SAUVEGARDES:../sauvegardes}
+    outil-mongodump: ${OUTIL_MONGODUMP:mongodump}
+    conservation: 7
+    # Chaque nuit à 3 h
+    planification: "0 0 3 * * *"
+  supervision:
+    adresse-grafana: ${ADRESSE_GRAFANA:}

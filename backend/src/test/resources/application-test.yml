@@ -10,3 +10,6 @@ oliveconnect:
     email: administrateur@test.tn
     telephone: "+21670000001"
     mot-de-passe: MotDePasseAdministrateur1
+  sauvegarde:
+    dossier: target/sauvegardes-test
+    outil-mongodump: "C:/Program Files/MongoDB/Tools/100/bin/mongodump.exe"

@@ -1,0 +1,127 @@
+<header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+  <div>
+    <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">Mes demandes de récolte</h1>
+    <p class="mt-1 text-gray-600">Suivez chaque demande, de son envoi jusqu'à la collecte.</p>
+  </div>
+  <a routerLink="/agriculteur/demandes/nouvelle" class="bouton-principal">+ Déclarer une récolte</a>
+</header>
+
+@if (demandeEnvoyee) {
+  <p role="status" class="mt-5 rounded-lg bg-white px-4 py-3 text-sm text-olive-900 shadow-sm">
+    ✓ Demande {{ demandeEnvoyee }} envoyée. La coopérative va l'examiner.
+  </p>
+}
+@if (messageSucces(); as message) {
+  <p role="status" class="mt-5 rounded-lg bg-white px-4 py-3 text-sm text-olive-900 shadow-sm">{{ message }}</p>
+}
+
+<nav class="mt-6 flex gap-2 border-b border-gray-200" aria-label="Demandes">
+  <button type="button" (click)="onglet.set('en-cours')" class="-mb-px border-b-2 px-4 py-3 text-sm font-semibold"
+    [class]="onglet() === 'en-cours' ? 'border-olive-700 text-olive-900' : 'border-transparent text-gray-500'">
+    En cours ({{ nombreEnCours() }})
+  </button>
+  <button type="button" (click)="onglet.set('historique')" class="-mb-px border-b-2 px-4 py-3 text-sm font-semibold"
+    [class]="onglet() === 'historique' ? 'border-olive-700 text-olive-900' : 'border-transparent text-gray-500'">
+    Historique
+  </button>
+</nav>
+
+<ul class="mt-5 grid gap-4 lg:grid-cols-2">
+  @for (demande of demandesAffichees(); track demande.id) {
+    <li>
+      <button type="button" (click)="ouvrir(demande)" class="w-full rounded-2xl border border-gray-200 bg-white p-5 text-left hover:border-olive-500">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-sm text-gray-500">
+              <span class="font-mono">{{ demande.numero }}</span>
+              @if (demande.type === 'URGENTE') { <span class="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-semibold text-amber-800">Urgente</span> }
+            </p>
+            <p class="text-lg font-bold text-gray-900">{{ demande.nomVerger }}</p>
+            <p class="text-sm text-gray-600">{{ demande.dateSouhaitee | date: 'EEEE d MMMM y' }} · {{ demande.quantiteEstimeeKg | number }} kg estimés</p>
+          </div>
+          <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold" [class]="couleurs[demande.statut]">{{ demande.libelleStatut }}</span>
+        </div>
+
+        <!-- Frise d'avancement -->
+        @if (rangEtape(demande) >= 0) {
+          <ol class="mt-4 flex items-center" aria-label="Avancement de la demande">
+            @for (etape of etapes; track etape.statut; let rang = $index) {
+              <li class="flex flex-1 flex-col items-center gap-1 text-center">
+                <span class="h-2.5 w-2.5 rounded-full" [class]="rang <= rangEtape(demande) ? 'bg-olive-700' : 'bg-gray-200'"></span>
+                <span class="text-[11px]" [class]="rang === rangEtape(demande) ? 'font-semibold text-olive-900' : 'text-gray-500'">{{ etape.libelle }}</span>
+              </li>
+            }
+          </ol>
+        }
+        @if (demande.statut === 'EN_COURS') {
+          <p class="mt-3 text-sm text-gray-600">🔒 Collecte démarrée : modification impossible.</p>
+        }
+      </button>
+    </li>
+  } @empty {
+    <li class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-gray-500 lg:col-span-2">
+      {{ onglet() === 'en-cours' ? 'Aucune demande en cours.' : 'Aucune demande dans l’historique.' }}
+    </li>
+  }
+</ul>
+
+<!-- Fiche d'une demande -->
+@if (selection(); as demande) {
+  <app-panneau-lateral [titre]="'Demande ' + demande.numero" [sousTitre]="demande.nomVerger + ' · ' + demande.libelleType" (fermer)="selection.set(null)">
+    @if (mode() === 'modification') {
+      <app-formulaire-demande [demande]="demande" (enregistre)="apresModification($event)" (annule)="mode.set('consultation')" />
+    } @else {
+      <div class="flex items-center gap-3">
+        <span class="rounded-full px-3 py-1 text-sm font-semibold" [class]="couleurs[demande.statut]">{{ demande.libelleStatut }}</span>
+      </div>
+      <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 text-sm">
+        <div><dt class="text-gray-500">Date souhaitée</dt><dd class="mt-1 font-medium text-gray-900">{{ demande.dateSouhaitee | date: 'EEEE d MMMM y' }}</dd></div>
+        <div><dt class="text-gray-500">Quantité estimée</dt><dd class="mt-1 font-medium text-gray-900">{{ demande.quantiteEstimeeKg | number }} kg</dd></div>
+        @if (demande.commentaire) {
+          <div class="col-span-2"><dt class="text-gray-500">Commentaire</dt><dd class="mt-1 text-gray-900">{{ demande.commentaire }}</dd></div>
+        }
+        @if (demande.motifAnnulation) {
+          <div class="col-span-2"><dt class="text-gray-500">Motif de l'annulation</dt><dd class="mt-1 text-gray-900">{{ demande.motifAnnulation }}</dd></div>
+        }
+      </dl>
+
+      <h3 class="mt-8 font-semibold text-gray-900">Historique</h3>
+      <ol class="mt-3 space-y-3 border-l-2 border-olive-100 pl-4">
+        @for (etape of demande.historique.slice().reverse(); track $index) {
+          <li class="text-sm">
+            <p class="font-medium text-gray-900">{{ etape.libelleNouveau }}</p>
+            <p class="text-gray-500">{{ etape.date | date: 'dd/MM/yyyy à HH:mm' }}{{ etape.commentaire ? ' · ' + etape.commentaire : '' }}</p>
+          </li>
+        }
+      </ol>
+
+      @if (messageErreur(); as message) {
+        <p role="alert" class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+      }
+
+      @if (demande.modifiable) {
+        <div class="mt-8 border-t border-gray-200 pt-6">
+          @if (mode() === 'annulation') {
+            <label for="motif-annulation" class="etiquette">Motif <span class="font-normal text-gray-500">(facultatif)</span></label>
+            <textarea id="motif-annulation" rows="2" [formControl]="motif" class="champ-saisie mt-1" placeholder="Olives pas encore mûres…"></textarea>
+            <p class="mt-2 text-sm text-gray-600">La place réservée dans la tournée sera libérée et la coopérative prévenue.</p>
+            <div class="mt-4 flex gap-3">
+              <button type="button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-red-700 px-6 py-3 font-semibold text-white hover:bg-red-800" (click)="confirmerAnnulation(demande)">
+                Confirmer l'annulation
+              </button>
+              <button type="button" class="bouton-secondaire" (click)="mode.set('consultation')">Retour</button>
+            </div>
+          } @else {
+            <p class="text-sm text-gray-600">Modifiable jusqu'au démarrage de la collecte.</p>
+            <div class="mt-3 flex gap-3">
+              <button type="button" class="bouton-principal flex-1" (click)="mode.set('modification')">Modifier</button>
+              <button type="button" class="inline-flex items-center justify-center rounded-lg border border-red-300 px-6 py-3 font-semibold text-red-700 hover:bg-red-50" (click)="mode.set('annulation')">
+                Annuler la demande
+              </button>
+            </div>
+          }
+        </div>
+      }
+    }
+  </app-panneau-lateral>
+}

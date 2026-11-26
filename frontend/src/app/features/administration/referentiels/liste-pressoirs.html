@@ -1,0 +1,90 @@
+<div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+  <input
+    type="search"
+    class="champ-filtre flex-1"
+    placeholder="Rechercher un nom ou un code…"
+    aria-label="Rechercher un pressoir"
+    [value]="filtres().texte"
+    (input)="changerFiltres({ texte: $any($event.target).value })"
+  />
+  <label class="flex items-center gap-2 text-sm text-gray-700">
+    <input type="checkbox" class="h-4 w-4 accent-olive-700" [checked]="filtres().avecArchives" (change)="changerFiltres({ avecArchives: $any($event.target).checked })" />
+    Afficher les pressoirs archivés
+  </label>
+  <button type="button" class="bouton-principal" (click)="panneau.set('nouveau')">+ Ajouter un pressoir</button>
+</div>
+
+@if (messageSucces(); as message) {
+  <p role="status" class="mt-4 rounded-lg bg-olive-50 px-4 py-3 text-sm text-olive-900">{{ message }}</p>
+}
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+<div class="mt-4 overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+  <table class="w-full min-w-[820px] text-left text-sm">
+    <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+      <tr>
+        @for (colonne of colonnes; track colonne.tri) {
+          <th class="px-4 py-3 font-semibold first:pl-6">
+            <button type="button" (click)="trierPar(colonne.tri)" class="inline-flex items-center gap-1 uppercase hover:text-olive-900" [class.text-olive-900]="filtres().tri === colonne.tri">
+              {{ colonne.libelle }} <span class="w-3 text-olive-700">{{ indicateurTri(colonne.tri) }}</span>
+            </button>
+          </th>
+        }
+        <th class="px-4 py-3 font-semibold">Position</th>
+        <th class="px-4 py-3 font-semibold">Responsables</th>
+        <th class="px-6 py-3 font-semibold">État</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      @for (pressoir of pressoirs() ?? []; track pressoir.id) {
+        <tr (click)="panneau.set(pressoir)" class="cursor-pointer hover:bg-olive-50" [class.text-gray-400]="pressoir.archive">
+          <td class="py-4 pl-6 pr-4 font-mono">{{ pressoir.code }}</td>
+          <td class="px-4 py-4">
+            <p class="font-semibold" [class.text-gray-900]="!pressoir.archive">{{ pressoir.nom }}</p>
+            @if (pressoir.telephone) { <p class="text-gray-500">{{ pressoir.telephone | telephone }}</p> }
+          </td>
+          <td class="px-4 py-4">{{ pressoir.libelleDelegation }}</td>
+          <td class="px-4 py-4 tabular-nums">{{ pressoir.capaciteJournaliereKg | number }} kg</td>
+          <td class="px-4 py-4 font-mono text-xs">{{ pressoir.latitude | number: '1.4-4' }}, {{ pressoir.longitude | number: '1.4-4' }}</td>
+          <td class="px-4 py-4">{{ pressoir.nombreResponsables }}</td>
+          <td class="px-6 py-4">
+            <span class="rounded-full px-2.5 py-1 text-xs font-semibold" [class]="pressoir.archive ? 'bg-gray-100 text-gray-600' : 'bg-olive-100 text-olive-900'">
+              {{ pressoir.archive ? 'Archivé' : 'Actif' }}
+            </span>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="7" class="px-6 py-12 text-center text-gray-500">Aucun pressoir ne correspond.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (panneau()) {
+  <app-panneau-lateral
+    [titre]="pressoirModifie() ? pressoirModifie()!.nom : 'Ajouter un pressoir'"
+    [sousTitre]="pressoirModifie() ? 'Code ' + pressoirModifie()!.code : 'Le code est attribué automatiquement'"
+    (fermer)="panneau.set(null)"
+  >
+    <app-formulaire-pressoir [pressoir]="pressoirModifie()" [delegations]="delegations()" (enregistre)="apresEnregistrement($event)" (annule)="panneau.set(null)" />
+    @if (pressoirModifie(); as pressoir) {
+      <div class="mt-8 border-t border-gray-200 pt-6">
+        @if (messageErreur(); as message) {
+          <p role="alert" class="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+        }
+        <p class="text-sm text-gray-600">
+          {{ pressoir.archive
+            ? 'Ce pressoir est archivé : il n’est plus proposé pour les tournées.'
+            : pressoir.nombreResponsables > 0
+              ? pressoir.nombreResponsables + ' responsable(s) rattaché(s) : rattachez-les à un autre pressoir avant d’archiver.'
+              : 'Archiver retire le pressoir des choix proposés, sans effacer les réceptions passées.' }}
+        </p>
+        <button type="button" class="bouton-secondaire mt-3 w-full" (click)="changerArchivage(pressoir)">
+          {{ pressoir.archive ? 'Restaurer le pressoir' : 'Archiver le pressoir' }}
+        </button>
+      </div>
+    }
+  </app-panneau-lateral>
+}

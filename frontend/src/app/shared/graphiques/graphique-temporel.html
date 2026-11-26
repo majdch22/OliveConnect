@@ -1,0 +1,86 @@
+<figure class="rounded-2xl border border-gray-200 bg-white p-5">
+  <figcaption class="flex items-baseline justify-between gap-4">
+    <h3 class="font-semibold text-gray-900">{{ titre() }}</h3>
+    @if (derniere(); as point) {
+      <p class="text-sm text-gray-500">
+        Actuellement <span class="text-lg font-semibold text-gray-900">{{ point.valeur | number: '1.0-1' }}</span> {{ unite() }}
+      </p>
+    }
+  </figcaption>
+
+  @if (points().length < 2) {
+    <p class="flex items-center justify-center text-sm text-gray-500" [style.height.px]="hauteur">Mesures en cours de collecte…</p>
+  } @else {
+    <div class="relative mt-3">
+      <svg
+        [attr.width]="largeur()"
+        [attr.height]="hauteur"
+        class="block cursor-crosshair outline-none focus-visible:ring-2 focus-visible:ring-olive-100"
+        tabindex="0"
+        role="img"
+        [attr.aria-label]="titre() + ', dernière valeur ' + (derniere()?.valeur ?? '') + ' ' + unite() + '. Flèches gauche et droite pour parcourir les mesures.'"
+        (pointermove)="suivrePointeur($event)"
+        (pointerleave)="indiceSurvole.set(null)"
+        (keydown)="naviguerAuClavier($event)"
+        (blur)="indiceSurvole.set(null)"
+      >
+        <!-- Quadrillage et graduations -->
+        @for (graduation of graduations(); track graduation.valeur) {
+          <line [attr.x1]="marge.gauche" [attr.x2]="largeur() - marge.droite" [attr.y1]="graduation.y" [attr.y2]="graduation.y" stroke="#e5e7eb" stroke-width="1" />
+          <text [attr.x]="marge.gauche - 8" [attr.y]="graduation.y + 4" text-anchor="end" class="fill-gray-500 text-[11px] tabular-nums">
+            {{ graduation.valeur | number: '1.0-0' }}
+          </text>
+        }
+        @for (repere of reperesTemps(); track $index) {
+          <text [attr.x]="repere.x" [attr.y]="hauteur - 6" [attr.text-anchor]="$first ? 'start' : $last ? 'end' : 'middle'" class="fill-gray-500 text-[11px] tabular-nums">
+            {{ repere.moment | date: 'HH:mm' }}
+          </text>
+        }
+
+        <!-- Aire et courbe -->
+        <path [attr.d]="aire()" fill="#5b7a1e" fill-opacity="0.1" />
+        <path [attr.d]="trace()" fill="none" stroke="#5b7a1e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+
+        <!-- Valeur actuelle au bout de la courbe -->
+        @if (pointFinal(); as fin) {
+          <circle [attr.cx]="fin.x" [attr.cy]="fin.y" r="4" fill="#5b7a1e" stroke="#ffffff" stroke-width="2" />
+          <text [attr.x]="fin.x + 10" [attr.y]="fin.y + 4" class="fill-gray-900 text-xs font-semibold tabular-nums">
+            {{ fin.valeur | number: '1.0-1' }}
+          </text>
+        }
+
+        <!-- Repère du survol -->
+        @if (survol(); as repere) {
+          <line [attr.x1]="repere.x" [attr.x2]="repere.x" [attr.y1]="marge.haut" [attr.y2]="hauteur - marge.bas" stroke="#9ca3af" stroke-width="1" />
+          @if (repere.y !== null) {
+            <circle [attr.cx]="repere.x" [attr.cy]="repere.y" r="4" fill="#5b7a1e" stroke="#ffffff" stroke-width="2" />
+          }
+        }
+      </svg>
+
+      @if (survol(); as repere) {
+        <div class="pointer-events-none absolute top-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-md" [style.left]="positionBulle(repere.x)">
+          <p class="text-sm font-semibold text-gray-900 tabular-nums">
+            {{ repere.point.valeur === null ? 'Aucune valeur' : (repere.point.valeur | number: '1.0-1') + ' ' + unite() }}
+          </p>
+          <p class="text-xs text-gray-500">{{ repere.point.moment | date: 'HH:mm:ss' }}</p>
+        </div>
+      }
+    </div>
+
+    <details class="mt-3 text-sm">
+      <summary class="cursor-pointer text-olive-700 hover:underline">Voir les valeurs</summary>
+      <table class="mt-2 w-full text-left">
+        <thead class="text-xs text-gray-500"><tr><th class="py-1 font-medium">Heure</th><th class="py-1 text-right font-medium">{{ titre() }} ({{ unite() }})</th></tr></thead>
+        <tbody class="tabular-nums">
+          @for (mesure of dernieresMesures(); track mesure.moment) {
+            <tr class="border-t border-gray-100">
+              <td class="py-1 text-gray-600">{{ mesure.moment | date: 'HH:mm:ss' }}</td>
+              <td class="py-1 text-right text-gray-900">{{ mesure.valeur === null ? '—' : (mesure.valeur | number: '1.0-1') }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </details>
+  }
+</figure>

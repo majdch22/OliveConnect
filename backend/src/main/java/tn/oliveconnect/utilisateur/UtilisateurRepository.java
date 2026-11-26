@@ -19,4 +19,10 @@ public interface UtilisateurRepository extends MongoRepository<Utilisateur, Stri
 
     /** Recherche dans le sous-document « agriculteur » (champ agriculteur.cin). */
     boolean existsByAgriculteurCin(String cin);
+
+    long countByStatut(StatutCompte statut);
+
+    long countByRoleAndStatut(Role role, StatutCompte statut);
+
+    long countByPressoirId(String pressoirId);
 }

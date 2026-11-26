@@ -11,12 +11,13 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import tn.oliveconnect.configuration.OliveConnectProperties;
+import tn.oliveconnect.parametres.ParametresService;
 import tn.oliveconnect.utilisateur.Utilisateur;
 
 /**
  * Fabrique le jeton d'accès remis après une connexion réussie.
  * Le jeton contient l'identifiant et le rôle du compte ; il est signé, donc impossible à modifier côté navigateur.
+ * Sa durée de validité est la durée de session des paramètres.
  */
 @Service
 @RequiredArgsConstructor
@@ -25,15 +26,16 @@ public class JetonService {
     /** Nom de l'information du jeton qui contient le rôle (lue par la configuration de sécurité). */
     public static final String INFORMATION_ROLE = "role";
 
-    private static final String EMETTEUR = "oliveconnect";
+    /** Émetteur inscrit dans chaque jeton et vérifié à chaque requête. */
+    public static final String EMETTEUR = "oliveconnect";
 
     private final JwtEncoder encodeurJeton;
-    private final OliveConnectProperties proprietes;
+    private final ParametresService parametresService;
     private final Clock horloge;
 
     public JetonGenere generer(Utilisateur utilisateur) {
         Instant maintenant = horloge.instant();
-        Instant expiration = maintenant.plus(proprietes.securite().dureeJeton());
+        Instant expiration = maintenant.plus(parametresService.dureeSession());
 
         JwtClaimsSet informations = JwtClaimsSet.builder()
                 .issuer(EMETTEUR)

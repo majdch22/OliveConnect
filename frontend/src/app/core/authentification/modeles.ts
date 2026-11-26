@@ -12,12 +12,15 @@ export type EspaceConnexion = 'UTILISATEURS' | 'ADMINISTRATION';
 
 /** Réponse du serveur après une connexion réussie (miroir de ConnexionReponse en Java). */
 export interface ConnexionReponse {
+  id: string;
   jeton: string;
   expiration: string;
   role: Role;
   libelleRole: string;
   prenom: string;
   nom: string;
+  /** Vrai si le mot de passe a été donné par l'administrateur : il faut le changer avant d'utiliser son espace. */
+  motDePasseProvisoire: boolean;
 }
 
 /** Session gardée dans le navigateur tant que le jeton est valide. */

@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import tn.oliveconnect.configuration.OliveConnectProperties;
+import tn.oliveconnect.parametres.ParametresService;
 import tn.oliveconnect.security.JetonService;
 import tn.oliveconnect.security.JetonService.JetonGenere;
 import tn.oliveconnect.utilisateur.Identifiants;
@@ -27,6 +27,7 @@ import tn.oliveconnect.utilisateur.UtilisateurRepository;
  * 4. le compte se connecte depuis la bonne page (administrateur ou non) ;
  * 5. le compte est actif.
  * Les étapes 4 et 5 ne sont atteintes qu'avec le bon mot de passe : un inconnu n'apprend rien sur le compte.
+ * Le nombre de tentatives et la durée du blocage viennent des paramètres modifiables par l'administrateur.
  */
 @Service
 @RequiredArgsConstructor
@@ -35,11 +36,11 @@ public class ConnexionService {
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder encodeurMotDePasse;
     private final JetonService jetonService;
-    private final OliveConnectProperties proprietes;
+    private final ParametresService parametresService;
     private final Clock horloge;
 
     public ConnexionReponse connecter(ConnexionRequete requete, EspaceConnexion espace) {
-        OliveConnectProperties.Securite securite = proprietes.securite();
+        int tentativesAvantBlocage = parametresService.tentativesAvantBlocage();
         Instant maintenant = horloge.instant();
 
         Utilisateur utilisateur = chercherParIdentifiant(requete.identifiant())
@@ -50,12 +51,12 @@ public class ConnexionService {
         }
 
         if (!encodeurMotDePasse.matches(requete.motDePasse(), utilisateur.getMotDePasse())) {
-            utilisateur.enregistrerEchecConnexion(securite.tentativesAvantBlocage(), securite.dureeBlocage(), maintenant);
+            utilisateur.enregistrerEchecConnexion(tentativesAvantBlocage, parametresService.dureeBlocage(), maintenant);
             utilisateurRepository.save(utilisateur);
             if (utilisateur.estBloque(maintenant)) {
                 throw ConnexionRefuseeException.compteBloque(minutesRestantes(utilisateur, maintenant));
             }
-            int restantes = securite.tentativesAvantBlocage() - utilisateur.getTentativesEchouees();
+            int restantes = tentativesAvantBlocage - utilisateur.getTentativesEchouees();
             throw ConnexionRefuseeException.identifiantsIncorrects(restantes);
         }
 
@@ -70,12 +71,14 @@ public class ConnexionService {
 
         JetonGenere jeton = jetonService.generer(utilisateur);
         return new ConnexionReponse(
+                utilisateur.getId(),
                 jeton.valeur(),
                 jeton.expiration(),
                 utilisateur.getRole(),
                 utilisateur.getRole().getLibelle(),
                 utilisateur.getPrenom(),
-                utilisateur.getNom());
+                utilisateur.getNom(),
+                utilisateur.isMotDePasseProvisoire());
     }
 
     /** L'identifiant saisi peut être un e-mail ou un numéro de téléphone. */

@@ -1,0 +1,153 @@
+<header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+  <div>
+    <h1 class="text-3xl font-bold text-olive-900">Utilisateurs</h1>
+    <p class="mt-1 text-gray-600">Tous les comptes de la plateforme : agriculteurs, personnel et administrateurs.</p>
+  </div>
+  <button type="button" class="bouton-principal" (click)="ouvrirCreation()">+ Créer un compte</button>
+</header>
+
+<!-- Barre de filtres -->
+<div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto_auto] xl:items-center">
+  <div class="relative md:col-span-2 xl:col-span-1">
+    <svg viewBox="0 0 24 24" class="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+    </svg>
+    <input
+      type="search"
+      class="champ-filtre w-full pl-10"
+      placeholder="Nom, e-mail, téléphone, carte d'identité, numéro d'adhérent…"
+      aria-label="Rechercher"
+      [value]="filtres().texte"
+      (input)="changerFiltres({ texte: $any($event.target).value })"
+    />
+  </div>
+  <select class="champ-filtre" aria-label="Rôle" [value]="filtres().role" (change)="changerFiltres({ role: $any($event.target).value })">
+    <option value="">Tous les rôles</option>
+    @for (role of roles; track role.code) {
+      <option [value]="role.code">{{ role.libelle }}</option>
+    }
+  </select>
+  <select class="champ-filtre" aria-label="État" [value]="filtres().statut" (change)="changerFiltres({ statut: $any($event.target).value })">
+    <option value="">Tous les états</option>
+    @for (statut of statuts; track statut.code) {
+      <option [value]="statut.code">{{ statut.libelle }}</option>
+    }
+  </select>
+  <select class="champ-filtre" aria-label="Délégation" [value]="filtres().delegation" (change)="changerFiltres({ delegation: $any($event.target).value })">
+    <option value="">Toutes les délégations</option>
+    @for (delegation of delegations(); track delegation.code) {
+      <option [value]="delegation.code">{{ delegation.libelle }}</option>
+    }
+  </select>
+  <button type="button" class="text-sm font-semibold text-olive-700 hover:underline disabled:invisible" [disabled]="!filtresActifs()" (click)="effacerFiltres()">
+    Effacer les filtres
+  </button>
+</div>
+
+<!-- Tri sur téléphone (sur ordinateur, on clique sur les en-têtes du tableau) -->
+<label class="mt-3 flex items-center gap-2 text-sm text-gray-600 md:hidden">
+  Trier par
+  <select class="champ-filtre flex-1" [value]="ordreTelephoneChoisi()" (change)="choisirOrdreTelephone($any($event.target).value)">
+    @for (ordre of ordresTelephone; track ordre.code) {
+      <option [value]="ordre.code">{{ ordre.libelle }}</option>
+    }
+  </select>
+</label>
+
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+<!-- Liste -->
+<section class="mt-5 overflow-hidden rounded-2xl border border-gray-200 bg-white" [class.opacity-60]="chargement()">
+  @if (resultat(); as page) {
+    @if (page.elements.length === 0) {
+      <p class="px-6 py-16 text-center text-gray-500">Aucun compte ne correspond à ces filtres.</p>
+    } @else {
+      <!-- Tableau sur ordinateur : en-têtes cliquables pour trier -->
+      <table class="hidden w-full text-left text-sm md:table">
+        <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+          <tr>
+            @for (colonne of colonnes; track colonne.tri) {
+              <th class="px-4 py-3 font-semibold first:pl-6" [attr.aria-sort]="filtres().tri === colonne.tri ? (filtres().sens === 'ASC' ? 'ascending' : 'descending') : null">
+                <button type="button" (click)="trierPar(colonne.tri)" class="inline-flex items-center gap-1 uppercase hover:text-olive-900" [class.text-olive-900]="filtres().tri === colonne.tri">
+                  {{ colonne.libelle }}
+                  <span class="w-3 text-olive-700">{{ indicateurTri(colonne.tri) }}</span>
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          @for (compte of page.elements; track compte.id) {
+            <tr (click)="ouvrirFiche(compte)" class="cursor-pointer hover:bg-olive-50">
+              <td class="py-4 pl-6 pr-4">
+                <p class="font-semibold text-gray-900">{{ compte.prenom }} {{ compte.nom }}</p>
+                <p class="text-gray-500">{{ compte.email ?? (compte.telephone | telephone) }}</p>
+              </td>
+              <td class="px-4 py-4 text-gray-700">
+                {{ compte.libelleRole }}
+                @if (compte.libelleDelegation) {
+                  <span class="block text-xs text-gray-500">{{ compte.libelleDelegation }}</span>
+                }
+              </td>
+              <td class="px-4 py-4"><app-badge-statut [statut]="compte.statut" /></td>
+              <td class="px-4 py-4 text-gray-700">{{ compte.derniereConnexion ? (compte.derniereConnexion | date: 'dd/MM/yyyy HH:mm') : 'Jamais' }}</td>
+              <td class="px-4 py-4 text-gray-700">{{ compte.dateCreation | date: 'dd/MM/yyyy' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Cartes sur téléphone -->
+      <ul class="divide-y divide-gray-100 md:hidden">
+        @for (compte of page.elements; track compte.id) {
+          <li (click)="ouvrirFiche(compte)" class="cursor-pointer px-4 py-4 hover:bg-olive-50">
+            <div class="flex items-center justify-between gap-3">
+              <p class="font-semibold text-gray-900">{{ compte.prenom }} {{ compte.nom }}</p>
+              <app-badge-statut [statut]="compte.statut" />
+            </div>
+            <p class="mt-1 text-sm text-gray-500">{{ compte.libelleRole }} · {{ compte.telephone | telephone }}</p>
+          </li>
+        }
+      </ul>
+
+      <app-pagination
+        [page]="page.page"
+        [taille]="page.taille"
+        [totalElements]="page.totalElements"
+        [totalPages]="page.totalPages"
+        (changerPage)="changerFiltres({ page: $event })"
+        (changerTaille)="changerFiltres({ taille: $event })"
+      />
+    }
+  } @else {
+    <p class="px-6 py-16 text-center text-gray-500">Chargement…</p>
+  }
+</section>
+
+<!-- Panneau latéral : fiche d'un compte, création, ou confirmation de création -->
+@if (compteOuvert(); as compte) {
+  <app-panneau-lateral [titre]="compte.prenom + ' ' + compte.nom" [sousTitre]="compte.libelleRole" (fermer)="fermerPanneau()">
+    <app-fiche-compte [compte]="compte" (change)="compteChange($event)" />
+  </app-panneau-lateral>
+}
+
+@if (creationOuverte()) {
+  <app-panneau-lateral titre="Créer un compte" sousTitre="Personnel de la coopérative ou administrateur" (fermer)="fermerPanneau()">
+    <app-formulaire-compte (cree)="compteCree($event)" (annule)="fermerPanneau()" />
+  </app-panneau-lateral>
+}
+
+@if (compteCreeRecemment(); as resultat) {
+  <app-panneau-lateral titre="Compte créé" [sousTitre]="resultat.compte.libelleRole" (fermer)="fermerPanneau()">
+    <p class="text-gray-700">Le compte de <strong>{{ resultat.compte.prenom }} {{ resultat.compte.nom }}</strong> est actif.</p>
+    <div class="mt-5">
+      <app-mot-de-passe-provisoire [motDePasse]="resultat.motDePasseProvisoire" [destinataire]="resultat.compte.prenom + ' ' + resultat.compte.nom" />
+    </div>
+    <div class="mt-6 flex gap-3">
+      <button type="button" class="bouton-principal flex-1" (click)="ouvrirFiche(resultat.compte)">Voir la fiche</button>
+      <button type="button" class="bouton-secondaire" (click)="fermerPanneau()">Fermer</button>
+    </div>
+  </app-panneau-lateral>
+}

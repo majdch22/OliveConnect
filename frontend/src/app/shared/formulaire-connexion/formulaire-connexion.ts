@@ -4,7 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthentificationService } from '../../core/authentification/authentification.service';
-import { ReponseErreur, ESPACE_PAR_ROLE, EspaceConnexion } from '../../core/authentification/modeles';
+import { ESPACE_PAR_ROLE, EspaceConnexion } from '../../core/authentification/modeles';
+import { texteErreur } from '../../core/erreurs/message-erreur';
 
 /**
  * Formulaire de connexion (identifiant + mot de passe), utilisé par les deux pages de connexion.
@@ -44,7 +45,7 @@ export class FormulaireConnexion {
       next: (reponse) => this.router.navigateByUrl(ESPACE_PAR_ROLE[reponse.role]),
       error: (erreur: HttpErrorResponse) => {
         this.envoiEnCours.set(false);
-        this.messageErreur.set(messagePour(erreur));
+        this.messageErreur.set(texteErreur(erreur));
       },
     });
   }
@@ -58,13 +59,4 @@ export class FormulaireConnexion {
     const champ = this.formulaire.controls[nom];
     return champ.touched && champ.hasError('required');
   }
-}
-
-/** Message affiché sous le formulaire : celui du serveur s'il en donne un. */
-function messagePour(erreur: HttpErrorResponse): string {
-  if (erreur.status === 0) {
-    return 'Le serveur ne répond pas. Vérifiez votre connexion puis réessayez.';
-  }
-  const corps = erreur.error as Partial<ReponseErreur> | null;
-  return corps?.message ?? 'Une erreur inattendue est survenue. Réessayez dans un instant.';
 }

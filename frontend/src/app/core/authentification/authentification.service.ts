@@ -30,6 +30,14 @@ export class AuthentificationService {
       .pipe(tap((reponse) => this.enregistrerSession(reponse)));
   }
 
+  /** Après un changement de mot de passe : il n'est plus provisoire, l'espace devient accessible. */
+  noterMotDePasseChange(): void {
+    const session = this.sessionCourante();
+    if (session) {
+      this.enregistrerSession({ ...session, motDePasseProvisoire: false });
+    }
+  }
+
   /** Ferme la session et renvoie vers la page de connexion du rôle. */
   deconnecter(): void {
     const role = this.sessionCourante()?.role ?? null;

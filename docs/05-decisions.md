@@ -97,6 +97,101 @@ valide ; les ouvriers saisonniers n'ont pas de compte (ce sont des ressources g�
 - L'étape « premier verger » des maquettes viendra avec la fonctionnalité des vergers (décision M4 : verger facultatif).
 - Prochaine étape logique : l'écran administrateur qui valide ou refuse les inscriptions.
 
+## Fonctionnalité 3 — Espace administrateur
+
+- Mise en page : menu fixe à gauche (ordinateur) ou en haut (téléphone), badge du nombre d'inscriptions en attente.
+- **Accueil** `/administration` : chiffres réels (inscriptions en attente, comptes actifs, désactivés, refusés, comptes actifs par rôle)
+  et les cinq dernières inscriptions à traiter.
+- **Inscriptions** `/administration/inscriptions` : onglets En attente / Acceptées / Refusées, recherche (nom, carte d'identité,
+  téléphone), filtre par délégation, tri (récentes, anciennes, nom A→Z, Z→A), pagination. Fiche dans un panneau latéral :
+  - accepter → compte actif + numéro d'adhérent attribué par la collection `compteurs` (ADH-0001, ADH-0002…, sans doublon) ;
+  - refuser → motif obligatoire (motifs rapides proposés) ; un refus peut être annulé en acceptant l'inscription.
+- **Utilisateurs** `/administration/utilisateurs` : recherche (nom, e-mail, téléphone, carte d'identité, numéro d'adhérent),
+  filtres rôle / état / délégation, tri par clic sur les en-têtes de colonnes (liste de tri sur téléphone), pagination 10/20/50.
+  Fiche : modifier, désactiver / réactiver, réinitialiser le mot de passe. Création de comptes du personnel et d'administrateurs
+  avec un **mot de passe provisoire** affiché une seule fois.
+- Filtres, tri et pagination exécutés par MongoDB (seule la page demandée est envoyée) ; tri alphabétique **à la française**
+  (sans tenir compte des majuscules ni des accents) ; index composé (rôle, statut).
+- Règles protégées par le serveur :
+  - compte désactivé → accès coupé **dès sa requête suivante** (le compte est relu à chaque requête, décision 10) ;
+  - le rôle est lu en base à chaque requête : un changement de rôle s'applique immédiatement ;
+  - un administrateur ne peut ni se désactiver ni changer son propre rôle ; il reste toujours au moins un administrateur actif ;
+  - un compte agriculteur ne devient pas un compte du personnel, et inversement ;
+  - l'administrateur ne crée pas de compte agriculteur (les agriculteurs s'inscrivent eux-mêmes).
+
+### Compléments (25/11/2026, soir) — Référentiels, Paramètres, Supervision
+
+- **Référentiels** `/administration/referentiels` : chaque onglet explique l'élément en une phrase.
+  - Variétés (collection `varietes`, code VAR-01…) et Pressoirs (collection `pressoirs`, code PR-01…, position GeoJSON
+    avec index 2dsphere, limitée à la région de Sfax) : recherche, archives, tri par colonne, ajout, modification, archivage.
+  - Un pressoir qui a encore des responsables rattachés ne peut pas être archivé.
+  - Délégations et Catégories de qualité : listes fixes en lecture seule (catégorie déduite de l'acidité).
+  - Un **responsable du pressoir est rattaché à un pressoir** (champ `pressoirId` du compte, décision 4).
+- **Paramètres** `/administration/parametres` (décision 9) : document unique `parametres` en sections (campagne, règles métier,
+  imports, notifications, sécurité), valeurs bornées, auteur et date de modification. Gardé en mémoire et relu après chaque
+  modification : la durée de session et le blocage après mots de passe incorrects s'appliquent **immédiatement**.
+- **Supervision** `/administration/supervision` (décision 18) :
+  - mesures relevées toutes les 10 s (Micrometer) et gardées une heure : processeur, mémoire, requêtes par minute,
+    temps de réponse moyen ; une courbe par mesure (jamais deux échelles sur un même graphique), survol et clavier,
+    tableau « Voir les valeurs » ;
+  - état des composants (application, MongoDB, mémoire, disque, sauvegardes) avec icône + libellé ; seuils d'alerte :
+    mémoire > 85 %, disque libre < 10 %, base > 200 ms, dernière sauvegarde > 26 h ;
+  - utilisateurs actifs (requête dans les 15 dernières minutes) ; derniers avertissements et erreurs du journal ;
+  - **sauvegardes réelles avec mongodump** : automatique chaque nuit à 3 h + bouton « Sauvegarder maintenant »,
+    7 dernières gardées, dossier `sauvegardes/` (exclu de git) ; lien Grafana affiché seulement si son adresse est configurée.
+- Les pages de l'administration sont **chargées à la demande** : les visiteurs ne téléchargent pas ce code.
+
+### Compléments (26/11/2026) — Ressources et Carte
+
+- **Ressources** `/administration/ressources` (décisions 8 et M3, rôle R4) :
+  - une collection `ressources` pour tracteurs, bennes, ouvriers saisonniers et matériel (champ `type`), codes TR-01, BN-01,
+    OUV-001, MAT-01 ; état : disponible, en panne, en révision, en congé ; archivage au lieu de suppression ;
+  - règles : une benne a une capacité, un matériel une quantité, seul un ouvrier appartient à une équipe, le type ne change pas ;
+  - collection `equipes` (EQ-01…) : effectif et ouvriers disponibles (« 5 sur 6 ») ; une équipe non vide ne peut pas être archivée ;
+  - adresses `/api/ressources` et `/api/equipes` ouvertes à l'administrateur et au **responsable logistique** (réutilisées par son espace) ;
+  - les périodes d'indisponibilité datées (décision 8) viendront avec le calendrier de la logistique.
+- **Carte** `/administration/carte` (fonctionnalité F4) : Leaflet + fond OpenStreetMap France, chargée à la demande.
+  Couches activables : pressoirs (repère + fiche au clic) et agriculteurs actifs par délégation (cercles dont la surface
+  est proportionnelle au nombre, comptés par une **agrégation MongoDB** `$match` + `$group`). Légende et listes cliquables.
+  Les vergers s'y ajouteront avec leur fonctionnalité.
+- Bouton « Se déconnecter » de l'administration présenté comme un vrai bouton.
+
+## Fonctionnalité 4 — Espace agriculteur (26/11/2026)
+
+- Mise en page : menu en haut sur ordinateur, **barre d'onglets en bas sur téléphone** (utilisation au verger).
+- **Accueil** : « Déclarer une récolte », « Signaler maturité ou problème », prochaine collecte, vergers, derniers signalements.
+- **Mes vergers** (collection `vergers`, code V-0001, position GeoJSON + index 2dsphere) : ajout, modification, archivage ;
+  position choisie sur la carte ou par le GPS du téléphone (« Ma position »), sinon placée à la main.
+- **Déclarer une récolte** (collection `demandes_recolte`, numéro D-0001) : verger, type, date, quantité (+ commentaire).
+  Quantité estimée proposée (superficie × rendement de la variété). Règles du serveur :
+  urgente dès aujourd'hui, planifiée dès demain, date dans la campagne des paramètres, une seule demande active par verger
+  et par date, modification et annulation seulement avant le démarrage de la collecte.
+  Historique des changements d'état rangé dans la demande ; **verrou optimiste** (`@Version`, décision 3).
+- **Signalements** (collection `alertes`, numéro AL-0001) : type, verger, position, description. Distance au verger calculée
+  (haversine) ; au-delà de la distance des paramètres, le signalement est marqué « loin du verger ».
+  Les photos (décision 15) viendront dans un second temps.
+- **Mon compte** : informations et changement du mot de passe.
+- Toutes les adresses `/api/agriculteur/**` sont réservées au rôle AGRICULTEUR et travaillent sur l'agriculteur **du jeton** :
+  un agriculteur ne voit ni ne modifie jamais les données d'un autre (403).
+
+## Revue de sécurité (26/11/2026)
+
+- **Jetons d'accès** : signature HS256 avec un secret d'au moins 32 caractères (obligatoire en production, sans valeur par défaut),
+  date d'expiration et émetteur « oliveconnect » vérifiés ; jeton falsifié, expiré ou d'un autre émetteur → 401 (testé).
+- **Compte relu à chaque requête** : un compte désactivé perd l'accès immédiatement, le rôle vient de la base.
+- **Mots de passe** : BCrypt ; règle 8 caractères + lettre + chiffre ; blocage après échecs ; mot de passe provisoire donné par
+  l'administrateur → changement **obligatoire** avant d'accéder à son espace (page `/mot-de-passe`).
+- **Droits** : chaque adresse est publique par choix (connexion, inscription), ouverte à tout compte connecté (profil, listes)
+  ou réservée à un rôle (@PreAuthorize) ; les données d'un agriculteur sont filtrées par l'identifiant du jeton.
+- **Erreurs** : toujours au format JSON (y compris 401 et 403 de la couche de sécurité) ; une erreur imprévue est écrite dans
+  le journal mais ne montre aucun détail technique.
+- **En-têtes** : X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy no-referrer, Content-Security-Policy stricte.
+- **Requêtes MongoDB** : construites avec Criteria ; toute recherche par texte est échappée (Pattern.quote).
+- **Interface** : Angular échappe tout le texte affiché ; les seules bulles HTML (carte) échappent les noms venant de la base.
+- **Points connus, à traiter au déploiement** : HTTPS (décision 1, obligatoire pour le GPS en dehors de « localhost ») ;
+  limitation du nombre de requêtes par adresse IP au niveau de Nginx ; le jeton est gardé dans le navigateur (localStorage),
+  ce qui reste sûr tant qu'aucun script étranger n'est injecté (en-tête de sécurité du contenu à configurer aussi sur Nginx).
+
 ## Notes techniques
 
 - L'API écoute sur le port **8081** : le port 8080 est déjà utilisé par Oracle sur le poste de développement.
