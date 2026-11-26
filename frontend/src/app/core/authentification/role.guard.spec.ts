@@ -30,8 +30,8 @@ describe('roleGuard', () => {
     expect(verifier(null)).toBe('/connexion');
   });
 
-  it('avec un autre rôle, renvoie vers l’espace de ce rôle', () => {
-    expect(verifier(session({ role: 'CHEF_EQUIPE' }))).toBe('/chef-equipe');
+  it('avec un autre rôle, affiche « Accès refusé » en nommant le profil attendu', () => {
+    expect(verifier(session({ role: 'CHEF_EQUIPE' }))).toBe('/acces-refuse?profil=AGRICULTEUR');
   });
 
   it('avec un mot de passe provisoire, renvoie vers le changement de mot de passe', () => {

@@ -18,14 +18,20 @@ public record VergerReponse(
         Integer niveauMaturite,
         StatutRecolte statutRecolte,
         String libelleStatutRecolte,
-        boolean archive) {
+        boolean archive,
+        int signalementsNonResolus) {
 
     public static VergerReponse depuis(Verger verger) {
+        return depuis(verger, 0);
+    }
+
+    /** @param signalementsNonResolus signalements du verger qui attendent encore une réponse de la coopérative */
+    public static VergerReponse depuis(Verger verger, int signalementsNonResolus) {
         return new VergerReponse(verger.getId(), verger.getCode(), verger.getNom(),
                 // GeoJSON range les coordonnées dans l'ordre [longitude, latitude]
                 verger.getLocalisation().getY(), verger.getLocalisation().getX(),
                 verger.getDelegation(), verger.getDelegation().getLibelle(), verger.getSuperficieHa(),
                 verger.getNombreArbres(), verger.getVarieteId(), verger.getNomVariete(), verger.getNiveauMaturite(),
-                verger.getStatutRecolte(), verger.getStatutRecolte().getLibelle(), verger.isArchive());
+                verger.getStatutRecolte(), verger.getStatutRecolte().getLibelle(), verger.isArchive(), signalementsNonResolus);
     }
 }

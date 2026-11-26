@@ -13,3 +13,5 @@ oliveconnect:
   sauvegarde:
     dossier: target/sauvegardes-test
     outil-mongodump: "C:/Program Files/MongoDB/Tools/100/bin/mongodump.exe"
+  photos:
+    dossier: target/photos-test

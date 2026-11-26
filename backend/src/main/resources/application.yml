@@ -7,6 +7,11 @@ spring:
     time-zone: Africa/Tunis
   mongodb:
     uri: ${MONGO_URI:mongodb://localhost:27017/oliveconnect}
+  servlet:
+    multipart:
+      # Une photo de signalement : 5 Mo au plus (décision 15)
+      max-file-size: 5MB
+      max-request-size: 6MB
   data:
     mongodb:
       # Crée les index déclarés dans les classes (@Indexed) au démarrage
@@ -41,3 +46,9 @@ oliveconnect:
     planification: "0 0 3 * * *"
   supervision:
     adresse-grafana: ${ADRESSE_GRAFANA:}
+  temps-reel:
+    origines-autorisees: ${ORIGINES_AUTORISEES:http://localhost:4200}
+  photos:
+    dossier: ${DOSSIER_PHOTOS:../uploads/signalements}
+    taille-maximum: 5242880  # 5 Mo
+

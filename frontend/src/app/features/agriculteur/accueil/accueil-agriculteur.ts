@@ -1,25 +1,33 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { switchMap } from 'rxjs';
 
 import { AuthentificationService } from '../../../core/authentification/authentification.service';
+import { NotificationsService } from '../../../core/notifications/notifications.service';
+import { DepuisPipe } from '../../../shared/pipes/depuis.pipe';
+import { VisiteAgriculteur } from '../visite/visite-agriculteur';
 import { COULEURS_STATUT_DEMANDE, Demande } from '../agriculteur.modeles';
 import { AgriculteurService } from '../agriculteur.service';
 
 /** États où une demande « vit » encore (pas terminée, annulée ni rejetée). */
 const EN_COURS = ['SOUMISE', 'VALIDEE', 'PLANIFIEE', 'EN_COURS'];
 
-/** Page /agriculteur : actions principales, prochaine collecte, vergers et derniers signalements. */
+/**
+ * Page /agriculteur : visite guidée proposée à la première connexion, actions principales, prochaine collecte,
+ * vergers, notifications récentes et derniers signalements.
+ */
 @Component({
   selector: 'app-accueil-agriculteur',
-  imports: [RouterLink, DatePipe, DecimalPipe],
+  imports: [RouterLink, DatePipe, DecimalPipe, DepuisPipe],
   templateUrl: './accueil-agriculteur.html',
 })
 export class AccueilAgriculteur {
   private readonly service = inject(AgriculteurService);
   readonly session = inject(AuthentificationService).session;
   readonly couleurs = COULEURS_STATUT_DEMANDE;
+  readonly visite = inject(VisiteAgriculteur);
 
   readonly vergers = toSignal(this.service.vergers(), { initialValue: [] });
   readonly demandes = toSignal(this.service.demandes(), { initialValue: [] });
@@ -34,4 +42,12 @@ export class AccueilAgriculteur {
   );
 
   readonly derniersSignalements = computed(() => this.signalements().slice(0, 3));
+
+  private readonly notifications = inject(NotificationsService);
+  /** Les trois dernières ; rechargées quand une notification arrive en direct. */
+  readonly notificationsRecentes = toSignal(
+    toObservable(this.notifications.derniereRecue).pipe(switchMap(() => this.notifications.liste(null, false, 0))),
+    { initialValue: null },
+  );
+  readonly notificationsRecentesAffichees = computed(() => this.notificationsRecentes()?.elements.slice(0, 3) ?? []);
 }

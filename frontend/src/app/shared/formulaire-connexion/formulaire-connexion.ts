@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 
 import { AuthentificationService } from '../../core/authentification/authentification.service';
 import { ESPACE_PAR_ROLE, EspaceConnexion } from '../../core/authentification/modeles';
@@ -13,7 +13,7 @@ import { texteErreur } from '../../core/erreurs/message-erreur';
  */
 @Component({
   selector: 'app-formulaire-connexion',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './formulaire-connexion.html',
 })
 export class FormulaireConnexion {
@@ -31,6 +31,9 @@ export class FormulaireConnexion {
   readonly envoiEnCours = signal(false);
   readonly messageErreur = signal<string | null>(null);
   readonly motDePasseVisible = signal(false);
+
+  /** Message affiché en arrivant : session expirée, ou mot de passe qui vient d'être changé. */
+  readonly information = lireInformation(inject(ActivatedRoute).snapshot.queryParamMap);
 
   envoyer(): void {
     if (this.formulaire.invalid) {
@@ -59,4 +62,14 @@ export class FormulaireConnexion {
     const champ = this.formulaire.controls[nom];
     return champ.touched && champ.hasError('required');
   }
+}
+
+function lireInformation(parametres: ParamMap): string | null {
+  if (parametres.has('sessionExpiree')) {
+    return 'Session expirée : reconnectez-vous pour continuer.';
+  }
+  if (parametres.has('motDePasseChange')) {
+    return 'Mot de passe changé : connectez-vous avec le nouveau.';
+  }
+  return null;
 }

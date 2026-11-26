@@ -169,10 +169,52 @@ valide ; les ouvriers saisonniers n'ont pas de compte (ce sont des ressources g�
   Historique des changements d'état rangé dans la demande ; **verrou optimiste** (`@Version`, décision 3).
 - **Signalements** (collection `alertes`, numéro AL-0001) : type, verger, position, description. Distance au verger calculée
   (haversine) ; au-delà de la distance des paramètres, le signalement est marqué « loin du verger ».
-  Les photos (décision 15) viendront dans un second temps.
-- **Mon compte** : informations et changement du mot de passe.
+  Photo facultative : voir « Fonctionnalité 5 ».
+- **Mon compte** : remplacé par la page commune « Mon profil » (fonctionnalité 5).
 - Toutes les adresses `/api/agriculteur/**` sont réservées au rôle AGRICULTEUR et travaillent sur l'agriculteur **du jeton** :
   un agriculteur ne voit ni ne modifie jamais les données d'un autre (403).
+
+## Fonctionnalité 5 — Notifications, mot de passe oublié, profil, photos, carte publique, aide (26/11/2026)
+
+Ce qui manquait encore à notre partie (pages publiques, administrateur, agriculteur) d'après les cas d'utilisation et les maquettes.
+
+- **Notifications (UC05, décision 13)** — collection `notifications`, une copie par destinataire (« pour un rôle » = chaque compte
+  actif du rôle, jamais une diffusion à tous). Index (destinataire, date) pour la cloche ; **index TTL de 90 jours**.
+  Temps réel : WebSocket STOMP à l'adresse `/ws` ; le **jeton est vérifié dans la trame CONNECT** (un navigateur ne peut pas
+  joindre d'en-tête à l'ouverture du WebSocket, qui reste donc publique) ; abonnement permis seulement à sa propre file
+  `/user/queue/…` ; envoi de messages par le navigateur refusé. Reconnexion automatique toutes les 5 s.
+  Interface : cloche avec pastille, bandeau des notifications en direct, page « Notifications » (Toutes, Non lues, Collectes,
+  Alertes, Compte ; « Tout marquer lu »), notifications récentes sur l'accueil de l'agriculteur.
+  Envoyées aujourd'hui : nouvelle demande (prioritaire si urgente), demande modifiée ou annulée, signalement → responsables de
+  collecte ; nouvelle inscription → administrateurs ; inscription acceptée → bienvenue à l'agriculteur. Les autres espaces
+  réutiliseront `NotificationService.notifierPersonne` / `notifierRole`.
+- **SMS simulés (décision 17)** — interface `EnvoiSms`, version `SmsSimule` : journal du serveur + collection
+  `messages_envoyes` (TTL 90 jours), liste « SMS envoyés » dans la supervision de l'administrateur. Toujours envoyés :
+  inscription acceptée (avec le numéro d'adhérent) ou refusée (avec le motif), code de mot de passe oublié. Les SMS de suivi
+  des collectes respectent le réglage « SMS » des paramètres et le choix de la personne.
+- **Mot de passe oublié (décision 10)** — collection `codes_reinitialisation` : code à 6 chiffres **chiffré avec BCrypt**, un seul
+  par compte, **index TTL 10 minutes** (et expiration vérifiée par le code), **3 essais** puis code annulé, nouveau code au plus
+  une fois par minute. Réponse identique que le compte existe ou non (on n'apprend pas si un numéro est inscrit).
+  Réussite : nouveau mot de passe, blocage levé, connexion automatique. Page en trois étapes avec compte à rebours « Renvoyer ».
+- **Mon profil (UC07, maquette P4)** — page commune à tous les rôles : téléphone, e-mail, délégation (agriculteur) modifiables
+  **avec le mot de passe actuel** (ils servent à se connecter) et vérification qu'aucun autre compte ne les utilise (409) ;
+  préférences « notifications dans l'application » et « SMS pour les collectes » ; changement du mot de passe ; visite guidée.
+  L'e-mail récapitulatif de la maquette n'est pas fait : aucun envoi d'e-mail n'a été décidé.
+- **Photos des signalements (décision 15)** — sans Docker, fichiers dans `uploads/signalements` (hors git), nommés d'après
+  l'identifiant du signalement (aucun nom venant de la personne). Images JPEG, PNG ou WebP **reconnues à leurs premiers octets**,
+  5 Mo au plus côté serveur ; **réduites sur le téléphone** (1600 pixels, JPEG) avant l'envoi. Visibles seulement par leur auteur,
+  jamais mises en cache. **Incluses dans les sauvegardes** : archive `….photos.zip` à côté de chaque sauvegarde mongodump.
+- **Vergers** — suppression réelle d'un verger **jamais utilisé** (aucune demande ni aucun signalement), sinon 409 et archivage
+  (M5). Un changement de nom est **reporté dans ses demandes et signalements** (point « champs copiés » tranché pour `nomVerger`).
+  Chaque verger affiche ses signalements non résolus ; vue « Liste » ou « Carte » (maquette A1).
+- **Carte publique (UC01, maquette M1)** — `/carte`, sans connexion : vergers non archivés des adhérents actifs, recherche,
+  filtres variété et maturité ≥ 70 %, légende. **Vie privée** : ni nom de l'agriculteur, ni code du verger, ni texte des
+  signalements, **position arrondie à environ 100 m**. Liens depuis l'accueil et la page « Demande envoyée ».
+- **Aide et visite guidée (UC06, maquettes P5 et P6)** — bouton « ? » qui ouvre l'aide de l'écran en cours ; guides rapides,
+  questions fréquentes, recherche sans accents. Visite guidée en 5 étapes proposée à la première connexion (« Plus tard »
+  possible), relançable depuis l'aide ou le profil ; une fois terminée ou passée, elle n'est plus proposée (enregistré sur le compte).
+- **Pages d'erreur (maquette P7)** — « Accès refusé » (page d'un autre profil, en nommant le profil attendu), « Page
+  introuvable » pour toute adresse inconnue, message « Session expirée » sur la page de connexion quand le serveur refuse le jeton.
 
 ## Revue de sécurité (26/11/2026)
 
@@ -187,10 +229,19 @@ valide ; les ouvriers saisonniers n'ont pas de compte (ce sont des ressources g�
   le journal mais ne montre aucun détail technique.
 - **En-têtes** : X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy no-referrer, Content-Security-Policy stricte.
 - **Requêtes MongoDB** : construites avec Criteria ; toute recherche par texte est échappée (Pattern.quote).
-- **Interface** : Angular échappe tout le texte affiché ; les seules bulles HTML (carte) échappent les noms venant de la base.
+- **Interface** : Angular échappe tout le texte affiché ; les seules bulles HTML (cartes) échappent les noms venant de la base
+  (fonction commune `echapperHtml`).
+- **Temps réel** : jeton vérifié à la connexion STOMP (testé avec un vrai client : sans jeton, refus), file personnelle seulement,
+  origines autorisées limitées aux pages de l'application.
+- **Fichiers envoyés** : type reconnu au contenu et non au nom (un texte nommé « photo.jpg » est refusé, testé), taille limitée,
+  nom de fichier fabriqué par le serveur.
+- **Mot de passe oublié** : aucune fuite sur l'existence d'un compte, codes chiffrés, limités dans le temps et en essais.
 - **Points connus, à traiter au déploiement** : HTTPS (décision 1, obligatoire pour le GPS en dehors de « localhost ») ;
-  limitation du nombre de requêtes par adresse IP au niveau de Nginx ; le jeton est gardé dans le navigateur (localStorage),
-  ce qui reste sûr tant qu'aucun script étranger n'est injecté (en-tête de sécurité du contenu à configurer aussi sur Nginx).
+  limitation du nombre de requêtes par adresse IP au niveau de Nginx (en particulier sur `/api/mot-de-passe-oublie`) ;
+  le jeton est gardé dans le navigateur (localStorage), ce qui reste sûr tant qu'aucun script étranger n'est injecté
+  (en-tête de sécurité du contenu à configurer aussi sur Nginx).
+- **Nginx au déploiement** : `client_max_body_size 6m` (photos, décision 15) ; transmettre `/ws` en WebSocket
+  (en-têtes `Upgrade` et `Connection`) ; variable `ORIGINES_AUTORISEES` = adresse publique du site.
 
 ## Notes techniques
 
@@ -223,8 +274,9 @@ valide ; les ouvriers saisonniers n'ont pas de compte (ce sont des ressources g�
 - Quantité modifiée après planification : revérifier la capacité des bennes ?
 - Deuxième voyage vers le pressoir
 - Un chef d'équipe peut-il avoir deux tournées le même jour ?
-- Annulation d'une demande encore SOUMISE
-- Champs copiés (`vergerNom`, `agriculteurNom`) : mise à jour quand l'original change
+- ~~Annulation d'une demande encore SOUMISE~~ → permise tant que la collecte n'a pas démarré (fonctionnalité 4)
+- ~~Champs copiés : mise à jour quand l'original change~~ → le nom du verger est reporté (fonctionnalité 5) ; le nom de
+  l'agriculteur n'est pas copié dans les demandes
 - Demande urgente créée depuis une alerte par le responsable de collecte
 
 ### Phase alertes et imports
@@ -237,7 +289,8 @@ valide ; les ouvriers saisonniers n'ont pas de compte (ce sont des ressources g�
 - Catégorie de qualité saisie ou calculée à partir de l'acidité
 
 ### Phase gestion des erreurs
-- Table erreur → code HTTP (400, 401, 403, 404, 409, 422)
+- ~~Table erreur → code HTTP~~ → 400 saisie, 401 non connecté, 403 interdit, 404 introuvable, 405, 409 conflit
+  (doublon, modifié par quelqu'un d'autre, non modifiable), 500 imprévu ; 422 non utilisé (GestionnaireErreurs)
 
 ### Phase logistique
 - Approvisionnements : stock et seuils
@@ -253,4 +306,11 @@ valide ; les ouvriers saisonniers n'ont pas de compte (ce sont des ressources g�
 - Plan du rapport
 
 ### Mise en place du projet
-- Dépôt git, `.gitignore` (exclure `__pycache__/`)
+- ~~Dépôt git, `.gitignore`~~ → fait, dépôt GitHub privé
+
+### Encore ouvert dans notre partie
+- Mode hors connexion (décision 16, en attente) et HTTPS (décision 1, au déploiement)
+- « Rester connecté » de la maquette de connexion (la session dure le temps fixé dans les paramètres)
+- E-mail récapitulatif (préférence de la maquette P4 et réglage des paramètres) : aucun envoi d'e-mail décidé
+- Décision 14 : index texte en français non utilisé (les recherches utilisent un tri français et une recherche échappée) ;
+  le verger a une position (point) et non un contour

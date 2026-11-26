@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import tn.oliveconnect.common.exception.ErreurMetierException;
+import tn.oliveconnect.notification.CategorieNotification;
+import tn.oliveconnect.notification.NotificationService;
+import tn.oliveconnect.notification.NouvelleNotification;
 import tn.oliveconnect.utilisateur.Identifiants;
 import tn.oliveconnect.utilisateur.InfosAgriculteur;
 import tn.oliveconnect.utilisateur.Role;
@@ -31,6 +34,7 @@ public class InscriptionService {
     private final UtilisateurRepository utilisateurRepository;
     private final VerificationIdentifiants verificationIdentifiants;
     private final PasswordEncoder encodeurMotDePasse;
+    private final NotificationService notificationService;
     private final Clock horloge;
 
     public InscriptionReponse inscrire(InscriptionRequete requete) {
@@ -64,6 +68,9 @@ public class InscriptionService {
             throw new ErreurMetierException(HttpStatus.CONFLICT, "DONNEES_DEJA_UTILISEES",
                     "Un compte existe déjà avec ce téléphone, cet e-mail ou cette carte d'identité.");
         }
+        notificationService.notifierRole(Role.ADMINISTRATEUR, NouvelleNotification.simple(CategorieNotification.COMPTE,
+                "Nouvelle inscription", agriculteur.getNomComplet() + " (" + requete.delegation().getLibelle()
+                        + ") demande à devenir adhérent.", "/administration/inscriptions"));
         return new InscriptionReponse(agriculteur.getPrenom(), masquer(telephone));
     }
 

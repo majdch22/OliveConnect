@@ -1,5 +1,6 @@
 package tn.oliveconnect.verger;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -8,6 +9,9 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface VergerRepository extends MongoRepository<Verger, String> {
 
     List<Verger> findByAgriculteurIdOrderByNomAsc(String agriculteurId);
+
+    /** Vergers visibles sur la carte publique. */
+    List<Verger> findByArchiveFalseAndAgriculteurIdIn(Collection<String> agriculteurIds);
 
     boolean existsByAgriculteurIdAndNomIgnoreCaseAndIdNot(String agriculteurId, String nom, String id);
 

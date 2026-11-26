@@ -12,8 +12,14 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import tn.oliveconnect.common.exception.ErreurMetierException;
 import tn.oliveconnect.compteur.CompteurService;
+import tn.oliveconnect.notification.CategorieNotification;
+import tn.oliveconnect.notification.NotificationService;
+import tn.oliveconnect.notification.NouvelleNotification;
 import tn.oliveconnect.parametres.Parametres;
 import tn.oliveconnect.parametres.ParametresService;
+import tn.oliveconnect.utilisateur.Role;
+import tn.oliveconnect.utilisateur.Utilisateur;
+import tn.oliveconnect.utilisateur.UtilisateurRepository;
 import tn.oliveconnect.verger.Verger;
 import tn.oliveconnect.verger.VergerService;
 
@@ -26,6 +32,8 @@ import tn.oliveconnect.verger.VergerService;
  * - la date est comprise dans la campagne de récolte (paramètres de l'administrateur) ;
  * - une seule demande active par verger et par date ;
  * - modification et annulation seulement tant que la collecte n'a pas démarré (états Soumise, Validée, Planifiée).
+ * Les responsables de collecte sont prévenus de chaque déclaration (en priorité si elle est urgente),
+ * modification et annulation.
  */
 @Service
 @RequiredArgsConstructor
@@ -33,10 +41,15 @@ public class DemandeRecolteService {
 
     private static final DateTimeFormatter FORMAT_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+    /** Espace du responsable de collecte, ouvert en touchant la notification. */
+    private static final String LIEN_COLLECTE = "/collecte";
+
     private final DemandeRecolteRepository demandeRepository;
     private final VergerService vergerService;
     private final ParametresService parametresService;
     private final CompteurService compteurService;
+    private final NotificationService notificationService;
+    private final UtilisateurRepository utilisateurRepository;
     private final Clock horloge;
 
     public List<DemandeReponse> mesDemandes(String agriculteurId) {
@@ -59,7 +72,12 @@ public class DemandeRecolteService {
         remplir(demande, requete, verger);
         demande.setDateSoumission(horloge.instant());
         demande.changerStatut(StatutDemande.SOUMISE, horloge.instant(), agriculteurId, null);
-        return DemandeReponse.depuis(demandeRepository.save(demande));
+        DemandeRecolte enregistree = demandeRepository.save(demande);
+        boolean urgente = enregistree.getType() == TypeRecolte.URGENTE;
+        NouvelleNotification contenu = NouvelleNotification.simple(CategorieNotification.COLLECTE,
+                (urgente ? "Demande urgente " : "Nouvelle demande ") + enregistree.getNumero(), resume(enregistree), LIEN_COLLECTE);
+        notificationService.notifierRole(Role.RESPONSABLE_COLLECTE, urgente ? contenu.enPriorite() : contenu);
+        return DemandeReponse.depuis(enregistree);
     }
 
     public DemandeReponse modifier(String id, DemandeRequete requete, String agriculteurId) {
@@ -70,7 +88,10 @@ public class DemandeRecolteService {
         verifierPasDeDoublon(requete, id);
         remplir(demande, requete, verger);
         // Si quelqu'un a modifié la demande entre-temps, la version ne correspond plus : refus (409)
-        return DemandeReponse.depuis(demandeRepository.save(demande));
+        DemandeRecolte enregistree = demandeRepository.save(demande);
+        notificationService.notifierRole(Role.RESPONSABLE_COLLECTE, NouvelleNotification.simple(CategorieNotification.COLLECTE,
+                "Demande " + enregistree.getNumero() + " modifiée", resume(enregistree), LIEN_COLLECTE));
+        return DemandeReponse.depuis(enregistree);
     }
 
     public DemandeReponse annuler(String id, String motif, String agriculteurId) {
@@ -79,7 +100,18 @@ public class DemandeRecolteService {
         String motifNettoye = motif == null || motif.isBlank() ? null : motif.trim();
         demande.setMotifAnnulation(motifNettoye);
         demande.changerStatut(StatutDemande.ANNULEE, horloge.instant(), agriculteurId, motifNettoye);
-        return DemandeReponse.depuis(demandeRepository.save(demande));
+        DemandeRecolte enregistree = demandeRepository.save(demande);
+        notificationService.notifierRole(Role.RESPONSABLE_COLLECTE, NouvelleNotification.simple(CategorieNotification.COLLECTE,
+                "Demande " + enregistree.getNumero() + " annulée",
+                resume(enregistree) + (motifNettoye == null ? "" : " · Motif : " + motifNettoye), LIEN_COLLECTE));
+        return DemandeReponse.depuis(enregistree);
+    }
+
+    /** « Ali Ben Salah · Verger Nord · 02/12/2026 · 3500 kg » : le texte des notifications d'une demande. */
+    private String resume(DemandeRecolte demande) {
+        String agriculteur = utilisateurRepository.findById(demande.getAgriculteurId()).map(Utilisateur::getNomComplet).orElse("");
+        return agriculteur + " · " + demande.getNomVerger() + " · " + demande.getDateSouhaitee().format(FORMAT_DATE)
+                + " · " + demande.getQuantiteEstimeeKg() + " kg";
     }
 
     // --- Règles ---

@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import {
   Demande,
   DemandeRequete,
-  Profil,
   Signalement,
   SignalementRequete,
   Verger,
@@ -36,6 +35,11 @@ export class AgriculteurService {
     return this.http.post<Verger>(`${ADRESSE}/vergers/${id}/${archiver ? 'archiver' : 'restaurer'}`, null);
   }
 
+  /** Seulement pour un verger jamais utilisé ; sinon le serveur répond 409 (il faut l'archiver). */
+  supprimerVerger(id: string): Observable<void> {
+    return this.http.delete<void>(`${ADRESSE}/vergers/${id}`);
+  }
+
   estimation(vergerId: string): Observable<{ quantiteKg: number }> {
     return this.http.get<{ quantiteKg: number }>(`${ADRESSE}/vergers/${vergerId}/estimation`);
   }
@@ -64,7 +68,19 @@ export class AgriculteurService {
     return this.http.post<Signalement>(`${ADRESSE}/signalements`, requete);
   }
 
-  // --- Listes et profil (communs à tous les rôles) ---
+  /** Envoie la photo (déjà réduite) d'un signalement, en formulaire « multipart ». */
+  joindrePhoto(signalementId: string, photo: Blob): Observable<Signalement> {
+    const formulaire = new FormData();
+    formulaire.append('photo', photo, 'photo.jpg');
+    return this.http.post<Signalement>(`${ADRESSE}/signalements/${signalementId}/photo`, formulaire);
+  }
+
+  /** La photo est protégée par le jeton : on la télécharge, puis le navigateur l'affiche depuis la mémoire. */
+  photo(signalementId: string): Observable<Blob> {
+    return this.http.get(`${ADRESSE}/signalements/${signalementId}/photo`, { responseType: 'blob' });
+  }
+
+  // --- Listes (communes à tous les rôles) ---
 
   varietes(): Observable<{ id: string; nom: string }[]> {
     return this.http.get<{ id: string; nom: string }[]>('/api/listes/varietes');
@@ -72,9 +88,5 @@ export class AgriculteurService {
 
   delegations(): Observable<{ code: string; libelle: string }[]> {
     return this.http.get<{ code: string; libelle: string }[]>('/api/inscription/delegations');
-  }
-
-  profil(): Observable<Profil> {
-    return this.http.get<Profil>('/api/profil');
   }
 }

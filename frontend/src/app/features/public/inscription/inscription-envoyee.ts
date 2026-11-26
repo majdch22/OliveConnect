@@ -50,7 +50,9 @@ import { InscriptionReponse } from './inscription.service';
             </p>
           }
 
+          <p class="mt-6 text-sm text-gray-600">En attendant, vous pouvez consulter la carte publique des vergers de la coopérative.</p>
           <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <a routerLink="/carte" class="bouton-secondaire">Voir la carte des vergers</a>
             <a routerLink="/" class="bouton-secondaire">Retour à l'accueil</a>
             <a routerLink="/connexion" class="bouton-principal">Aller à la connexion</a>
           </div>

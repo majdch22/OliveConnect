@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,8 @@ import tn.oliveconnect.configuration.OliveConnectProperties;
  * Sauvegardes de la base MongoDB avec l'outil officiel mongodump.
  * - Automatique chaque nuit (planification dans application.yml), ou à la demande depuis la page de supervision.
  * - Une sauvegarde = un fichier compressé « oliveconnect-AAAAMMJJ-HHMMSS.archive.gz ».
- * - Seules les plus récentes sont gardées (7 par défaut) ; les plus anciennes sont supprimées.
+ * - Les photos des signalements (fichiers, décision 15) sont copiées à côté, dans « oliveconnect-AAAAMMJJ-HHMMSS.photos.zip ».
+ * - Seules les plus récentes sont gardées (7 par défaut) ; les plus anciennes sont supprimées avec leurs photos.
  * Restauration : mongorestore --gzip --archive=&lt;fichier&gt; (procédure décrite dans la documentation de déploiement).
  */
 @Service
@@ -38,6 +41,7 @@ public class SauvegardeService {
     private static final Logger journal = LoggerFactory.getLogger(SauvegardeService.class);
     private static final String PREFIXE = "oliveconnect-";
     private static final String SUFFIXE = ".archive.gz";
+    private static final String SUFFIXE_PHOTOS = ".photos.zip";
     private static final DateTimeFormatter FORMAT_NOM = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     /** Une sauvegarde présente dans le dossier. */
@@ -45,6 +49,7 @@ public class SauvegardeService {
     }
 
     private final OliveConnectProperties.Sauvegarde reglages;
+    private final Path dossierPhotos;
     private final String adresseBase;
     private final Clock horloge;
     private final AtomicBoolean enCours = new AtomicBoolean(false);
@@ -52,6 +57,7 @@ public class SauvegardeService {
     public SauvegardeService(OliveConnectProperties proprietes, @Value("${spring.mongodb.uri}") String adresseBase,
             Clock horloge) {
         this.reglages = proprietes.sauvegarde();
+        this.dossierPhotos = Path.of(proprietes.photos().dossier()).toAbsolutePath().normalize();
         this.adresseBase = adresseBase;
         this.horloge = horloge;
     }
@@ -104,6 +110,7 @@ public class SauvegardeService {
                 Files.deleteIfExists(fichier);
                 throw echec("mongodump s'est arrêté en erreur. " + sortie);
             }
+            copierPhotos(dossier().resolve(nom.replace(SUFFIXE, SUFFIXE_PHOTOS)));
             supprimerLesPlusAnciennes();
             journal.info("Sauvegarde créée : {}", fichier);
             return decrire(fichier);
@@ -121,6 +128,22 @@ public class SauvegardeService {
         List<Sauvegarde> sauvegardes = lister();
         for (Sauvegarde ancienne : sauvegardes.subList(Math.min(reglages.conservation(), sauvegardes.size()), sauvegardes.size())) {
             Files.deleteIfExists(dossier().resolve(ancienne.nom()));
+            Files.deleteIfExists(dossier().resolve(ancienne.nom().replace(SUFFIXE, SUFFIXE_PHOTOS)));
+        }
+    }
+
+    /** Range toutes les photos des signalements dans une archive zip (rien à faire s'il n'y en a pas encore). */
+    private void copierPhotos(Path archive) throws IOException {
+        if (!Files.isDirectory(dossierPhotos)) {
+            return;
+        }
+        try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(archive));
+                Stream<Path> photos = Files.list(dossierPhotos)) {
+            for (Path photo : photos.filter(Files::isRegularFile).toList()) {
+                zip.putNextEntry(new ZipEntry(photo.getFileName().toString()));
+                Files.copy(photo, zip);
+                zip.closeEntry();
+            }
         }
     }
 

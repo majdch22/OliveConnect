@@ -4,9 +4,15 @@
     <div class="flex items-center justify-between px-5 py-4 lg:block lg:px-6 lg:py-6">
       <app-logo [clair]="true" />
       <p class="hidden text-xs font-semibold uppercase tracking-wider text-olive-100/70 lg:mt-2 lg:block">Administration</p>
-      <button type="button" (click)="authentification.deconnecter()" class="rounded-lg border border-white/30 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/10 lg:hidden">
-        Se déconnecter
-      </button>
+      <div class="flex items-center gap-2 lg:hidden">
+        <app-cloche-notifications adresse="/administration/notifications" [clair]="true" />
+        <a routerLink="/administration/profil" aria-label="Mon profil" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-sm font-bold text-white">
+          {{ authentification.session()?.prenom?.charAt(0) }}{{ authentification.session()?.nom?.charAt(0) }}
+        </a>
+        <button type="button" (click)="authentification.deconnecter()" class="rounded-lg border border-white/30 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/10">
+          Se déconnecter
+        </button>
+      </div>
     </div>
 
     <nav class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-1 lg:flex-col lg:px-3 lg:pb-0" aria-label="Menu de l'administration">
@@ -29,8 +35,13 @@
 
     @if (authentification.session(); as session) {
       <div class="hidden border-t border-white/10 px-6 py-5 lg:block">
-        <p class="font-semibold">{{ session.prenom }} {{ session.nom }}</p>
-        <p class="text-sm text-olive-100/80">{{ session.libelleRole }}</p>
+        <div class="flex items-start justify-between gap-2">
+          <a routerLink="/administration/profil" class="hover:underline">
+            <p class="font-semibold">{{ session.prenom }} {{ session.nom }}</p>
+            <p class="text-sm text-olive-100/80">{{ session.libelleRole }} · Mon profil</p>
+          </a>
+          <app-cloche-notifications adresse="/administration/notifications" [clair]="true" />
+        </div>
         <button type="button" (click)="authentification.deconnecter()" class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/30 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7" /></svg>
           Se déconnecter
@@ -45,4 +56,5 @@
       <router-outlet />
     </div>
   </main>
+  <app-bandeau-notification />
 </div>

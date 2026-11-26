@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { connecteGuard, dejaConnecteGuard, roleGuard } from './core/authentification/role.guard';
 import { ConnexionAdministration } from './features/administration/connexion-administration/connexion-administration';
+import { PageErreur } from './features/erreurs/page-erreur';
 import { EspaceProvisoire } from './features/espaces/espace-provisoire';
 import { Accueil } from './features/public/accueil/accueil';
 import { Connexion } from './features/public/connexion/connexion';
@@ -15,6 +16,17 @@ export const routes: Routes = [
   { path: 'connexion', component: Connexion, canActivate: [dejaConnecteGuard], title: 'Connexion · OliveConnect' },
   { path: 'inscription', component: Inscription, canActivate: [dejaConnecteGuard], title: 'Inscription · OliveConnect' },
   { path: 'inscription/envoyee', component: InscriptionEnvoyee, title: 'Demande envoyée · OliveConnect' },
+  {
+    path: 'carte',
+    title: 'Carte des vergers · OliveConnect',
+    loadComponent: () => import('./features/public/carte-publique/carte-publique').then((m) => m.CartePublique),
+  },
+  {
+    path: 'mot-de-passe-oublie',
+    title: 'Mot de passe oublié · OliveConnect',
+    canActivate: [dejaConnecteGuard],
+    loadComponent: () => import('./features/public/mot-de-passe-oublie/mot-de-passe-oublie').then((m) => m.MotDePasseOublie),
+  },
   {
     path: 'administration/connexion',
     component: ConnexionAdministration,
@@ -77,6 +89,8 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/administration/supervision/supervision-administration').then((m) => m.SupervisionAdministration),
       },
+      { path: 'notifications', title: 'Notifications · Administration', loadComponent: () => import('./features/compte/notifications/page-notifications').then((m) => m.PageNotifications), },
+      { path: 'profil', title: 'Mon profil · Administration', loadComponent: () => import('./features/compte/profil/page-profil').then((m) => m.PageProfil), },
     ],
   },
 
@@ -113,10 +127,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/agriculteur/signalements/signalements-agriculteur').then((m) => m.SignalementsAgriculteur),
       },
+      { path: 'compte', title: 'Mon profil · OliveConnect', loadComponent: () => import('./features/compte/profil/page-profil').then((m) => m.PageProfil), },
+      { path: 'notifications', title: 'Notifications · OliveConnect', loadComponent: () => import('./features/compte/notifications/page-notifications').then((m) => m.PageNotifications), },
       {
-        path: 'compte',
-        title: 'Mon compte · OliveConnect',
-        loadComponent: () => import('./features/agriculteur/compte/compte-agriculteur').then((m) => m.CompteAgriculteur),
+        path: 'aide',
+        title: 'Aide · OliveConnect',
+        loadComponent: () => import('./features/agriculteur/aide/aide-agriculteur').then((m) => m.AideAgriculteur),
       },
     ],
   },
@@ -135,6 +151,7 @@ export const routes: Routes = [
   { path: 'logistique', component: EspaceProvisoire, canActivate: [roleGuard('RESPONSABLE_LOGISTIQUE')] },
   { path: 'pressoir', component: EspaceProvisoire, canActivate: [roleGuard('RESPONSABLE_PRESSOIR')] },
 
-  // Toute autre adresse ramène à l'accueil
-  { path: '**', redirectTo: '' },
+  // Pages d'erreur : page réservée à un autre profil, adresse inconnue
+  { path: 'acces-refuse', component: PageErreur, data: { type: 'acces-refuse' }, title: 'Accès refusé · OliveConnect' },
+  { path: '**', component: PageErreur, data: { type: 'introuvable' }, title: 'Page introuvable · OliveConnect' },
 ];

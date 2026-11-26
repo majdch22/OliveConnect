@@ -5,9 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -21,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.jayway.jsonpath.JsonPath;
@@ -236,6 +241,100 @@ class EspaceAgriculteurTest extends TestAvecComptes {
         mockMvc.perform(get("/api/agriculteur/vergers").header("Authorization", jetonChef))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code", is("ACCES_REFUSE")));
+    }
+
+    // --- Compléments : suppression, nom recopié, photo, carte publique, notifications ---
+
+    @Test
+    void un_verger_jamais_utilise_se_supprime_mais_un_verger_avec_historique_s_archive() throws Exception {
+        String vergerVide = id(creerVerger(jetonAli, "Verger ajouté par erreur"));
+        String vergerUtilise = id(creerVerger(jetonAli, "Verger Nord"));
+        declarer(jetonAli, vergerUtilise, "PLANIFIEE", AUJOURD_HUI.plusDays(1));
+
+        mockMvc.perform(delete("/api/agriculteur/vergers/" + vergerVide).header("Authorization", jetonAli))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/agriculteur/vergers/" + vergerUtilise).header("Authorization", jetonAli))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code", is("VERGER_DEJA_UTILISE")));
+    }
+
+    @Test
+    void renommer_un_verger_met_a_jour_le_nom_dans_ses_demandes() throws Exception {
+        String vergerId = id(creerVerger(jetonAli, "Verger Nord"));
+        String demandeId = id(declarer(jetonAli, vergerId, "PLANIFIEE", AUJOURD_HUI.plusDays(1)));
+
+        mockMvc.perform(put("/api/agriculteur/vergers/" + vergerId).header("Authorization", jetonAli)
+                .contentType(MediaType.APPLICATION_JSON).content(verger("Verger des Oliviers", 34.81, 10.77)));
+
+        mockMvc.perform(get("/api/agriculteur/demandes/" + demandeId).header("Authorization", jetonAli))
+                .andExpect(jsonPath("$.nomVerger", is("Verger des Oliviers")));
+    }
+
+    @Test
+    void chaque_verger_indique_ses_signalements_non_resolus() throws Exception {
+        String vergerId = id(creerVerger(jetonAli, "Verger Nord"));
+        signaler(jetonAli, vergerId, 34.8102, 10.7702);
+
+        mockMvc.perform(get("/api/agriculteur/vergers").header("Authorization", jetonAli))
+                .andExpect(jsonPath("$[0].signalementsNonResolus", is(1)));
+    }
+
+    @Test
+    void une_photo_se_joint_au_signalement_et_seul_son_auteur_la_voit() throws Exception {
+        String vergerId = id(creerVerger(jetonAli, "Verger Nord"));
+        String signalementId = id(signaler(jetonAli, vergerId, 34.8102, 10.7702));
+        byte[] png = { (byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0 };
+
+        mockMvc.perform(multipart("/api/agriculteur/signalements/" + signalementId + "/photo")
+                        .file(new MockMultipartFile("photo", "olives.png", "image/png", png)).header("Authorization", jetonAli))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.avecPhoto", is(true)));
+
+        mockMvc.perform(get("/api/agriculteur/signalements/" + signalementId + "/photo").header("Authorization", jetonAli))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("image/png"));
+        mockMvc.perform(get("/api/agriculteur/signalements/" + signalementId + "/photo").header("Authorization", jetonHela))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void un_fichier_qui_n_est_pas_une_image_est_refuse_meme_avec_un_nom_en_jpg() throws Exception {
+        String vergerId = id(creerVerger(jetonAli, "Verger Nord"));
+        String signalementId = id(signaler(jetonAli, vergerId, 34.8102, 10.7702));
+
+        mockMvc.perform(multipart("/api/agriculteur/signalements/" + signalementId + "/photo")
+                        .file(new MockMultipartFile("photo", "photo.jpg", "image/jpeg", "<script>alert(1)</script>".getBytes()))
+                        .header("Authorization", jetonAli))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code", is("PHOTO_REFUSEE")));
+    }
+
+    @Test
+    void la_carte_publique_montre_les_vergers_sans_le_nom_de_l_agriculteur_et_avec_une_position_arrondie() throws Exception {
+        creerVerger(jetonAli, "Verger Nord");
+        String archive = id(creerVerger(jetonAli, "Ancien verger"));
+        mockMvc.perform(post("/api/agriculteur/vergers/" + archive + "/archiver").header("Authorization", jetonAli));
+
+        mockMvc.perform(get("/api/public/vergers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].nom", is("Verger Nord")))
+                .andExpect(jsonPath("$[0].latitude", is(34.81)))
+                .andExpect(jsonPath("$[0].agriculteurId").doesNotExist())
+                .andExpect(content().string(not(containsString("Ben Salah"))));
+    }
+
+    @Test
+    void une_demande_urgente_previent_en_priorite_les_responsables_de_collecte() throws Exception {
+        String jetonKarim = jetonDe(creerPersonnel("Karim", "Trabelsi", "+21650000001", Role.RESPONSABLE_COLLECTE, StatutCompte.ACTIF));
+        String vergerId = id(creerVerger(jetonAli, "Verger Nord"));
+
+        declarer(jetonAli, vergerId, "URGENTE", AUJOURD_HUI);
+
+        mockMvc.perform(get("/api/notifications").header("Authorization", jetonKarim))
+                .andExpect(jsonPath("$.elements[0].titre", is("Demande urgente D-0001")))
+                .andExpect(jsonPath("$.elements[0].prioritaire", is(true)))
+                .andExpect(jsonPath("$.elements[0].message", containsString("Ali Ben Salah")));
     }
 
     // --- Outils des tests ---

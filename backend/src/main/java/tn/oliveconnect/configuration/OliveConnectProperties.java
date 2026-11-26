@@ -13,7 +13,9 @@ public record OliveConnectProperties(
         Securite securite,
         PremierAdministrateur premierAdministrateur,
         Sauvegarde sauvegarde,
-        Supervision supervision) {
+        Supervision supervision,
+        TempsReel tempsReel,
+        Photos photos) {
 
     /**
      * Réglages de la connexion.
@@ -49,5 +51,18 @@ public record OliveConnectProperties(
 
     /** @param adresseGrafana adresse du tableau Grafana (vide tant que Grafana n'est pas installé) */
     public record Supervision(String adresseGrafana) {
+    }
+
+    /** @param originesAutorisees adresses des pages autorisées à ouvrir la connexion temps réel (séparées par des virgules) */
+    public record TempsReel(String originesAutorisees) {
+    }
+
+    /**
+     * Photos jointes aux signalements (décision 15), rangées en fichiers sur le serveur.
+     *
+     * @param dossier       dossier des photos (inclus dans les sauvegardes)
+     * @param tailleMaximum taille maximale d'une photo, en octets
+     */
+    public record Photos(String dossier, long tailleMaximum) {
     }
 }

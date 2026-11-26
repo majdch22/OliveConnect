@@ -7,7 +7,7 @@ import { ESPACE_PAR_ROLE, pageDeConnexion, Role } from './modeles';
 /**
  * Protège l'espace d'un rôle.
  * - Personne de connecté : renvoi vers la page de connexion adaptée.
- * - Connecté avec un autre rôle : renvoi vers son propre espace.
+ * - Connecté avec un autre rôle : page « Accès refusé », qui indique le profil auquel la page est réservée.
  * - Mot de passe provisoire (donné par l'administrateur) : renvoi vers la page de changement du mot de passe.
  */
 export function roleGuard(roleAttendu: Role): CanActivateFn {
@@ -19,7 +19,7 @@ export function roleGuard(roleAttendu: Role): CanActivateFn {
       return router.parseUrl(pageDeConnexion(roleAttendu));
     }
     if (session.role !== roleAttendu) {
-      return router.parseUrl(ESPACE_PAR_ROLE[session.role]);
+      return router.createUrlTree(['/acces-refuse'], { queryParams: { profil: roleAttendu } });
     }
     if (session.motDePasseProvisoire) {
       return router.parseUrl('/mot-de-passe');

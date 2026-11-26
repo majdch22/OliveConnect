@@ -12,7 +12,11 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import tn.oliveconnect.common.exception.ErreurMetierException;
 import tn.oliveconnect.compteur.CompteurService;
+import tn.oliveconnect.notification.CategorieNotification;
+import tn.oliveconnect.notification.NotificationService;
+import tn.oliveconnect.notification.NouvelleNotification;
 import tn.oliveconnect.parametres.ParametresService;
+import tn.oliveconnect.utilisateur.Role;
 import tn.oliveconnect.verger.Verger;
 import tn.oliveconnect.verger.VergerService;
 
@@ -20,6 +24,7 @@ import tn.oliveconnect.verger.VergerService;
  * Signalements d'un agriculteur.
  * Le signalement porte sur l'un de ses vergers ; s'il est fait loin du verger (au-delà de la distance des paramètres),
  * il est enregistré quand même mais marqué « loin du verger » pour que le responsable de collecte le vérifie.
+ * Les responsables de collecte sont prévenus en temps réel de chaque signalement.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,12 +35,13 @@ public class AlerteService {
     /** Un signalement tel qu'affiché à l'agriculteur. */
     public record AlerteReponse(String id, String numero, String vergerId, String nomVerger, TypeAlerte type,
             String libelleType, double latitude, double longitude, int distanceAuVergerMetres, boolean loinDuVerger,
-            String description, StatutAlerte statut, String libelleStatut, Instant dateCreation) {
+            String description, boolean avecPhoto, StatutAlerte statut, String libelleStatut, Instant dateCreation) {
 
-        static AlerteReponse depuis(Alerte alerte) {
+        public static AlerteReponse depuis(Alerte alerte) {
             return new AlerteReponse(alerte.getId(), alerte.getNumero(), alerte.getVergerId(), alerte.getNomVerger(),
                     alerte.getType(), alerte.getType().getLibelle(), alerte.getPosition().getY(), alerte.getPosition().getX(),
-                    alerte.getDistanceAuVergerMetres(), alerte.isLoinDuVerger(), alerte.getDescription(), alerte.getStatut(),
+                    alerte.getDistanceAuVergerMetres(), alerte.isLoinDuVerger(), alerte.getDescription(), alerte.getPhoto() != null,
+                    alerte.getStatut(),
                     alerte.getStatut().getLibelle(), alerte.getDateCreation());
         }
     }
@@ -44,6 +50,7 @@ public class AlerteService {
     private final VergerService vergerService;
     private final ParametresService parametresService;
     private final CompteurService compteurService;
+    private final NotificationService notificationService;
     private final Clock horloge;
 
     public List<AlerteReponse> mesSignalements(String agriculteurId) {
@@ -73,7 +80,13 @@ public class AlerteService {
         alerte.setDescription(requete.description().trim());
         alerte.setStatut(StatutAlerte.OUVERTE);
         alerte.setDateCreation(horloge.instant());
-        return AlerteReponse.depuis(alerteRepository.save(alerte));
+        Alerte enregistree = alerteRepository.save(alerte);
+        notificationService.notifierRole(Role.RESPONSABLE_COLLECTE, NouvelleNotification.simple(CategorieNotification.ALERTE,
+                enregistree.getType().getLibelle() + " · " + enregistree.getNomVerger() + " (" + enregistree.getNumero() + ")",
+                enregistree.getDescription() + (enregistree.isLoinDuVerger()
+                        ? " · Position à " + enregistree.getDistanceAuVergerMetres() + " m du verger, à vérifier." : ""),
+                "/collecte"));
+        return AlerteReponse.depuis(enregistree);
     }
 
     /** Distance à vol d'oiseau entre deux points GPS (formule de haversine), en mètres. */

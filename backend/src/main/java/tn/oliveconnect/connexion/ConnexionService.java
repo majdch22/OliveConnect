@@ -3,7 +3,6 @@ package tn.oliveconnect.connexion;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import tn.oliveconnect.parametres.ParametresService;
 import tn.oliveconnect.security.JetonService;
 import tn.oliveconnect.security.JetonService.JetonGenere;
-import tn.oliveconnect.utilisateur.Identifiants;
 import tn.oliveconnect.utilisateur.StatutCompte;
 import tn.oliveconnect.utilisateur.Utilisateur;
 import tn.oliveconnect.utilisateur.UtilisateurRepository;
@@ -43,7 +41,7 @@ public class ConnexionService {
         int tentativesAvantBlocage = parametresService.tentativesAvantBlocage();
         Instant maintenant = horloge.instant();
 
-        Utilisateur utilisateur = chercherParIdentifiant(requete.identifiant())
+        Utilisateur utilisateur = utilisateurRepository.chercherParIdentifiant(requete.identifiant())
                 .orElseThrow(() -> ConnexionRefuseeException.identifiantsIncorrects(0));
 
         if (utilisateur.estBloque(maintenant)) {
@@ -79,14 +77,6 @@ public class ConnexionService {
                 utilisateur.getPrenom(),
                 utilisateur.getNom(),
                 utilisateur.isMotDePasseProvisoire());
-    }
-
-    /** L'identifiant saisi peut être un e-mail ou un numéro de téléphone. */
-    private Optional<Utilisateur> chercherParIdentifiant(String identifiant) {
-        if (Identifiants.estEmail(identifiant)) {
-            return utilisateurRepository.findByEmail(Identifiants.normaliserEmail(identifiant));
-        }
-        return utilisateurRepository.findByTelephone(Identifiants.normaliserTelephone(identifiant));
     }
 
     private void verifierCompteActif(StatutCompte statut) {

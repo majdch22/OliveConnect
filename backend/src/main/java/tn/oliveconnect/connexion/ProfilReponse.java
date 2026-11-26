@@ -1,6 +1,8 @@
 package tn.oliveconnect.connexion;
 
+import tn.oliveconnect.utilisateur.Delegation;
 import tn.oliveconnect.utilisateur.InfosAgriculteur;
+import tn.oliveconnect.utilisateur.PreferencesNotification;
 import tn.oliveconnect.utilisateur.Role;
 import tn.oliveconnect.utilisateur.Utilisateur;
 
@@ -18,10 +20,14 @@ public record ProfilReponse(
         String libelleRole,
         boolean motDePasseProvisoire,
         String numeroAdherent,
-        String libelleDelegation) {
+        Delegation delegation,
+        String libelleDelegation,
+        PreferencesNotification preferences,
+        boolean visiteGuideeTerminee) {
 
     public static ProfilReponse depuis(Utilisateur utilisateur) {
         InfosAgriculteur agriculteur = utilisateur.getAgriculteur();
+        Delegation delegation = agriculteur == null ? null : agriculteur.getDelegation();
         return new ProfilReponse(
                 utilisateur.getId(),
                 utilisateur.getPrenom(),
@@ -32,6 +38,9 @@ public record ProfilReponse(
                 utilisateur.getRole().getLibelle(),
                 utilisateur.isMotDePasseProvisoire(),
                 agriculteur == null ? null : agriculteur.getNumeroAdherent(),
-                agriculteur == null || agriculteur.getDelegation() == null ? null : agriculteur.getDelegation().getLibelle());
+                delegation,
+                delegation == null ? null : delegation.getLibelle(),
+                utilisateur.preferences(),
+                utilisateur.isVisiteGuideeTerminee());
     }
 }

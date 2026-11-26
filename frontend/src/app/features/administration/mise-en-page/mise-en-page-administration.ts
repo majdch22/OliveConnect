@@ -3,15 +3,18 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthentificationService } from '../../../core/authentification/authentification.service';
 import { Logo } from '../../../shared/logo/logo';
+import { BandeauNotification } from '../../../shared/notifications/bandeau-notification';
+import { ClocheNotifications } from '../../../shared/notifications/cloche-notifications';
 import { AdministrationService } from '../administration.service';
 
 /**
  * Cadre commun à toutes les pages de l'administration.
  * Ordinateur : menu fixe à gauche. Téléphone : menu en haut, défilant horizontalement.
+ * La cloche ouvre les notifications (nouvelles inscriptions…) ; un bandeau montre celles qui arrivent en direct.
  */
 @Component({
   selector: 'app-mise-en-page-administration',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo, ClocheNotifications, BandeauNotification],
   templateUrl: './mise-en-page-administration.html',
 })
 export class MiseEnPageAdministration implements OnInit {

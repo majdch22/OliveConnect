@@ -63,11 +63,22 @@ public class Utilisateur {
 
     private Instant derniereConnexion;
 
+    /** Vide tant que la personne n'a rien choisi : voir {@link #preferences()}. */
+    private PreferencesNotification preferencesNotification;
+
+    /** Vrai une fois la visite guidée terminée ou passée : elle n'est plus proposée à la connexion. */
+    private boolean visiteGuideeTerminee;
+
     @CreatedDate
     private Instant dateCreation;
 
     public String getNomComplet() {
         return prenom + " " + nom;
+    }
+
+    /** Préférences de notification, avec les valeurs par défaut si la personne n'a rien choisi. */
+    public PreferencesNotification preferences() {
+        return preferencesNotification == null ? PreferencesNotification.PAR_DEFAUT : preferencesNotification;
     }
 
     public boolean estActif() {

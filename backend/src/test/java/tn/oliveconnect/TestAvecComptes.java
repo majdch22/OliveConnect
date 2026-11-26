@@ -2,11 +2,14 @@ package tn.oliveconnect;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,10 +19,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.jayway.jsonpath.JsonPath;
 
 import tn.oliveconnect.compteur.Compteur;
+import tn.oliveconnect.motdepasse.CodeReinitialisation;
+import tn.oliveconnect.notification.Notification;
 import tn.oliveconnect.parametres.Parametres;
 import tn.oliveconnect.parametres.ParametresService;
 import tn.oliveconnect.referentiel.Pressoir;
 import tn.oliveconnect.referentiel.Variete;
+import tn.oliveconnect.sms.MessageEnvoye;
 import tn.oliveconnect.utilisateur.Delegation;
 import tn.oliveconnect.utilisateur.InfosAgriculteur;
 import tn.oliveconnect.utilisateur.Role;
@@ -62,6 +68,9 @@ public abstract class TestAvecComptes {
         // Vidées (et non supprimées) pour garder leurs index : codes uniques, index géographique
         mongoTemplate.remove(new Query(), Variete.class);
         mongoTemplate.remove(new Query(), Pressoir.class);
+        mongoTemplate.remove(new Query(), Notification.class);
+        mongoTemplate.remove(new Query(), MessageEnvoye.class);
+        mongoTemplate.remove(new Query(), CodeReinitialisation.class);
         parametresService.relireDepuisLaBase();
     }
 
@@ -85,6 +94,12 @@ public abstract class TestAvecComptes {
         infos.setDelegation(delegation);
         compte.setAgriculteur(infos);
         return utilisateurRepository.save(compte);
+    }
+
+    /** Textes des SMS simulés envoyés à ce numéro, du plus ancien au plus récent. */
+    protected List<String> smsEnvoyesA(String telephone) {
+        return mongoTemplate.find(Query.query(Criteria.where("telephone").is(telephone)),
+                MessageEnvoye.class).stream().map(MessageEnvoye::texte).toList();
     }
 
     /** Se connecte sur la bonne page selon le rôle et renvoie l'en-tête « Bearer ... » à joindre aux requêtes. */

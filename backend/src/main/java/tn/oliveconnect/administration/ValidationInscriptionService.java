@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import tn.oliveconnect.common.exception.ErreurMetierException;
 import tn.oliveconnect.compteur.CompteurService;
+import tn.oliveconnect.notification.CategorieNotification;
+import tn.oliveconnect.notification.NotificationService;
+import tn.oliveconnect.notification.NouvelleNotification;
+import tn.oliveconnect.sms.MotifSms;
 import tn.oliveconnect.utilisateur.InfosAgriculteur;
 import tn.oliveconnect.utilisateur.Role;
 import tn.oliveconnect.utilisateur.StatutCompte;
@@ -19,6 +23,8 @@ import tn.oliveconnect.utilisateur.UtilisateurRepository;
  * - Accepter : le compte devient actif et reçoit son numéro d'adhérent (ADH-0001, ADH-0002…).
  * - Refuser : le compte reste fermé, avec un motif obligatoire.
  * Un refus peut être annulé plus tard en acceptant l'inscription.
+ * Dans les deux cas l'agriculteur reçoit un SMS, comme annoncé à l'inscription ; s'il est accepté,
+ * un message de bienvenue l'attend aussi dans l'application.
  */
 @Service
 @RequiredArgsConstructor
@@ -27,6 +33,7 @@ public class ValidationInscriptionService {
     private final UtilisateurRepository utilisateurRepository;
     private final GestionComptesService gestionComptesService;
     private final CompteurService compteurService;
+    private final NotificationService notificationService;
     private final Clock horloge;
 
     public CompteAdministration accepter(String id, String administrateurId) {
@@ -44,6 +51,12 @@ public class ValidationInscriptionService {
         noterTraitement(infos, administrateurId);
         agriculteur.setStatut(StatutCompte.ACTIF);
         utilisateurRepository.save(agriculteur);
+
+        notificationService.envoyerSmsSeul(agriculteur, "OliveConnect : bonjour " + agriculteur.getPrenom()
+                + ", votre compte est activé. Numéro d'adhérent : " + infos.getNumeroAdherent() + ".", MotifSms.INSCRIPTION_ACCEPTEE);
+        notificationService.notifierPersonne(agriculteur.getId(), NouvelleNotification.simple(CategorieNotification.COMPTE,
+                "Bienvenue sur OliveConnect", "Votre compte a été activé. Votre numéro d'adhérent : " + infos.getNumeroAdherent() + ".",
+                "/agriculteur/vergers"));
         return CompteAdministration.depuis(agriculteur);
     }
 
@@ -58,6 +71,8 @@ public class ValidationInscriptionService {
         noterTraitement(infos, administrateurId);
         agriculteur.setStatut(StatutCompte.REFUSE);
         utilisateurRepository.save(agriculteur);
+        notificationService.envoyerSmsSeul(agriculteur, "OliveConnect : votre demande d'inscription n'a pas été acceptée. Motif : "
+                + infos.getMotifRefus(), MotifSms.INSCRIPTION_REFUSEE);
         return CompteAdministration.depuis(agriculteur);
     }
 

@@ -1,18 +1,21 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, output, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { catchError, of, switchMap } from 'rxjs';
 
 import { erreursParChamp, texteErreur } from '../../../core/erreurs/message-erreur';
 import { Position, SelecteurPosition } from '../../../shared/carte/selecteur-position';
+import { reduirePhoto } from '../../../shared/photos/reduire-photo';
 import { Signalement, TYPES_SIGNALEMENT, TypeAlerte } from '../agriculteur.modeles';
 import { AgriculteurService } from '../agriculteur.service';
 
 type NomChamp = 'vergerId' | 'type' | 'latitude' | 'description';
 
 /**
- * « Signaler maturité ou problème » : type, verger, position (GPS proposé) et description.
+ * « Signaler maturité ou problème » : type, verger, position (GPS proposé), description et photo facultative.
  * Le verger choisi apparaît sur la carte en gris, pour situer la position du signalement.
+ * La photo est réduite sur le téléphone, puis envoyée juste après le signalement.
  */
 @Component({
   selector: 'app-formulaire-signalement',
@@ -60,6 +63,22 @@ type NomChamp = 'vergerId' | 'type' | 'latitude' | 'description';
         @if (erreur('description'); as message) { <p class="message-champ">{{ message }}</p> }
       </div>
 
+      <div class="flex flex-col gap-2">
+        <p class="etiquette">Photo <span class="font-normal text-gray-500">(facultative)</span></p>
+        @if (apercu(); as adresse) {
+          <div class="flex items-center gap-4">
+            <img [src]="adresse" alt="Photo jointe" class="h-24 w-24 rounded-lg object-cover" />
+            <button type="button" class="text-sm font-semibold text-red-700 hover:underline" (click)="retirerPhoto()">Retirer la photo</button>
+          </div>
+        } @else {
+          <label class="bouton-secondaire cursor-pointer self-start">
+            📷 Ajouter une photo
+            <input type="file" accept="image/*" capture="environment" class="sr-only" (change)="choisirPhoto($event)" />
+          </label>
+        }
+        @if (erreurPhoto(); as message) { <p class="message-champ">{{ message }}</p> }
+      </div>
+
       @if (messageErreur(); as message) {
         <p role="alert" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
       }
@@ -70,10 +89,10 @@ type NomChamp = 'vergerId' | 'type' | 'latitude' | 'description';
     </form>
   `,
 })
-export class FormulaireSignalement {
+export class FormulaireSignalement implements OnDestroy {
   private readonly service = inject(AgriculteurService);
 
-  readonly envoye = output<Signalement>();
+  readonly envoye = output<Signalement & { photoNonEnvoyee?: boolean }>();
   readonly annule = output<void>();
 
   readonly types = TYPES_SIGNALEMENT;
@@ -98,6 +117,38 @@ export class FormulaireSignalement {
   readonly envoiEnCours = signal(false);
   readonly messageErreur = signal<string | null>(null);
   readonly erreursServeur = signal<Record<string, string>>({});
+
+  /** Photo déjà réduite, prête à partir, et son aperçu. */
+  private photo: Blob | null = null;
+  readonly apercu = signal<string | null>(null);
+  readonly erreurPhoto = signal<string | null>(null);
+
+  async choisirPhoto(evenement: Event): Promise<void> {
+    const fichier = (evenement.target as HTMLInputElement).files?.[0];
+    this.erreurPhoto.set(null);
+    if (!fichier) {
+      return;
+    }
+    try {
+      this.photo = await reduirePhoto(fichier);
+      this.apercu.set(URL.createObjectURL(this.photo));
+    } catch (erreur) {
+      this.erreurPhoto.set((erreur as Error).message);
+    }
+  }
+
+  retirerPhoto(): void {
+    const adresse = this.apercu();
+    if (adresse) {
+      URL.revokeObjectURL(adresse);
+    }
+    this.photo = null;
+    this.apercu.set(null);
+  }
+
+  ngOnDestroy(): void {
+    this.retirerPhoto();
+  }
 
   positionChoisie(position: Position): void {
     this.formulaire.patchValue({ latitude: position.latitude, longitude: position.longitude });
@@ -137,6 +188,14 @@ export class FormulaireSignalement {
         longitude: saisie.longitude!,
         description: saisie.description!.trim(),
       })
+      // Le signalement d'abord, puis sa photo : si la photo échoue (réseau), le signalement est tout de même reçu
+      .pipe(
+        switchMap((signalement) =>
+          this.photo
+            ? this.service.joindrePhoto(signalement.id, this.photo).pipe(catchError(() => of({ ...signalement, photoNonEnvoyee: true })))
+            : of(signalement),
+        ),
+      )
       .subscribe({
         next: (signalement) => this.envoye.emit(signalement),
         error: (erreur: HttpErrorResponse) => {

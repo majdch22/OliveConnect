@@ -14,4 +14,6 @@ public interface DemandeRecolteRepository extends MongoRepository<DemandeRecolte
     /** Une demande active existe-t-elle déjà pour ce verger et cette date (en ignorant la demande modifiée) ? */
     boolean existsByVergerIdAndDateSouhaiteeAndStatutInAndIdNot(String vergerId, LocalDate date,
             Collection<StatutDemande> statuts, String id);
+
+    boolean existsByVergerId(String vergerId);
 }

@@ -1,4 +1,7 @@
 <form [formGroup]="formulaire" (ngSubmit)="envoyer()" novalidate class="flex flex-col gap-4">
+  @if (information) {
+    <p role="status" class="rounded-lg bg-olive-50 px-3 py-3 text-sm text-olive-900">⏱ {{ information }}</p>
+  }
   <div class="flex flex-col gap-1">
     <label for="identifiant" class="etiquette">E-mail ou téléphone</label>
     <input
@@ -37,6 +40,8 @@
     @if (champManquant('motDePasse')) {
       <p class="message-champ">Saisissez votre mot de passe.</p>
     }
+    <a routerLink="/mot-de-passe-oublie" [queryParams]="espace() === 'ADMINISTRATION' ? { espace: 'administration' } : {}"
+      class="self-end text-sm font-semibold text-olive-700 hover:underline">Mot de passe oublié ?</a>
   </div>
 
   @if (messageErreur(); as message) {

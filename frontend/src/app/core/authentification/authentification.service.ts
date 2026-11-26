@@ -38,11 +38,14 @@ export class AuthentificationService {
     }
   }
 
-  /** Ferme la session et renvoie vers la page de connexion du rôle. */
-  deconnecter(): void {
+  /**
+   * Ferme la session et renvoie vers la page de connexion du rôle.
+   * @param sessionExpiree vrai quand le serveur a refusé le jeton : la page de connexion l'explique
+   */
+  deconnecter(sessionExpiree = false): void {
     const role = this.sessionCourante()?.role ?? null;
     this.effacerSession();
-    this.router.navigateByUrl(pageDeConnexion(role));
+    this.router.navigate([pageDeConnexion(role)], { queryParams: sessionExpiree ? { sessionExpiree: 1 } : {} });
   }
 
   /** Jeton à joindre aux requêtes, ou null s'il est absent ou expiré. */

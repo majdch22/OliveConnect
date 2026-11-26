@@ -1,0 +1,83 @@
+<div class="min-h-screen bg-olive-50">
+  <header class="border-b border-gray-200 bg-white">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+      <a routerLink="/" aria-label="Accueil OliveConnect"><app-logo /></a>
+      <a [routerLink]="pageDeConnexion" class="text-sm font-semibold text-olive-700 hover:underline">← Retour à la connexion</a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-lg px-4 py-10 sm:py-16">
+    <div class="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+      <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">Mot de passe oublié ?</h1>
+      <p class="mt-2 text-gray-600">Recevez un code par SMS, puis choisissez un nouveau mot de passe.</p>
+
+      <!-- Avancement en trois étapes -->
+      <ol class="mt-6 grid grid-cols-3 gap-2 text-center text-xs font-semibold" aria-label="Étapes">
+        @for (libelle of ['Recevoir un code', 'Saisir le code', 'Nouveau mot de passe']; track libelle; let numero = $index) {
+          <li class="rounded-lg px-2 py-2" [class]="etape() === numero + 1 ? 'bg-olive-700 text-white' : etape() > numero + 1 ? 'bg-olive-100 text-olive-900' : 'bg-gray-100 text-gray-500'">
+            {{ numero + 1 }}. {{ libelle }}
+          </li>
+        }
+      </ol>
+
+      @if (information(); as message) {
+        <p role="status" class="mt-6 rounded-lg bg-olive-50 px-4 py-3 text-sm text-olive-900">✔ {{ message }} Il est valable 10 minutes.</p>
+      }
+      @if (messageErreur(); as message) {
+        <p role="alert" class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+      }
+
+      @switch (etape()) {
+        @case (1) {
+          <form (ngSubmit)="demanderCode()" novalidate class="mt-6 flex flex-col gap-5">
+            <div class="flex flex-col gap-1">
+              <label for="oubli-identifiant" class="etiquette">Téléphone ou e-mail du compte</label>
+              <input id="oubli-identifiant" [formControl]="identifiant" autocomplete="username" placeholder="+216 98 123 412" class="champ-saisie" [class.en-erreur]="erreur('identifiant')" />
+              @if (erreur('identifiant'); as message) { <p class="message-champ">{{ message }}</p> }
+            </div>
+            <button type="submit" class="bouton-principal" [disabled]="envoiEnCours()">{{ envoiEnCours() ? 'Envoi…' : 'Envoyer le code' }}</button>
+          </form>
+        }
+        @case (2) {
+          <form (ngSubmit)="verifierCode()" novalidate class="mt-6 flex flex-col gap-5">
+            <div class="flex flex-col gap-1">
+              <label for="oubli-code" class="etiquette">Code reçu par SMS</label>
+              <input id="oubli-code" [formControl]="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••"
+                class="champ-saisie text-center font-mono text-2xl tracking-[0.5em]" [class.en-erreur]="erreur('code')" />
+              @if (erreur('code'); as message) { <p class="message-champ">{{ message }}</p> }
+            </div>
+            <button type="submit" class="bouton-principal" [disabled]="envoiEnCours()">Vérifier le code</button>
+            <p class="text-center text-sm text-gray-600">
+              Pas reçu ?
+              @if (attenteRenvoi() > 0) {
+                Renvoyer dans {{ texteAttente() }}
+              } @else {
+                <button type="button" class="font-semibold text-olive-700 hover:underline" (click)="demanderCode()">Renvoyer un code</button>
+              }
+            </p>
+            <p class="text-center text-xs text-gray-500">Code faux 3 fois ou expiré : demandez-en un nouveau.</p>
+          </form>
+        }
+        @case (3) {
+          <form [formGroup]="nouveau" (ngSubmit)="reinitialiser()" novalidate class="mt-6 flex flex-col gap-5">
+            <div class="flex flex-col gap-1">
+              <label for="oubli-nouveau" class="etiquette">Nouveau mot de passe</label>
+              <input id="oubli-nouveau" type="password" autocomplete="new-password" formControlName="nouveauMotDePasse" class="champ-saisie" [class.en-erreur]="erreur('nouveauMotDePasse')" />
+              @if (erreur('nouveauMotDePasse'); as message) {
+                <p class="message-champ">{{ message }}</p>
+              } @else {
+                <p class="text-xs text-gray-500">Robustesse : <span class="font-semibold">{{ robustesse() }}</span> · 8 caractères minimum, une lettre et un chiffre</p>
+              }
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="oubli-confirmation" class="etiquette">Confirmer le mot de passe</label>
+              <input id="oubli-confirmation" type="password" autocomplete="new-password" formControlName="confirmation" class="champ-saisie" [class.en-erreur]="erreur('confirmation')" />
+              @if (erreur('confirmation'); as message) { <p class="message-champ">{{ message }}</p> }
+            </div>
+            <button type="submit" class="bouton-principal" [disabled]="envoiEnCours()">Réinitialiser et se connecter</button>
+          </form>
+        }
+      }
+    </div>
+  </main>
+</div>

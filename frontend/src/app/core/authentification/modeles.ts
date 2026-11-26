@@ -44,6 +44,16 @@ export const ESPACE_PAR_ROLE: Record<Role, string> = {
   ADMINISTRATEUR: '/administration',
 };
 
+/** Libellé de chaque rôle, tel qu'affiché à l'écran. */
+export const LIBELLES_ROLE: Record<Role, string> = {
+  AGRICULTEUR: 'Agriculteur',
+  RESPONSABLE_COLLECTE: 'Responsable de collecte',
+  CHEF_EQUIPE: "Chef d'équipe de récolte",
+  RESPONSABLE_LOGISTIQUE: 'Responsable logistique',
+  RESPONSABLE_PRESSOIR: 'Responsable du pressoir',
+  ADMINISTRATEUR: 'Administrateur',
+};
+
 /** Page de connexion à utiliser pour un rôle donné. */
 export function pageDeConnexion(role: Role | null): string {
   return role === 'ADMINISTRATEUR' ? '/administration/connexion' : '/connexion';

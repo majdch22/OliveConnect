@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { switchMap } from 'rxjs';
@@ -32,6 +32,7 @@ const COULEURS_STATUT: Record<Signalement['statut'], string> = {
     @if (dernierEnvoi(); as envoi) {
       <div role="status" class="mt-5 rounded-lg px-4 py-3 text-sm shadow-sm" [class]="envoi.loinDuVerger ? 'bg-amber-50 text-amber-900' : 'bg-white text-olive-900'">
         ✓ Signalement {{ envoi.numero }} envoyé.
+        @if (envoi.photoNonEnvoyee) { La photo n’a pas pu partir : réessayez plus tard depuis un meilleur réseau. }
         @if (envoi.loinDuVerger) {
           La position est à {{ envoi.distanceAuVergerMetres | number }} m du verger : la coopérative le vérifiera.
         }
@@ -52,6 +53,13 @@ const COULEURS_STATUT: Record<Signalement['statut'], string> = {
             @if (signalement.loinDuVerger) { · <span class="text-amber-800">à {{ signalement.distanceAuVergerMetres | number }} m du verger</span> }
           </p>
           <p class="mt-3 text-gray-700">« {{ signalement.description }} »</p>
+          @if (signalement.avecPhoto) {
+            @if (photos()[signalement.id]; as adresse) {
+              <img [src]="adresse" alt="Photo du signalement" class="mt-3 h-32 w-full rounded-lg object-cover sm:w-48" />
+            } @else {
+              <button type="button" class="mt-3 text-sm font-semibold text-olive-700 hover:underline" (click)="voirPhoto(signalement.id)">📷 Voir la photo</button>
+            }
+          }
         </li>
       } @empty {
         <li class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-gray-500 lg:col-span-2">
@@ -67,7 +75,7 @@ const COULEURS_STATUT: Record<Signalement['statut'], string> = {
     }
   `,
 })
-export class SignalementsAgriculteur {
+export class SignalementsAgriculteur implements OnDestroy {
   private readonly service = inject(AgriculteurService);
   readonly couleurs = COULEURS_STATUT;
 
@@ -78,13 +86,24 @@ export class SignalementsAgriculteur {
 
   /** Ouvert d'office quand on arrive depuis l'accueil (?nouveau=1). */
   readonly formulaireOuvert = signal(inject(ActivatedRoute).snapshot.queryParamMap.has('nouveau'));
-  readonly dernierEnvoi = signal<Signalement | null>(null);
+  readonly dernierEnvoi = signal<(Signalement & { photoNonEnvoyee?: boolean }) | null>(null);
+
+  /** Photos déjà téléchargées (adresse en mémoire du navigateur), par signalement. */
+  readonly photos = signal<Record<string, string>>({});
+
+  voirPhoto(id: string): void {
+    this.service.photo(id).subscribe((image) => this.photos.update((deja) => ({ ...deja, [id]: URL.createObjectURL(image) })));
+  }
+
+  ngOnDestroy(): void {
+    Object.values(this.photos()).forEach((adresse) => URL.revokeObjectURL(adresse));
+  }
 
   icone(signalement: Signalement): string {
     return TYPES_SIGNALEMENT.find((type) => type.code === signalement.type)?.icone ?? '';
   }
 
-  apresEnvoi(signalement: Signalement): void {
+  apresEnvoi(signalement: Signalement & { photoNonEnvoyee?: boolean }): void {
     this.formulaireOuvert.set(false);
     this.dernierEnvoi.set(signalement);
     this.rechargement.update((valeur) => valeur + 1);

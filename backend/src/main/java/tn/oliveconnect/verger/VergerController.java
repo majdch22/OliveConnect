@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
  * POST /api/agriculteur/vergers                     ajout
  * PUT  /api/agriculteur/vergers/{id}                modification
  * POST /api/agriculteur/vergers/{id}/archiver       archivage (ou /restaurer)
+ * DELETE /api/agriculteur/vergers/{id}              suppression d'un verger jamais utilisé
  * GET  /api/agriculteur/vergers/{id}/estimation     quantité attendue (kg), proposée dans « Déclarer une récolte »
  */
 @RestController
@@ -59,6 +61,12 @@ public class VergerController {
     @PostMapping("/{id}/restaurer")
     public VergerReponse restaurer(@PathVariable String id, @AuthenticationPrincipal Jwt agriculteur) {
         return vergerService.changerArchivage(id, false, agriculteur.getSubject());
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void supprimer(@PathVariable String id, @AuthenticationPrincipal Jwt agriculteur) {
+        vergerService.supprimer(id, agriculteur.getSubject());
     }
 
     /** Réponse : { "quantiteKg": 13500 }. */

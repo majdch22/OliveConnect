@@ -13,13 +13,27 @@
   <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
 }
 
-@if (nombreArchives() > 0) {
-  <label class="mt-5 flex items-center gap-2 text-sm text-gray-700">
-    <input type="checkbox" class="h-4 w-4 accent-olive-700" [checked]="afficherArchives()" (change)="afficherArchives.set($any($event.target).checked)" />
-    Afficher les vergers archivés ({{ nombreArchives() }})
-  </label>
-}
+<div class="mt-5 flex flex-wrap items-center justify-between gap-4">
+  <div class="inline-flex rounded-lg border border-gray-300 bg-white p-1" role="group" aria-label="Affichage">
+    <button type="button" class="rounded-md px-4 py-1.5 text-sm font-semibold" [attr.aria-pressed]="vue() === 'liste'"
+      [class]="vue() === 'liste' ? 'bg-olive-700 text-white' : 'text-gray-700'" (click)="vue.set('liste')">Liste</button>
+    <button type="button" class="rounded-md px-4 py-1.5 text-sm font-semibold" [attr.aria-pressed]="vue() === 'carte'"
+      [class]="vue() === 'carte' ? 'bg-olive-700 text-white' : 'text-gray-700'" (click)="vue.set('carte')">Carte</button>
+  </div>
+  @if (nombreArchives() > 0) {
+    <label class="flex items-center gap-2 text-sm text-gray-700">
+      <input type="checkbox" class="h-4 w-4 accent-olive-700" [checked]="afficherArchives()" (change)="afficherArchives.set($any($event.target).checked)" />
+      Afficher les vergers archivés ({{ nombreArchives() }})
+    </label>
+  }
+</div>
 
+@if (vue() === 'carte') {
+  <div class="mt-5">
+    <app-carte-vergers [vergers]="vergersAffiches()" (choisi)="panneau.set($event)" />
+    <p class="mt-2 text-sm text-gray-500">Touchez un verger pour l'ouvrir.</p>
+  </div>
+} @else {
 <ul class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
   @for (verger of vergersAffiches(); track verger.id) {
     <li class="flex flex-col rounded-2xl border border-gray-200 bg-white p-5" [class.opacity-60]="verger.archive">
@@ -33,6 +47,12 @@
       <p class="mt-2 text-sm text-gray-600">
         {{ verger.nomVariete }} · {{ verger.superficieHa | number: '1.0-1' }} ha · {{ verger.nombreArbres | number }} arbres · {{ verger.libelleDelegation }}
       </p>
+
+      @if (verger.signalementsNonResolus > 0) {
+        <a routerLink="/agriculteur/signalements" class="mt-3 inline-flex self-start rounded-lg bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-900 hover:bg-amber-100">
+          ⚠ {{ verger.signalementsNonResolus }} signalement{{ verger.signalementsNonResolus > 1 ? 's' : '' }} en attente de réponse
+        </a>
+      }
 
       <!-- Maturité mesurée par les capteurs -->
       <div class="mt-4">
@@ -64,6 +84,7 @@
     </li>
   }
 </ul>
+}
 
 @if (panneau()) {
   <app-panneau-lateral
@@ -81,6 +102,9 @@
         <button type="button" class="bouton-secondaire mt-3 w-full" (click)="changerArchivage(verger)">
           {{ verger.archive ? 'Restaurer le verger' : 'Archiver le verger' }}
         </button>
+        <p class="mt-6 text-sm text-gray-600">Ajouté par erreur ? Un verger sans aucune demande ni aucun signalement peut être supprimé.</p>
+        <button type="button" class="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-red-300 px-6 py-3 font-semibold text-red-700 hover:bg-red-50"
+          (click)="supprimer(verger)">Supprimer le verger</button>
       </div>
     }
   </app-panneau-lateral>

@@ -32,7 +32,8 @@ import tn.oliveconnect.security.ReponsesSecurite;
  * Règles de sécurité du serveur.
  * - Sans état : aucune session serveur, chaque requête porte son jeton d'accès (en-tête Authorization: Bearer).
  *   Pas de cookie de session, donc pas de protection CSRF à activer.
- * - Seules la connexion, l'inscription et l'état de santé sont publiques ; tout le reste exige un jeton valide.
+ * - Seules la connexion, l'inscription, le mot de passe oublié, la carte publique et l'état de santé sont publics ;
+ *   tout le reste exige un jeton valide (pour le temps réel, le jeton est vérifié dans la connexion STOMP).
  * - Jeton vérifié : signature HS256, date d'expiration et émetteur « oliveconnect ».
  * - À chaque requête, le compte est relu en base ({@link LectureCompteConnecte}) : un compte désactivé perd l'accès
  *   immédiatement, et son rôle devient une autorité Spring « ROLE_... », utilisable avec @PreAuthorize.
@@ -52,7 +53,11 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(acces -> acces
                         .requestMatchers(HttpMethod.POST, "/api/connexion", "/api/administration/connexion").permitAll()
                         .requestMatchers("/api/inscription", "/api/inscription/delegations").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/mot-de-passe-oublie/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        // Ouverture du WebSocket : le jeton est vérifié ensuite, dans le message STOMP de connexion
+                        .requestMatchers("/ws").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(serveur -> serveur
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(lectureCompteConnecte))

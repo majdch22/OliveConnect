@@ -16,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -81,6 +82,12 @@ public class GestionnaireErreurs {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ReponseErreur> methodeNonPermise(HttpRequestMethodNotSupportedException exception) {
         return reponse(HttpStatus.METHOD_NOT_ALLOWED, "METHODE_NON_PERMISE", "Cette action n'est pas permise à cette adresse.");
+    }
+
+    /** Fichier envoyé trop gros (photo de plus de 5 Mo) : refusé avant même d'arriver au service. */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ReponseErreur> fichierTropGros(MaxUploadSizeExceededException exception) {
+        return reponse(HttpStatus.BAD_REQUEST, "PHOTO_REFUSEE", "La photo dépasse 5 Mo.");
     }
 
     /** Toute autre erreur : écrite dans le journal, message neutre pour l'utilisateur. */

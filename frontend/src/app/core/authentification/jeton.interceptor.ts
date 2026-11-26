@@ -21,7 +21,7 @@ export const jetonInterceptor: HttpInterceptorFn = (requete, suivant) => {
   return suivant(requeteAvecJeton).pipe(
     catchError((erreur: HttpErrorResponse) => {
       if (erreur.status === 401 && !estConnexion) {
-        authentification.deconnecter();
+        authentification.deconnecter(true);
       }
       return throwError(() => erreur);
     }),

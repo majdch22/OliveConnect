@@ -1,4 +1,4 @@
-import { Role } from '../../core/authentification/modeles';
+import { LIBELLES_ROLE, Role } from '../../core/authentification/modeles';
 import { StatutCompte } from '../../shared/ui/badge-statut';
 
 /** Un compte vu par l'administrateur (miroir de CompteAdministration en Java). */
@@ -94,14 +94,10 @@ export interface OptionListe {
 }
 
 /** Rôles proposés dans les filtres et les formulaires, avec leur libellé. */
-export const ROLES: { code: Role; libelle: string }[] = [
-  { code: 'AGRICULTEUR', libelle: 'Agriculteur' },
-  { code: 'RESPONSABLE_COLLECTE', libelle: 'Responsable de collecte' },
-  { code: 'CHEF_EQUIPE', libelle: "Chef d'équipe de récolte" },
-  { code: 'RESPONSABLE_LOGISTIQUE', libelle: 'Responsable logistique' },
-  { code: 'RESPONSABLE_PRESSOIR', libelle: 'Responsable du pressoir' },
-  { code: 'ADMINISTRATEUR', libelle: 'Administrateur' },
-];
+export const ROLES: { code: Role; libelle: string }[] = (Object.keys(LIBELLES_ROLE) as Role[]).map((code) => ({
+  code,
+  libelle: LIBELLES_ROLE[code],
+}));
 
 /** États proposés dans le filtre de la liste des utilisateurs. */
 export const STATUTS: { code: StatutCompte; libelle: string }[] = [

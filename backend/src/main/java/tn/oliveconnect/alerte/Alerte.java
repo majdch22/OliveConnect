@@ -51,6 +51,10 @@ public class Alerte {
     private boolean loinDuVerger;
 
     private String description;
+
+    /** Nom du fichier de la photo jointe (dossier des photos du serveur), ou null s'il n'y en a pas. */
+    private String photo;
+
     private StatutAlerte statut;
     private Instant dateCreation;
 }

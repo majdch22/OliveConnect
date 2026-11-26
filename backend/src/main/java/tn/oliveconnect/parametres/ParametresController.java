@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import tn.oliveconnect.utilisateur.UtilisateurRepository;
 
 /**
  * Paramètres de la plateforme (réservés à l'administrateur).
@@ -28,7 +27,6 @@ import tn.oliveconnect.utilisateur.UtilisateurRepository;
 public class ParametresController {
 
     private final ParametresService parametresService;
-    private final UtilisateurRepository utilisateurRepository;
 
     /** Paramètres et liste des fréquences proposées dans les menus déroulants. */
     public record ParametresReponse(Parametres parametres, List<Frequence> frequencesPossibles) {
@@ -44,10 +42,7 @@ public class ParametresController {
     @PutMapping
     public ParametresReponse modifier(@Valid @RequestBody ParametresRequete requete,
             @AuthenticationPrincipal Jwt administrateur) {
-        String auteur = utilisateurRepository.findById(administrateur.getSubject())
-                .map(compte -> compte.getNomComplet())
-                .orElse("Administrateur");
-        return reponse(parametresService.modifier(requete, auteur));
+        return reponse(parametresService.modifierPar(requete, administrateur.getSubject()));
     }
 
     private static ParametresReponse reponse(Parametres parametres) {

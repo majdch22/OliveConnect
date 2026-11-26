@@ -4,6 +4,7 @@ import { afterNextRender, Component, computed, effect, ElementRef, inject, OnDes
 import * as L from 'leaflet';
 
 import { texteErreur } from '../../../core/erreurs/message-erreur';
+import { echapperHtml } from '../../../shared/carte/echapper-html';
 import { DelegationSurCarte, DonneesCarte, Pressoir } from '../administration.modeles';
 import { AdministrationService } from '../administration.service';
 
@@ -140,12 +141,12 @@ export class CarteAdministration implements OnDestroy {
 
   private texteDelegation(delegation: DelegationSurCarte): string {
     const enAttente = delegation.inscriptionsEnAttente > 0 ? ` · ${delegation.inscriptionsEnAttente} inscription(s) en attente` : '';
-    return `<strong>${echapper(delegation.libelle)}</strong><br>${delegation.agriculteursActifs} agriculteur(s) actif(s)${enAttente}`;
+    return `<strong>${echapperHtml(delegation.libelle)}</strong><br>${delegation.agriculteursActifs} agriculteur(s) actif(s)${enAttente}`;
   }
 
   private fichePressoir(pressoir: Pressoir): string {
-    return `<strong>${echapper(pressoir.nom)}</strong> <span style="color:#6b7280">${echapper(pressoir.code)}</span><br>
-      ${echapper(pressoir.libelleDelegation)}<br>
+    return `<strong>${echapperHtml(pressoir.nom)}</strong> <span style="color:#6b7280">${echapperHtml(pressoir.code)}</span><br>
+      ${echapperHtml(pressoir.libelleDelegation)}<br>
       Capacité : ${pressoir.capaciteJournaliereKg.toLocaleString('fr-FR')} kg par jour<br>
       Responsable(s) rattaché(s) : ${pressoir.nombreResponsables}`;
   }
@@ -160,9 +161,4 @@ export class CarteAdministration implements OnDestroy {
       couche.remove();
     }
   }
-}
-
-/** Les noms viennent de la base : on les échappe avant de les insérer dans les bulles de la carte. */
-function echapper(texte: string): string {
-  return texte.replace(/[&<>"']/g, (caractere) => `&#${caractere.charCodeAt(0)};`);
 }

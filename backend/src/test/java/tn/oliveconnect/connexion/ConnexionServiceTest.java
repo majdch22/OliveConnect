@@ -57,6 +57,8 @@ class ConnexionServiceTest {
     void preparer() {
         when(parametresService.tentativesAvantBlocage()).thenReturn(5);
         when(parametresService.dureeBlocage()).thenReturn(Duration.ofMinutes(15));
+        // La recherche par e-mail ou téléphone est une méthode du dépôt lui-même : on garde son vrai fonctionnement
+        when(utilisateurRepository.chercherParIdentifiant(any())).thenCallRealMethod();
         Clock horlogeFixe = Clock.fixed(MAINTENANT, ZoneId.of("Africa/Tunis"));
         connexionService = new ConnexionService(utilisateurRepository, encodeurMotDePasse, jetonService,
                 parametresService, horlogeFixe);

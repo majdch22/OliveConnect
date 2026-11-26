@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import tn.oliveconnect.common.exception.ErreurMetierException;
 import tn.oliveconnect.configuration.OliveConnectProperties;
+import tn.oliveconnect.utilisateur.Utilisateur;
+import tn.oliveconnect.utilisateur.UtilisateurRepository;
 
 /**
  * Lecture et modification des paramètres.
@@ -24,6 +26,7 @@ import tn.oliveconnect.configuration.OliveConnectProperties;
 public class ParametresService {
 
     private final ParametresRepository parametresRepository;
+    private final UtilisateurRepository utilisateurRepository;
     private final OliveConnectProperties proprietes;
     private final Clock horloge;
 
@@ -37,6 +40,12 @@ public class ParametresService {
             enMemoire.set(parametres);
         }
         return parametres;
+    }
+
+    /** Enregistre les paramètres au nom de l'administrateur connecté (son nom est noté comme auteur). */
+    public Parametres modifierPar(ParametresRequete requete, String administrateurId) {
+        String auteur = utilisateurRepository.findById(administrateurId).map(Utilisateur::getNomComplet).orElse("Administrateur");
+        return modifier(requete, auteur);
     }
 
     public Parametres modifier(ParametresRequete requete, String auteur) {

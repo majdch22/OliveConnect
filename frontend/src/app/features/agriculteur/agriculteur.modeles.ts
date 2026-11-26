@@ -18,6 +18,8 @@ export interface Verger {
   statutRecolte: StatutRecolte;
   libelleStatutRecolte: string;
   archive: boolean;
+  /** Signalements du verger qui attendent encore une réponse de la coopérative. */
+  signalementsNonResolus: number;
 }
 
 export interface VergerRequete {
@@ -73,6 +75,7 @@ export interface Signalement {
   distanceAuVergerMetres: number;
   loinDuVerger: boolean;
   description: string;
+  avecPhoto: boolean;
   statut: 'OUVERTE' | 'PRISE_EN_CHARGE' | 'RESOLUE';
   libelleStatut: string;
   dateCreation: string;
@@ -84,17 +87,6 @@ export interface SignalementRequete {
   latitude: number;
   longitude: number;
   description: string;
-}
-
-export interface Profil {
-  id: string;
-  prenom: string;
-  nom: string;
-  email: string | null;
-  telephone: string;
-  libelleRole: string;
-  numeroAdherent: string | null;
-  libelleDelegation: string | null;
 }
 
 /** Les étapes normales d'une demande, dans l'ordre, pour la frise d'avancement. */

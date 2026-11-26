@@ -8,6 +8,7 @@ import { texteErreur } from '../../../core/erreurs/message-erreur';
 import { GraphiqueTemporel, PointTemporel } from '../../../shared/graphiques/graphique-temporel';
 import { Echantillon } from '../administration.modeles';
 import { AdministrationService } from '../administration.service';
+import { MessagesEnvoyes } from './messages-envoyes';
 
 /** Intervalle de rafraîchissement automatique de la page. */
 const RAFRAICHISSEMENT_MS = 10_000;
@@ -19,7 +20,7 @@ const RAFRAICHISSEMENT_MS = 10_000;
  */
 @Component({
   selector: 'app-supervision-administration',
-  imports: [DatePipe, DecimalPipe, NgTemplateOutlet, GraphiqueTemporel],
+  imports: [DatePipe, DecimalPipe, NgTemplateOutlet, GraphiqueTemporel, MessagesEnvoyes],
   templateUrl: './supervision-administration.html',
 })
 export class SupervisionAdministration {
