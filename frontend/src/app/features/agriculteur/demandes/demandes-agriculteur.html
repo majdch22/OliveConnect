@@ -37,7 +37,7 @@
               @if (demande.type === 'URGENTE') { <span class="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-semibold text-amber-800">Urgente</span> }
             </p>
             <p class="text-lg font-bold text-gray-900">{{ demande.nomVerger }}</p>
-            <p class="text-sm text-gray-600">{{ demande.dateSouhaitee | date: 'EEEE d MMMM y' }} · {{ demande.quantiteEstimeeKg | number }} kg estimés</p>
+            <p class="text-sm text-gray-600">{{ (demande.datePlanifiee ?? demande.dateSouhaitee) | date: 'EEEE d MMMM y' }} · {{ demande.quantiteEstimeeKg | number }} kg estimés</p>
           </div>
           <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold" [class]="couleurs[demande.statut]">{{ demande.libelleStatut }}</span>
         </div>
@@ -79,6 +79,16 @@
         <div><dt class="text-gray-500">Quantité estimée</dt><dd class="mt-1 font-medium text-gray-900">{{ demande.quantiteEstimeeKg | number }} kg</dd></div>
         @if (demande.commentaire) {
           <div class="col-span-2"><dt class="text-gray-500">Commentaire</dt><dd class="mt-1 text-gray-900">{{ demande.commentaire }}</dd></div>
+        }
+        @if (demande.datePlanifiee) {
+          <div class="col-span-2"><dt class="text-gray-500">Collecte planifiée</dt><dd class="mt-1 font-medium text-olive-900">{{ demande.datePlanifiee | date: 'EEEE d MMMM y' }} · tournée {{ demande.numeroTournee }}</dd></div>
+        }
+        @if (demande.poidsRecuKg !== null) {
+          <div class="col-span-2 rounded-lg bg-olive-50 px-4 py-3"><dt class="text-olive-900">Résultat au pressoir</dt>
+            <dd class="mt-1 font-semibold text-olive-900">{{ demande.poidsRecuKg | number }} kg · acidité {{ demande.aciditeMoyenne | number: '1.1-2' }} % · {{ demande.libelleCategorieQualite }}</dd></div>
+        }
+        @if (demande.motifRejet) {
+          <div class="col-span-2"><dt class="text-gray-500">Motif de la coopérative</dt><dd class="mt-1 text-gray-900">{{ demande.motifRejet }}</dd></div>
         }
         @if (demande.motifAnnulation) {
           <div class="col-span-2"><dt class="text-gray-500">Motif de l'annulation</dt><dd class="mt-1 text-gray-900">{{ demande.motifAnnulation }}</dd></div>

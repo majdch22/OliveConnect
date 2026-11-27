@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import tn.oliveconnect.common.Distances;
 import tn.oliveconnect.common.exception.ErreurMetierException;
 import tn.oliveconnect.compteur.CompteurService;
 import tn.oliveconnect.notification.CategorieNotification;
@@ -30,19 +31,21 @@ import tn.oliveconnect.verger.VergerService;
 @RequiredArgsConstructor
 public class AlerteService {
 
-    private static final double RAYON_TERRE_METRES = 6_371_000;
-
     /** Un signalement tel qu'affiché à l'agriculteur. */
     public record AlerteReponse(String id, String numero, String vergerId, String nomVerger, TypeAlerte type,
             String libelleType, double latitude, double longitude, int distanceAuVergerMetres, boolean loinDuVerger,
-            String description, boolean avecPhoto, StatutAlerte statut, String libelleStatut, Instant dateCreation) {
+            String description, boolean avecPhoto, StatutAlerte statut, String libelleStatut, Instant dateCreation,
+            String reponseCooperative) {
 
         public static AlerteReponse depuis(Alerte alerte) {
+            // Dernier commentaire laissé par la coopérative : la réponse que l'agriculteur voit sous son signalement
+            String reponse = alerte.getTraitements().reversed().stream().map(Alerte.Traitement::commentaire)
+                    .filter(commentaire -> commentaire != null && !commentaire.isBlank()).findFirst().orElse(null);
             return new AlerteReponse(alerte.getId(), alerte.getNumero(), alerte.getVergerId(), alerte.getNomVerger(),
                     alerte.getType(), alerte.getType().getLibelle(), alerte.getPosition().getY(), alerte.getPosition().getX(),
                     alerte.getDistanceAuVergerMetres(), alerte.isLoinDuVerger(), alerte.getDescription(), alerte.getPhoto() != null,
                     alerte.getStatut(),
-                    alerte.getStatut().getLibelle(), alerte.getDateCreation());
+                    alerte.getStatut().getLibelle(), alerte.getDateCreation(), reponse);
         }
     }
 
@@ -91,10 +94,6 @@ public class AlerteService {
 
     /** Distance à vol d'oiseau entre deux points GPS (formule de haversine), en mètres. */
     static double distanceMetres(double latitude1, double longitude1, double latitude2, double longitude2) {
-        double ecartLatitude = Math.toRadians(latitude2 - latitude1);
-        double ecartLongitude = Math.toRadians(longitude2 - longitude1);
-        double a = Math.pow(Math.sin(ecartLatitude / 2), 2)
-                + Math.cos(Math.toRadians(latitude1)) * Math.cos(Math.toRadians(latitude2)) * Math.pow(Math.sin(ecartLongitude / 2), 2);
-        return 2 * RAYON_TERRE_METRES * Math.asin(Math.sqrt(a));
+        return Distances.metres(latitude1, longitude1, latitude2, longitude2);
     }
 }

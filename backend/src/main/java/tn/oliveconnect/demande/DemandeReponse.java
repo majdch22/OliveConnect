@@ -20,6 +20,12 @@ public record DemandeReponse(
         boolean modifiable,
         Instant dateSoumission,
         String motifAnnulation,
+        String motifRejet,
+        String numeroTournee,
+        LocalDate datePlanifiee,
+        Integer poidsRecuKg,
+        Double aciditeMoyenne,
+        String libelleCategorieQualite,
         List<Etape> historique) {
 
     /** Un changement d'état, en toutes lettres. */
@@ -36,6 +42,8 @@ public record DemandeReponse(
                 demande.getType(), demande.getType().getLibelle(), demande.getDateSouhaitee(),
                 demande.getQuantiteEstimeeKg(), demande.getCommentaire(), demande.getStatut(),
                 demande.getStatut().getLibelle(), demande.estModifiable(), demande.getDateSoumission(),
-                demande.getMotifAnnulation(), etapes);
+                demande.getMotifAnnulation(), demande.getMotifRejet(), demande.getNumeroTournee(), demande.getDatePlanifiee(),
+                demande.getPoidsRecuKg(), demande.getAciditeMoyenne(),
+                demande.getCategorieQualite() == null ? null : demande.getCategorieQualite().getLibelle(), etapes);
     }
 }

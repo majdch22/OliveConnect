@@ -53,6 +53,9 @@ const COULEURS_STATUT: Record<Signalement['statut'], string> = {
             @if (signalement.loinDuVerger) { · <span class="text-amber-800">à {{ signalement.distanceAuVergerMetres | number }} m du verger</span> }
           </p>
           <p class="mt-3 text-gray-700">« {{ signalement.description }} »</p>
+          @if (signalement.reponseCooperative) {
+            <p class="mt-2 rounded-lg bg-olive-50 px-3 py-2 text-sm text-olive-900">💬 Coopérative : {{ signalement.reponseCooperative }}</p>
+          }
           @if (signalement.avecPhoto) {
             @if (photos()[signalement.id]; as adresse) {
               <img [src]="adresse" alt="Photo du signalement" class="mt-3 h-32 w-full rounded-lg object-cover sm:w-48" />

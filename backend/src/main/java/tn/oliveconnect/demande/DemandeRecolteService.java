@@ -17,6 +17,7 @@ import tn.oliveconnect.notification.NotificationService;
 import tn.oliveconnect.notification.NouvelleNotification;
 import tn.oliveconnect.parametres.Parametres;
 import tn.oliveconnect.parametres.ParametresService;
+import tn.oliveconnect.tournee.TourneeService;
 import tn.oliveconnect.utilisateur.Role;
 import tn.oliveconnect.utilisateur.Utilisateur;
 import tn.oliveconnect.utilisateur.UtilisateurRepository;
@@ -31,7 +32,9 @@ import tn.oliveconnect.verger.VergerService;
  * - une récolte urgente peut être demandée pour aujourd'hui ; une récolte planifiée à partir de demain ;
  * - la date est comprise dans la campagne de récolte (paramètres de l'administrateur) ;
  * - une seule demande active par verger et par date ;
- * - modification et annulation seulement tant que la collecte n'a pas démarré (états Soumise, Validée, Planifiée).
+ * - modification et annulation seulement tant que la collecte n'a pas démarré (états Soumise, Validée, Planifiée) ;
+ * - une demande planifiée annulée, ou dont la date ou le verger change, sort de sa tournée (la place est libérée) ;
+ *   si seule la quantité change, la tournée reçoit la nouvelle quantité.
  * Les responsables de collecte sont prévenus de chaque déclaration (en priorité si elle est urgente),
  * modification et annulation.
  */
@@ -50,6 +53,7 @@ public class DemandeRecolteService {
     private final CompteurService compteurService;
     private final NotificationService notificationService;
     private final UtilisateurRepository utilisateurRepository;
+    private final TourneeService tourneeService;
     private final Clock horloge;
 
     public List<DemandeReponse> mesDemandes(String agriculteurId) {
@@ -86,9 +90,21 @@ public class DemandeRecolteService {
         Verger verger = vergerActif(requete.vergerId(), agriculteurId);
         verifierDate(requete);
         verifierPasDeDoublon(requete, id);
+        LocalDate ancienneDate = demande.getDateSouhaitee();
+        String ancienVerger = demande.getVergerId();
         remplir(demande, requete, verger);
+        boolean planifiee = demande.getStatut() == StatutDemande.PLANIFIEE;
+        boolean deplacee = planifiee && (!ancienneDate.equals(demande.getDateSouhaitee()) || !ancienVerger.equals(demande.getVergerId()));
+        if (deplacee) {
+            tourneeService.retirerDemande(demande, "date ou verger modifié par l'agriculteur");
+            demande.changerStatut(StatutDemande.VALIDEE, horloge.instant(), agriculteurId,
+                    "Date ou verger modifié : collecte à replanifier");
+        }
         // Si quelqu'un a modifié la demande entre-temps, la version ne correspond plus : refus (409)
         DemandeRecolte enregistree = demandeRepository.save(demande);
+        if (planifiee && !deplacee) {
+            tourneeService.mettreAJourQuantite(enregistree);
+        }
         notificationService.notifierRole(Role.RESPONSABLE_COLLECTE, NouvelleNotification.simple(CategorieNotification.COLLECTE,
                 "Demande " + enregistree.getNumero() + " modifiée", resume(enregistree), LIEN_COLLECTE));
         return DemandeReponse.depuis(enregistree);
@@ -98,6 +114,9 @@ public class DemandeRecolteService {
         DemandeRecolte demande = verifierProprietaire(id, agriculteurId);
         verifierModifiable(demande);
         String motifNettoye = motif == null || motif.isBlank() ? null : motif.trim();
+        if (demande.getStatut() == StatutDemande.PLANIFIEE) {
+            tourneeService.retirerDemande(demande, "demande annulée par l'agriculteur");
+        }
         demande.setMotifAnnulation(motifNettoye);
         demande.changerStatut(StatutDemande.ANNULEE, horloge.instant(), agriculteurId, motifNettoye);
         DemandeRecolte enregistree = demandeRepository.save(demande);
@@ -105,6 +124,39 @@ public class DemandeRecolteService {
                 "Demande " + enregistree.getNumero() + " annulée",
                 resume(enregistree) + (motifNettoye == null ? "" : " · Motif : " + motifNettoye), LIEN_COLLECTE));
         return DemandeReponse.depuis(enregistree);
+    }
+
+    /**
+     * Demande urgente créée par un responsable de collecte pour le verger d'un signalement (maturité critique, ravageur…).
+     * Mêmes règles de date et de doublon que pour l'agriculteur ; la demande est directement « validée » puisque
+     * c'est la coopérative qui la crée. L'agriculteur est prévenu.
+     */
+    public DemandeRecolte creerPourLaCooperative(Verger verger, LocalDate date, int quantiteKg, String commentaire,
+            String auteurId) {
+        if (verger.isArchive()) {
+            throw erreurChamp(HttpStatus.BAD_REQUEST, "dateSouhaitee", "Ce verger est archivé.");
+        }
+        DemandeRequete requete = new DemandeRequete(verger.getId(), TypeRecolte.URGENTE, date, quantiteKg, commentaire);
+        verifierDate(requete);
+        verifierPasDeDoublon(requete, "");
+
+        DemandeRecolte demande = new DemandeRecolte();
+        demande.setNumero(compteurService.prochainCode("DEMANDE", "D-%04d"));
+        demande.setAgriculteurId(verger.getAgriculteurId());
+        demande.setCreeeParLaCooperative(true);
+        remplir(demande, requete, verger);
+        demande.setDateSoumission(horloge.instant());
+        demande.changerStatut(StatutDemande.SOUMISE, horloge.instant(), auteurId, "Créée par la coopérative");
+        demande.changerStatut(StatutDemande.VALIDEE, horloge.instant(), auteurId, null);
+        DemandeRecolte enregistree = demandeRepository.save(demande);
+        notificationService.notifierPersonne(verger.getAgriculteurId(), NouvelleNotification.simple(CategorieNotification.COLLECTE,
+                        "Récolte urgente prévue · " + verger.getNom(),
+                        "La coopérative a créé la demande " + enregistree.getNumero() + " pour le "
+                                + date.format(FORMAT_DATE) + ". Elle sera planifiée en priorité.",
+                        "/agriculteur/demandes")
+                .avecSms("OliveConnect : une récolte urgente de votre verger " + verger.getNom() + " est prévue à partir du "
+                        + date.format(FORMAT_DATE) + "."));
+        return enregistree;
     }
 
     /** « Ali Ben Salah · Verger Nord · 02/12/2026 · 3500 kg » : le texte des notifications d'une demande. */

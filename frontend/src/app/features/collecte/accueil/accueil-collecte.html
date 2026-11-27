@@ -1,0 +1,129 @@
+<header>
+  <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">Bonjour {{ session()?.prenom }}</h1>
+  <p class="mt-1 text-gray-600">Voici l'état de la collecte aujourd'hui.</p>
+</header>
+
+@if (visite.aProposer()) {
+  <section class="mt-5 flex flex-col justify-between gap-4 rounded-2xl border border-olive-100 bg-white p-5 sm:flex-row sm:items-center">
+    <div>
+      <p class="font-semibold text-olive-900">Première visite ?</p>
+      <p class="mt-1 text-sm text-gray-600">Une visite guidée de 5 étapes vous montre comment examiner les demandes et planifier une tournée.</p>
+    </div>
+    <div class="flex shrink-0 gap-2">
+      <button type="button" class="bouton-principal px-4 py-2 text-sm" (click)="visite.commencer()">Commencer la visite</button>
+      <button type="button" class="bouton-secondaire px-4 py-2 text-sm" (click)="visite.plusTard()">Plus tard</button>
+    </div>
+  </section>
+}
+
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+@if (tableau(); as tableau) {
+  <!-- Chiffres clés : chacun ouvre sa liste -->
+  <section data-visite="accueil" class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="Chiffres clés">
+    <a routerLink="/collecte/demandes" [queryParams]="{ statut: 'SOUMISE' }" class="rounded-2xl border border-gray-200 bg-white p-5 hover:border-olive-500">
+      <p class="text-sm text-gray-500">Demandes à examiner</p>
+      <p class="mt-1 text-3xl font-bold text-gray-900">{{ tableau.demandesParStatut.SOUMISE }}</p>
+      @if (tableau.demandesParStatut.URGENTES_A_TRAITER > 0) {
+        <p class="mt-1 text-sm font-semibold text-amber-800">⚠ {{ tableau.demandesParStatut.URGENTES_A_TRAITER }} urgente(s) en attente</p>
+      } @else {
+        <p class="mt-1 text-sm text-gray-500">Aucune urgence en attente</p>
+      }
+    </a>
+    <a routerLink="/collecte/planifier" class="rounded-2xl border border-gray-200 bg-white p-5 hover:border-olive-500">
+      <p class="text-sm text-gray-500">Validées à planifier</p>
+      <p class="mt-1 text-3xl font-bold text-gray-900">{{ tableau.demandesParStatut.VALIDEE }}</p>
+      <p class="mt-1 text-sm text-gray-500">{{ tableau.demandesParStatut.PLANIFIEE }} déjà planifiée(s)</p>
+    </a>
+    <a routerLink="/collecte/alertes" class="rounded-2xl border border-gray-200 bg-white p-5 hover:border-olive-500">
+      <p class="text-sm text-gray-500">Signalements ouverts</p>
+      <p class="mt-1 text-3xl font-bold text-gray-900">{{ tableau.alertesParStatut.OUVERTE }}</p>
+      <p class="mt-1 text-sm text-gray-500">
+        @if (tableau.delaiMoyenPriseEnChargeMinutes !== null) { Prise en charge en {{ delai(tableau.delaiMoyenPriseEnChargeMinutes) }} en moyenne }
+        @else { Aucun signalement encore pris en charge }
+      </p>
+    </a>
+    <a routerLink="/collecte/tournees" class="rounded-2xl border border-gray-200 bg-white p-5 hover:border-olive-500">
+      <p class="text-sm text-gray-500">Tournées aujourd'hui</p>
+      <p class="mt-1 text-3xl font-bold text-gray-900">{{ tourneesDuJour() }}</p>
+      <p class="mt-1 text-sm text-gray-500">{{ tableau.quantitePlanifieeAujourdhuiKg | number }} kg estimés</p>
+    </a>
+  </section>
+
+  <div class="mt-6 grid gap-6 lg:grid-cols-5">
+    <!-- Charge des 7 prochains jours -->
+    <section class="rounded-2xl border border-gray-200 bg-white p-5 lg:col-span-3">
+      <h2 class="font-semibold text-gray-900">Charge des 7 prochains jours</h2>
+      <p class="mt-1 text-sm text-gray-500">Quantité estimée par jour : déjà en tournée, et validée en attente d'une tournée.</p>
+      <table class="mt-4 w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs uppercase tracking-wide text-gray-500">
+            <th class="py-2 font-semibold">Jour</th>
+            <th class="py-2 font-semibold">Charge</th>
+            <th class="py-2 text-right font-semibold">En tournée</th>
+            <th class="py-2 text-right font-semibold">En attente</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          @for (jour of tableau.charge; track jour.date) {
+            <tr>
+              <td class="py-2.5 pr-3 whitespace-nowrap font-medium text-gray-900">{{ jour.date | date: 'EEE d MMM' }}</td>
+              <td class="w-1/2 py-2.5 pr-3">
+                <div class="h-2.5 w-full rounded-full bg-gray-100"
+                  [title]="(jour.planifieeKg + jour.enAttenteKg | number) + ' kg au total'">
+                  <div class="h-2.5 rounded-full bg-olive-700" [style.width.%]="pourcentage(jour.planifieeKg + jour.enAttenteKg, chargeMaximum())"></div>
+                </div>
+              </td>
+              <td class="py-2.5 text-right whitespace-nowrap text-gray-900">{{ jour.planifieeKg | number }} kg
+                @if (jour.tournees) { <span class="text-gray-500">· {{ jour.tournees }} tournée(s)</span> }
+              </td>
+              <td class="py-2.5 text-right whitespace-nowrap" [class]="jour.enAttenteKg ? 'font-semibold text-amber-800' : 'text-gray-400'">{{ jour.enAttenteKg | number }} kg</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <div class="space-y-6 lg:col-span-2">
+      <!-- Pressoirs aujourd'hui -->
+      <section class="rounded-2xl border border-gray-200 bg-white p-5">
+        <h2 class="font-semibold text-gray-900">Pressoirs aujourd'hui</h2>
+        <ul class="mt-4 space-y-4">
+          @for (pressoir of tableau.pressoirsAujourdhui; track pressoir.id) {
+            <li>
+              <div class="flex items-baseline justify-between gap-3 text-sm">
+                <span class="font-medium text-gray-900">{{ pressoir.nom }}</span>
+                <span class="text-gray-600">{{ pressoir.reserveKg | number }} / {{ pressoir.capaciteJournaliereKg | number }} kg</span>
+              </div>
+              <div class="mt-1.5 h-2.5 w-full rounded-full bg-gray-100" [title]="pourcentage(pressoir.reserveKg, pressoir.capaciteJournaliereKg) + ' % réservé'">
+                <div class="h-2.5 rounded-full bg-olive-700" [style.width.%]="pourcentage(pressoir.reserveKg, pressoir.capaciteJournaliereKg)"></div>
+              </div>
+              @if (pressoir.restantKg <= 0) {
+                <p class="mt-1 text-xs font-semibold text-red-700">✖ Complet aujourd'hui</p>
+              }
+            </li>
+          } @empty {
+            <li class="text-sm text-gray-500">Aucun pressoir enregistré.</li>
+          }
+        </ul>
+      </section>
+
+      <!-- Signalements non résolus par type -->
+      <section class="rounded-2xl border border-gray-200 bg-white p-5">
+        <h2 class="font-semibold text-gray-900">Signalements non résolus</h2>
+        <ul class="mt-3 divide-y divide-gray-100 text-sm">
+          @for (ligne of tableau.alertesNonResoluesParType; track ligne.type) {
+            <li class="flex items-center justify-between py-2">
+              <a routerLink="/collecte/alertes" [queryParams]="{ type: ligne.type }" class="text-gray-700 hover:underline">{{ ligne.libelle }}</a>
+              <span class="font-semibold" [class]="ligne.nombre ? 'text-gray-900' : 'text-gray-400'">{{ ligne.nombre }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+} @else if (!messageErreur()) {
+  <p class="mt-10 text-center text-gray-500">Chargement du tableau de bord…</p>
+}

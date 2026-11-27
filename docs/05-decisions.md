@@ -216,6 +216,115 @@ Ce qui manquait encore à notre partie (pages publiques, administrateur, agricul
 - **Pages d'erreur (maquette P7)** — « Accès refusé » (page d'un autre profil, en nommant le profil attendu), « Page
   introuvable » pour toute adresse inconnue, message « Session expirée » sur la page de connexion quand le serveur refuse le jeton.
 
+## Fonctionnalité 6 — Espace du responsable de collecte (26/11/2026)
+
+Cas d'utilisation UC20 à UC23, maquettes D1 et RC1 à RC4. Toutes les adresses `/api/collecte/**` sont ouvertes au
+responsable de collecte et à l'administrateur (rôle R3). Les responsables de collecte partagent tout (R8).
+
+- **Mise en page** `/collecte` : menu en haut (Accueil, Demandes, Planifier, Tournées, Alertes avec la pastille des
+  signalements ouverts, Carte, Aide), défilant sur téléphone ; cloche, aide de l'écran, profil ; visite guidée en 5 étapes.
+  L'état de la visite et la page d'aide sont désormais communs aux espaces (`EtatVisiteGuidee`, `PageAide`).
+- **Tableau de bord** `/collecte` : demandes à examiner (dont urgentes), validées à planifier, signalements ouverts et
+  **délai moyen de prise en charge**, tournées du jour, **charge des 7 prochains jours** (déjà en tournée / validée en
+  attente), capacité des pressoirs aujourd'hui, signalements non résolus par type. Chiffres calculés par des agrégations
+  MongoDB à chaque lecture (les indicateurs pré-calculés de la décision 12 viendront avec les pesées du pressoir).
+- **Demandes (UC20, RC1)** `/collecte/demandes` : onglets par état avec compteurs (`$group`), recherche (numéro, verger),
+  filtre urgente / planifiée. **Tri : urgentes, puis verger le plus mûr, puis date souhaitée**, fait par MongoDB
+  (`$lookup` vers `vergers` après conversion de `vergerId` en ObjectId), seule la page demandée est renvoyée ; index
+  (statut, type, date souhaitée). Fiche : verger, maturité, agriculteur, **pressoir le plus proche** (`$nearSphere`,
+  index 2dsphere), passé du verger, historique avec le nom des auteurs.
+  - Valider : soumise → validée (commentaire interne facultatif). « Valider et planifier » ouvre la planification.
+  - Rejeter : soumise ou validée → rejetée, **motif obligatoire** (motifs proposés en un clic) envoyé à l'agriculteur.
+  - Une décision déjà prise par un autre responsable → 409 « déjà traitée ». L'agriculteur est prévenu (notification + SMS).
+- **Planification (UC21, D1)** `/collecte/planifier` — collection `tournees` (numéro T-0001, `@Version`, étapes et
+  affectations en sous-documents, noms copiés ; index (date, statut), (ressource, date), (chef, date)) :
+  - le serveur propose seulement les **chefs d'équipe libres** ce jour-là (R5) et les **ressources disponibles et libres**
+    (RG04, état « disponible », non archivées) ; une équipe s'affecte en un clic (ouvriers disponibles, M3) ;
+  - **conflits bloquants (409)** : demande plus validée, ressource déjà prise ce jour-là (« TR-05 est déjà affecté à la
+    tournée T-0040 »), ressource indisponible, chef déjà en tournée ; date passée ou hors campagne → 400 ;
+  - **avertissements** : capacité des bennes < quantité estimée (RG05), aucune benne / tracteur / ouvrier, date différente
+    de la date souhaitée, **pressoir saturé** avec les autres pressoirs qui ont la capacité, du plus proche au plus
+    éloigné du premier verger (`$nearSphere`) ;
+  - capacité d'un pressoir (décision 7) : maximum = capacité journalière ; **réservé = somme des quantités estimées des
+    tournées du jour vers ce pressoir**, calculé par agrégation (`$match`, `$unwind`, `$group`) plutôt que stocké ;
+    la quantité reçue viendra avec la réception des bennes ;
+  - le contrôle est relancé à chaque changement de l'écran (`/planification/verification`) ; la création refait les
+    mêmes contrôles, passe les demandes « planifiées » (tournée, date planifiée, historique) et prévient chaque agriculteur
+    (notification + SMS) et le chef d'équipe.
+- **Tournées (RC2)** `/collecte/tournees` : liste d'un jour (◀ Aujourd'hui ▶), mise à jour à chaque notification reçue,
+  fiche (vergers dans l'ordre de passage, ressources, historique). **Annulation** seulement avant le démarrage, motif
+  obligatoire ; les demandes redeviennent « validées » et les ressources sont libérées.
+- **Signalements (UC22, RC3)** `/collecte/alertes` : onglets Ouvertes / Prises en charge / Résolues, filtre par type, photo
+  visible par la coopérative. Les actions sont rangées dans l'alerte (sous-documents `traitements` : état, date, auteur,
+  commentaire) : prendre en charge (commentaire facultatif), **résoudre (commentaire obligatoire : la réponse lue par
+  l'agriculteur)**, **créer une demande urgente** pour le verger. L'agriculteur est prévenu à chaque étape et voit la
+  dernière réponse de la coopérative sous son signalement.
+- **Carte (UC23, RC4)** `/collecte/carte` : vergers colorés par statut de récolte, cercle pointillé pour les vergers des
+  tournées du jour, signalements non résolus, pressoirs ; filtres statut, variété, maturité minimale ; **seule la zone
+  visible est demandée au serveur** (`$geoWithin` sur l'index 2dsphere des vergers) ; liste des mêmes vergers sous la carte.
+- **Côté agriculteur** : la fiche d'une demande affiche le jour planifié et la tournée, ou le motif d'un rejet.
+- **Démonstration** (profil dev) : vergers de Mounir, Hela et Youssef avec une maturité, demandes soumises (dont une
+  urgente) et validées, deux signalements. Compte : `salma.chaabane@oliveconnect.tn`.
+- Tests : `EspaceCollecteTest` (19 scénarios : droits, tri, validation, rejet, planification, conflits, avertissements,
+  capacité réservée, annulations, signalements, carte) ; tests Angular de l'accueil et de l'aide.
+
+**Points tranchés pendant le codage**
+- Tournée annulée → ses demandes redeviennent « validées » (à replanifier) ; agriculteurs et chef prévenus.
+- Demande planifiée annulée par l'agriculteur, ou dont il change la date ou le verger → elle sort de sa tournée
+  (place libérée, chef prévenu) ; une tournée sans verger est annulée d'elle-même. Si seule la quantité change, la
+  tournée reçoit la nouvelle quantité ; la capacité des bennes n'est pas revérifiée (le responsable la voit dans la fiche).
+- Demande urgente créée depuis une alerte → au nom de l'agriculteur, directement « validée », marquée « créée par la
+  coopérative » ; l'alerte passe « prise en charge ».
+- Date d'une tournée : aujourd'hui ou plus tard, dans la campagne ; elle peut différer de la date souhaitée (avertissement).
+- Décision 2 (transactions) : **pas encore activée** — le MongoDB local n'est pas en replica set. La création d'une tournée
+  contrôle tout avant d'écrire, puis enregistre la tournée et ses demandes ; deux planifications exactement simultanées
+  sur la même ressource restent possibles tant que le replica set n'est pas activé.
+
+## Fonctionnalité 7 — Espace du responsable du pressoir (26/11/2026)
+
+Cas d'utilisation UC50 à UC52, maquettes M7 et PR1. Adresses `/api/pressoir/**` : le responsable n'agit que sur le pressoir
+auquel son compte est rattaché (décision 4, R6) ; un compte non rattaché reçoit un message clair (409). L'administrateur
+(R3) indique le pressoir par `?pressoirId=`.
+
+- **Mise en page** `/pressoir` : mobile d'abord (pesée au pont-bascule) — barre d'onglets en bas sur téléphone, menu en haut
+  sur ordinateur (Réception, Historique, Capacité, Tableau de bord, Aide) ; nom du pressoir rappelé ; visite guidée en 5 étapes.
+- **Réception d'une benne (UC50, M7)** — collection `receptions` (numéro R-0001 ; index (pressoir, jour), (vergers) et
+  **(tournée, benne) unique**) :
+  - tournée de ce pressoir, **en cours ou livrée** (une tournée planifiée n'est pas encore partie → 409) ; benne affectée à la
+    tournée et pas encore reçue ;
+  - **RG07** : poids > tolérance des paramètres (110 %) × capacité de la benne → refus 400 sous le champ ;
+  - **catégorie de qualité calculée** à partir de l'acidité (seuils `CategorieQualite`) ; taux de remplissage = poids ÷ capacité ;
+    l'écran affiche les deux pendant la saisie ;
+  - **décision 11** : le poids est réparti entre les vergers de la tournée (sous-documents `parts`) au prorata des quantités ;
+    en attendant les quantités saisies par le chef d'équipe, ce sont les quantités estimées ; le reste de l'arrondi va au
+    dernier verger (la somme des parts = le poids pesé) ;
+  - **dernière benne reçue → tournée « clôturée », demandes « terminées »** avec, pour chaque demande, le poids reçu, l'acidité
+    pondérée par le poids et la catégorie ; l'agriculteur est prévenu (notification + SMS), le chef d'équipe et les responsables
+    de collecte aussi. Chaque benne reçue prévient les responsables de collecte.
+- **Capacité (UC51, décision 7)** — collection `capacites_pressoirs` (un document par pressoir et par jour, index unique) :
+  le responsable publie la capacité d'aujourd'hui ou d'un jour à venir (motif facultatif). Maximum = capacité publiée, sinon
+  la capacité habituelle ; **reçu** = somme des pesées (agrégation) ; **engagé** = pour chaque tournée du jour, le plus grand de
+  son estimation et de ce qui en est reçu (le reçu seul une fois clôturée) ; restant = maximum − engagé. **La planification des
+  tournées utilise la capacité publiée** du jour choisi.
+- **Historique (PR1)** : réceptions d'une période (aujourd'hui, 7 jours, 30 jours, dates), répartition par verger,
+  **export CSV** (séparateur « ; », virgule décimale, encodage UTF-8 avec marque d'ordre pour les tableurs).
+- **Tableau de bord (UC52)** sur 7 ou 30 jours, par agrégations MongoDB sur `receptions` : poids, bennes, remplissage moyen,
+  **acidité moyenne pondérée** (`$sum` de `$multiply` poids × acidité), volume par jour, répartition par catégorie,
+  **qualité par variété** (`$unwind` des parts, `$lookup` vers `vergers`, `$group` par variété).
+- **Côté agriculteur** : la fiche d'une demande terminée affiche le poids reçu, l'acidité et la catégorie.
+- **Démonstration** (profil dev) : compte `fethi.ayadi@oliveconnect.tn` (Huilerie El Amra) ; historique de pesées sur les
+  6 derniers jours et une tournée d'aujourd'hui « livrée » dont les deux bennes attendent leur pesée. Le démarrage et la
+  livraison sont simulés car l'espace du chef d'équipe n'existe pas encore.
+- Tests : `EspacePressoirTest` (9 scénarios : droits, tournée non partie, autre pressoir, 110 %, catégorie et répartition,
+  benne reçue deux fois, clôture et résultat des demandes, capacité attendue / reçue / restante, capacité publiée utilisée
+  par la planification, historique, export, tableau de bord) ; test Angular des catégories.
+
+**Points tranchés pendant le codage**
+- Catégorie de qualité : **calculée** à partir de l'acidité, jamais saisie.
+- Une benne n'est reçue **qu'une fois par tournée** : le deuxième voyage n'est pas géré (une autre tournée est planifiée).
+- Réception possible dès que la tournée est « en cours » (une benne peut arriver avant la fin de la tournée) ou « livrée ».
+- Lien réception ↔ vergers : par les parts de chaque benne (`parts`, `vergerIds`).
+
 ## Revue de sécurité (26/11/2026)
 
 - **Jetons d'accès** : signature HS256 avec un secret d'au moins 32 caractères (obligatoire en production, sans valeur par défaut),
@@ -261,7 +370,7 @@ Ce qui manquait encore à notre partie (pages publiques, administrateur, agricul
 - Les deux versions du diagramme de classes (texte dans `02` et image `classes.png`) ne correspondent pas : choisir une seule référence
 - Informations de l'agriculteur : bloc imbriqué dans le compte ou héritage avec discriminant
 - Variété : collection à part ou simple texte
-- Lien Réception ↔ vergers absent du diagramme de classes
+- ~~Lien Réception ↔ vergers absent du diagramme de classes~~ → parts de chaque benne (fonctionnalité 7)
 - Un agriculteur doit-il avoir au moins un verger ?
 - Listes de valeurs manquantes (TypeNotification, SourceImport, StatutImport, StatutAppro)
 - Ouvriers un par un ou par équipes
@@ -270,14 +379,14 @@ Ce qui manquait encore à notre partie (pages publiques, administrateur, agricul
 ### Phase demandes et tournées
 - Statut « LIVRÉE » : « en route » ou « arrivée » ?
 - Le chef d'équipe peut-il changer de pressoir à la livraison ? (RG06)
-- Tournée annulée : que deviennent les demandes ?
-- Quantité modifiée après planification : revérifier la capacité des bennes ?
-- Deuxième voyage vers le pressoir
-- Un chef d'équipe peut-il avoir deux tournées le même jour ?
+- ~~Tournée annulée : que deviennent les demandes ?~~ → redeviennent « validées » (fonctionnalité 6)
+- ~~Quantité modifiée après planification : revérifier la capacité des bennes ?~~ → quantité reportée dans la tournée, sans nouveau contrôle (fonctionnalité 6)
+- ~~Deuxième voyage vers le pressoir~~ → non géré : une benne est reçue une fois par tournée (fonctionnalité 7)
+- ~~Un chef d'équipe peut-il avoir deux tournées le même jour ?~~ → non (R5, contrôlé à la planification)
 - ~~Annulation d'une demande encore SOUMISE~~ → permise tant que la collecte n'a pas démarré (fonctionnalité 4)
 - ~~Champs copiés : mise à jour quand l'original change~~ → le nom du verger est reporté (fonctionnalité 5) ; le nom de
   l'agriculteur n'est pas copié dans les demandes
-- Demande urgente créée depuis une alerte par le responsable de collecte
+- ~~Demande urgente créée depuis une alerte par le responsable de collecte~~ → oui, directement validée (fonctionnalité 6)
 
 ### Phase alertes et imports
 - États d'alerte « NOUVELLE » et « INFO » présents dans les maquettes mais pas dans le modèle
@@ -286,7 +395,7 @@ Ce qui manquait encore à notre partie (pages publiques, administrateur, agricul
 - Fichier d'import avec des lignes invalides : sort des lignes valides (RG08 vs statut PARTIEL)
 
 ### Phase pressoir et tableau de bord
-- Catégorie de qualité saisie ou calculée à partir de l'acidité
+- ~~Catégorie de qualité saisie ou calculée à partir de l'acidité~~ → calculée (fonctionnalité 7)
 
 ### Phase gestion des erreurs
 - ~~Table erreur → code HTTP~~ → 400 saisie, 401 non connecté, 403 interdit, 404 introuvable, 405, 409 conflit

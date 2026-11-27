@@ -1,0 +1,78 @@
+<header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+  <div>
+    <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">Historique des réceptions</h1>
+    <p class="mt-1 text-gray-600">Chaque benne pesée, et la part de chaque verger.</p>
+  </div>
+  <button type="button" class="bouton-secondaire" (click)="exporter()">⬇ Exporter la période (CSV)</button>
+</header>
+
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+<div class="mt-6 flex flex-wrap items-center gap-2">
+  @for (raccourci of raccourcis; track raccourci.jours) {
+    <button type="button" class="rounded-lg border px-3 py-2 text-sm font-semibold"
+      [class]="estPeriode(raccourci.jours) ? 'border-olive-700 bg-olive-700 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'"
+      [attr.aria-pressed]="estPeriode(raccourci.jours)" (click)="periode(raccourci.jours)">{{ raccourci.libelle }}</button>
+  }
+  <label class="ml-2 flex items-center gap-2 text-sm text-gray-600">Du
+    <input #debut type="date" class="champ-filtre" [value]="du()" (change)="changerDates(debut.value, fin.value)" /></label>
+  <label class="flex items-center gap-2 text-sm text-gray-600">au
+    <input #fin type="date" class="champ-filtre" [value]="au()" (change)="changerDates(debut.value, fin.value)" /></label>
+</div>
+
+<div class="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+        <tr>
+          <th class="px-4 py-3 font-semibold">Date</th>
+          <th class="px-4 py-3 font-semibold">Tournée</th>
+          <th class="px-4 py-3 font-semibold">Benne</th>
+          <th class="px-4 py-3 text-right font-semibold">Poids</th>
+          <th class="px-4 py-3 text-right font-semibold">Remplissage</th>
+          <th class="px-4 py-3 text-right font-semibold">Acidité</th>
+          <th class="px-4 py-3 font-semibold">Catégorie</th>
+          <th class="px-4 py-3 font-semibold">Reçue par</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        @for (reception of resultat()?.elements ?? []; track reception.id) {
+          <tr class="cursor-pointer hover:bg-olive-50" tabindex="0" (click)="basculer(reception)" (keydown.enter)="basculer(reception)"
+            [attr.aria-expanded]="ouverte() === reception.id">
+            <td class="px-4 py-3 whitespace-nowrap">{{ reception.dateHeure | date: 'dd/MM HH:mm' }}</td>
+            <td class="px-4 py-3 font-mono">{{ reception.numeroTournee }}</td>
+            <td class="px-4 py-3">{{ reception.codeBenne }}</td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">{{ reception.poidsNetKg | number }} kg</td>
+            <td class="px-4 py-3 text-right">{{ reception.tauxRemplissage }} %</td>
+            <td class="px-4 py-3 text-right">{{ reception.aciditePourcent | number: '1.1-2' }} %</td>
+            <td class="px-4 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap" [class]="classesCategorie(reception.categorie)">{{ reception.libelleCategorie }}</span></td>
+            <td class="px-4 py-3 whitespace-nowrap text-gray-600">{{ reception.nomAuteur }}</td>
+          </tr>
+          @if (ouverte() === reception.id) {
+            <tr class="bg-gray-50">
+              <td colspan="8" class="px-6 py-3 text-sm text-gray-700">
+                <p class="font-semibold text-gray-900">Répartition entre les vergers</p>
+                <ul class="mt-1 space-y-0.5">
+                  @for (part of reception.parts; track $index) {
+                    <li>{{ part.nomVerger }} : {{ part.poidsKg | number }} kg</li>
+                  }
+                </ul>
+                @if (reception.commentaire) {
+                  <p class="mt-2">📝 {{ reception.commentaire }}</p>
+                }
+              </td>
+            </tr>
+          }
+        } @empty {
+          <tr><td colspan="8" class="px-4 py-10 text-center text-gray-500">{{ resultat() ? 'Aucune réception sur cette période.' : 'Chargement…' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (resultat(); as pageResultat) {
+    <app-pagination [page]="pageResultat.page" [taille]="pageResultat.taille" [totalElements]="pageResultat.totalElements"
+      [totalPages]="pageResultat.totalPages" (changerPage)="page.set($event)" (changerTaille)="changerTaille($event)" />
+  }
+</div>

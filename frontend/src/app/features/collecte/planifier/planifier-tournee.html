@@ -1,0 +1,176 @@
+<header>
+  <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">Planifier une tournée</h1>
+  <p class="mt-1 text-gray-600">Cochez les demandes dans l'ordre de passage, puis choisissez la date, l'équipe et le pressoir.</p>
+</header>
+
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+<div class="mt-6 grid gap-6 lg:grid-cols-5">
+  <!-- 1. Demandes validées -->
+  <section class="lg:col-span-2" aria-labelledby="titre-demandes">
+    <div class="flex items-baseline justify-between">
+      <h2 id="titre-demandes" class="font-semibold text-gray-900">Demandes validées</h2>
+      <span class="text-sm text-gray-500">Urgentes d'abord</span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      @for (demande of demandesValidees() ?? []; track demande.id) {
+        <li>
+          <label class="flex cursor-pointer items-start gap-3 rounded-xl border bg-white p-4 hover:border-olive-500"
+            [class]="rang(demande) ? 'border-olive-700 ring-1 ring-olive-700' : 'border-gray-200'">
+            <input type="checkbox" class="mt-1 h-4 w-4 accent-olive-700" [attr.aria-label]="demande.numero + ' · ' + demande.nomVerger" [checked]="rang(demande) > 0" (change)="basculerDemande(demande)" />
+            <span class="min-w-0 flex-1">
+              <span class="flex items-center justify-between gap-2">
+                <span class="font-semibold text-gray-900">{{ demande.nomVerger }}</span>
+                @if (rang(demande)) { <span class="rounded-full bg-olive-700 px-2 text-xs font-bold leading-5 text-white" title="Ordre de passage">{{ rang(demande) }}</span> }
+              </span>
+              <span class="block text-sm text-gray-600">
+                <span class="font-mono">{{ demande.numero }}</span> · {{ demande.nomAgriculteur }}
+              </span>
+              <span class="mt-1 flex flex-wrap gap-x-3 text-sm text-gray-600">
+                @if (demande.type === 'URGENTE') { <span class="font-semibold text-amber-800">⚠ Urgente</span> }
+                <span>{{ demande.dateSouhaitee | date: 'EEE dd/MM' }}</span>
+                <span>{{ demande.quantiteEstimeeKg | number }} kg</span>
+                <span>Maturité {{ demande.niveauMaturite !== null ? demande.niveauMaturite + ' %' : '—' }}</span>
+              </span>
+            </span>
+          </label>
+        </li>
+      } @empty {
+        <li class="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
+          @if (demandesValidees() === null) { Chargement… } @else {
+            Aucune demande validée à planifier. <a routerLink="/collecte/demandes" class="font-semibold text-olive-700 hover:underline">Examiner les demandes →</a>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- 2. La tournée -->
+  <section class="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 lg:col-span-3" aria-labelledby="titre-tournee">
+    <h2 id="titre-tournee" class="text-lg font-bold text-olive-900">
+      Nouvelle tournée — {{ demandesChoisies().length }} demande(s) · {{ quantiteChoisie() | number }} kg
+    </h2>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label for="date-tournee" class="etiquette">Date</label>
+        <input id="date-tournee" type="date" class="champ-saisie mt-1" [min]="dateMinimum" [ngModel]="date()" (ngModelChange)="changerDate($event)" />
+      </div>
+      <div>
+        <label for="chef-equipe" class="etiquette">Chef d'équipe</label>
+        <select id="chef-equipe" class="champ-saisie mt-1" [ngModel]="chefEquipeId()" (ngModelChange)="chefEquipeId.set($event)">
+          <option value="">Choisir…</option>
+          @for (chef of options()?.chefs ?? []; track chef.id) { <option [value]="chef.id">{{ chef.nomComplet }}</option> }
+        </select>
+        @if (options(); as options) {
+          @if (options.chefsOccupes) { <p class="mt-1 text-xs text-gray-500">{{ options.chefsOccupes }} chef(s) déjà en tournée ce jour-là.</p> }
+          @if (options.chefs.length === 0) { <p class="message-champ mt-1">Aucun chef d'équipe libre ce jour-là.</p> }
+        }
+      </div>
+    </div>
+
+    <fieldset>
+      <legend class="etiquette">Pressoir de destination</legend>
+      <div class="mt-2 grid gap-2 sm:grid-cols-2">
+        @for (pressoir of options()?.pressoirs ?? []; track pressoir.id) {
+          <label class="flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm"
+            [class]="pressoirId() === pressoir.id ? 'border-olive-700 bg-olive-50' : 'border-gray-200 hover:border-olive-500'">
+            <input type="radio" name="pressoir" class="mt-0.5 accent-olive-700" [attr.aria-label]="pressoir.nom" [value]="pressoir.id" [checked]="pressoirId() === pressoir.id" (change)="pressoirId.set(pressoir.id)" />
+            <span>
+              <span class="block font-semibold text-gray-900">{{ pressoir.nom }}</span>
+              <span class="block" [class]="pressoir.restantKg < quantiteChoisie() ? 'text-red-700' : 'text-gray-600'">
+                {{ pressoir.restantKg | number }} kg libres sur {{ pressoir.capaciteJournaliereKg | number }}
+              </span>
+            </span>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend class="etiquette">Ressources disponibles le {{ date() | date: 'dd/MM' }}</legend>
+      @if (options(); as options) {
+        @if (options.ressourcesOccupees) {
+          <p class="mt-1 text-xs text-gray-500">{{ options.ressourcesOccupees }} ressource(s) déjà affectée(s) à une autre tournée ce jour-là : elles ne sont pas proposées.</p>
+        }
+        @if (options.equipes.length) {
+          <p class="mt-3 text-sm font-medium text-gray-700">👷 Équipes d'ouvriers</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            @for (equipe of options.equipes; track equipe.id) {
+              <button type="button" class="rounded-full border px-3 py-1.5 text-sm font-semibold disabled:opacity-50"
+                [class]="equipeAffectee(equipe) ? 'border-olive-700 bg-olive-700 text-white' : 'border-gray-300 text-gray-700 hover:border-olive-500'"
+                [disabled]="equipe.ouvriersDisponibles.length === 0" [attr.aria-pressed]="equipeAffectee(equipe)" (click)="basculerEquipe(equipe)">
+                {{ equipe.nom }} · {{ equipe.ouvriersDisponibles.length }} / {{ equipe.effectif }} disponibles
+              </button>
+            }
+          </div>
+        }
+        @for (groupe of ressourcesParType(); track groupe.type) {
+          <p class="mt-3 text-sm font-medium text-gray-700">{{ icones[groupe.type] }} {{ groupe.type === 'OUVRIER' ? 'Ouvriers sans équipe' : groupe.libelle + 's' }}</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            @for (ressource of groupe.ressources; track ressource.id) {
+              <button type="button" class="rounded-full border px-3 py-1.5 text-sm"
+                [class]="estChoisie(ressource.id) ? 'border-olive-700 bg-olive-700 text-white' : 'border-gray-300 text-gray-700 hover:border-olive-500'"
+                [attr.aria-pressed]="estChoisie(ressource.id)" [title]="ressource.nom" [attr.aria-label]="ressource.code + ' · ' + ressource.nom" (click)="basculerRessource(ressource)">
+                {{ ressource.code }}{{ ressource.capaciteKg ? ' (' + (ressource.capaciteKg / 1000 | number: '1.0-1') + ' t)' : '' }}{{ groupe.type === 'OUVRIER' ? ' · ' + ressource.nom : '' }}
+              </button>
+            }
+          </div>
+        }
+        <p class="mt-3 text-sm text-gray-600">{{ ressourcesChoisies().length }} ressource(s) choisie(s), dont {{ ouvriersAffectes() }} ouvrier(s).</p>
+      } @else {
+        <p class="mt-2 text-sm text-gray-500">Chargement des ressources…</p>
+      }
+    </fieldset>
+
+    <div>
+      <label for="commentaire-tournee" class="etiquette">Consigne pour le chef d'équipe <span class="font-normal text-gray-500">(facultatif)</span></label>
+      <textarea id="commentaire-tournee" rows="2" maxlength="300" class="champ-saisie mt-1" [ngModel]="commentaire()" (ngModelChange)="commentaire.set($event)"
+        placeholder="Accès, horaires, matériel à prévoir…"></textarea>
+    </div>
+
+    <!-- Contrôle de la tournée par le serveur -->
+    <div aria-live="polite" class="space-y-2">
+      @if (verification(); as verification) {
+        <p class="text-sm text-gray-700">
+          Capacité des bennes : <strong>{{ verification.capaciteBennesKg | number }} kg</strong> pour
+          <strong>{{ verification.quantiteEstimeeKg | number }} kg</strong> estimés.
+        </p>
+        @for (conflit of verification.conflits; track conflit) {
+          <p class="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-800">✖ {{ conflit }}</p>
+        }
+        @for (avertissement of verification.avertissements; track avertissement) {
+          <p class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">⚠ {{ avertissement }}</p>
+        }
+        @if (verification.pressoirsSuggeres.length) {
+          <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+            <p class="font-medium text-gray-800">Pressoirs qui ont la capacité, du plus proche au plus éloigné :</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              @for (pressoir of verification.pressoirsSuggeres; track pressoir.id) {
+                <button type="button" class="rounded-full border border-olive-700 px-3 py-1 text-sm font-semibold text-olive-700 hover:bg-olive-50" (click)="pressoirId.set(pressoir.id)">
+                  {{ pressoir.nom }} · {{ pressoir.restantKg | number }} kg libres
+                </button>
+              }
+            </div>
+          </div>
+        }
+        @if (!verification.conflits.length && !verification.avertissements.length) {
+          <p class="rounded-lg border border-olive-100 bg-olive-50 px-4 py-2.5 text-sm text-olive-900">✓ Aucun conflit : la tournée peut être créée.</p>
+        }
+      } @else if (erreurVerification(); as message) {
+        <p class="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-800">{{ message }}</p>
+      } @else {
+        <p class="text-sm text-gray-500">Choisissez au moins une demande, le chef d'équipe et le pressoir : la tournée sera contrôlée aussitôt.</p>
+      }
+    </div>
+
+    @if (erreurCreation(); as message) {
+      <p role="alert" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+    }
+    <button type="button" class="bouton-principal w-full" [disabled]="!creable() || envoiEnCours()" (click)="creer()">
+      {{ envoiEnCours() ? 'Création…' : 'Créer la tournée et prévenir l’équipe' }}
+    </button>
+  </section>
+</div>

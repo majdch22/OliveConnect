@@ -1,0 +1,141 @@
+<header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+  <div>
+    <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">Tournées du {{ date() | date: 'EEEE d MMMM y' }}</h1>
+    <p class="mt-1 flex items-center gap-2 text-gray-600"><span class="h-2 w-2 rounded-full bg-olive-700" aria-hidden="true"></span> Mises à jour en direct</p>
+  </div>
+  <a routerLink="/collecte/planifier" [queryParams]="{ date: date() >= aujourdhui ? date() : null }" class="bouton-principal">+ Nouvelle tournée</a>
+</header>
+
+@if (tourneeCreee) {
+  <p role="status" class="mt-5 rounded-lg bg-white px-4 py-3 text-sm text-olive-900 shadow-sm">✓ Tournée {{ tourneeCreee }} créée. Les agriculteurs et le chef d'équipe sont prévenus.</p>
+}
+@if (messageSucces(); as message) {
+  <p role="status" class="mt-5 rounded-lg bg-white px-4 py-3 text-sm text-olive-900 shadow-sm">✓ {{ message }}</p>
+}
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+<div class="mt-6 flex flex-wrap items-center gap-2">
+  <button type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-gray-50" (click)="changerJour(-1)" aria-label="Jour précédent">◀</button>
+  <button type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-gray-50" (click)="allerAu(aujourdhui)">Aujourd'hui</button>
+  <button type="button" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-gray-50" (click)="changerJour(1)" aria-label="Jour suivant">▶</button>
+  <input type="date" class="champ-filtre" aria-label="Choisir le jour" [value]="date()" (change)="allerAu($any($event.target).value)" />
+  <select class="champ-filtre" aria-label="État des tournées" (change)="filtreStatut.set($any($event.target).value)">
+    <option value="">Tous les états</option>
+    <option value="PLANIFIEE">Planifiées</option>
+    <option value="EN_COURS">En cours</option>
+    <option value="LIVREE">Livrées</option>
+    <option value="CLOTUREE">Clôturées</option>
+    <option value="ANNULEE">Annulées</option>
+  </select>
+</div>
+
+<div class="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+        <tr>
+          <th class="px-4 py-3 font-semibold">Tournée</th>
+          <th class="px-4 py-3 font-semibold">Chef d'équipe</th>
+          <th class="px-4 py-3 text-right font-semibold">Vergers</th>
+          <th class="px-4 py-3 text-right font-semibold">Estimé</th>
+          <th class="px-4 py-3 text-right font-semibold">Bennes</th>
+          <th class="px-4 py-3 font-semibold">Pressoir</th>
+          <th class="px-4 py-3 font-semibold">État</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        @for (tournee of tourneesAffichees(); track tournee.id) {
+          <tr class="cursor-pointer hover:bg-olive-50" tabindex="0" (click)="ouvrir(tournee)" (keydown.enter)="ouvrir(tournee)">
+            <td class="px-4 py-3 font-mono font-semibold text-gray-900">{{ tournee.numero }}</td>
+            <td class="px-4 py-3">{{ tournee.nomChefEquipe }}</td>
+            <td class="px-4 py-3 text-right">{{ tournee.etapes.length }}</td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">{{ tournee.quantiteEstimeeKg | number }} kg</td>
+            <td class="px-4 py-3 text-right whitespace-nowrap" [class.text-amber-800]="tournee.capaciteBennesKg < tournee.quantiteEstimeeKg">
+              {{ tournee.capaciteBennesKg | number }} kg
+            </td>
+            <td class="px-4 py-3">{{ tournee.nomPressoir }}</td>
+            <td class="px-4 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap" [class]="couleurs[tournee.statut]">{{ tournee.libelleStatut }}</span></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="px-4 py-10 text-center text-gray-500">{{ tournees() === null ? 'Chargement…' : 'Aucune tournée ce jour-là.' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (selection(); as tournee) {
+  <app-panneau-lateral [titre]="'Tournée ' + tournee.numero" [sousTitre]="(tournee.date | date: 'EEEE d MMMM y') + ' · ' + tournee.nomChefEquipe + ' → ' + tournee.nomPressoir" (fermer)="selection.set(null)">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="rounded-full px-3 py-1 text-sm font-semibold" [class]="couleurs[tournee.statut]">{{ tournee.libelleStatut }}</span>
+      <span class="text-sm text-gray-600">{{ tournee.quantiteEstimeeKg | number }} kg estimés · bennes {{ tournee.capaciteBennesKg | number }} kg</span>
+    </div>
+    @if (tournee.commentaire) {
+      <p class="mt-4 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-700">📝 {{ tournee.commentaire }}</p>
+    }
+    @if (tournee.motifAnnulation) {
+      <p class="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">Motif de l'annulation : {{ tournee.motifAnnulation }}</p>
+    }
+
+    <h3 class="mt-6 font-semibold text-gray-900">Vergers, dans l'ordre de passage</h3>
+    <ol class="mt-3 space-y-2">
+      @for (etape of tournee.etapes; track etape.demandeId) {
+        <li class="flex items-start gap-3 rounded-lg border border-gray-200 p-3 text-sm">
+          <span class="rounded-full bg-olive-100 px-2 font-bold leading-6 text-olive-900">{{ etape.ordre }}</span>
+          <span class="flex-1">
+            <span class="block font-semibold text-gray-900">{{ etape.nomVerger }} @if (etape.type === 'URGENTE') { <span class="text-amber-800">⚠</span> }</span>
+            <span class="block text-gray-600">{{ etape.nomAgriculteur }} · <span class="font-mono">{{ etape.numeroDemande }}</span> · {{ etape.quantiteEstimeeKg | number }} kg</span>
+          </span>
+        </li>
+      } @empty {
+        <li class="text-sm text-gray-500">Plus aucun verger dans cette tournée.</li>
+      }
+    </ol>
+
+    <h3 class="mt-6 font-semibold text-gray-900">Ressources</h3>
+    <dl class="mt-3 space-y-2 text-sm">
+      @for (groupe of typesRessource; track groupe.type) {
+        @if (nombreDe(tournee, groupe.type)) {
+          <div class="flex gap-3"><dt class="w-28 shrink-0 text-gray-500">{{ icones[groupe.type] }} {{ groupe.libelle }}</dt>
+            <dd class="text-gray-900">{{ groupe.type === 'OUVRIER' ? nombreDe(tournee, groupe.type) + ' ouvrier(s)' : codesDe(tournee, groupe.type) }}</dd></div>
+        }
+      }
+      @if (tournee.affectations.length === 0) { <p class="text-gray-500">Aucune ressource affectée.</p> }
+    </dl>
+
+    <h3 class="mt-6 font-semibold text-gray-900">Historique</h3>
+    <ol class="mt-3 space-y-3 border-l-2 border-olive-100 pl-4">
+      @for (etape of tournee.historique.slice().reverse(); track $index) {
+        <li class="text-sm">
+          <p class="font-medium text-gray-900">{{ etape.libelleNouveau }}</p>
+          <p class="text-gray-500">{{ etape.date | date: 'dd/MM/yyyy à HH:mm' }}{{ etape.commentaire ? ' · ' + etape.commentaire : '' }}</p>
+        </li>
+      }
+    </ol>
+
+    @if (erreurFiche(); as message) {
+      <p role="alert" class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+    }
+
+    @if (tournee.annulable) {
+      <div class="mt-8 border-t border-gray-200 pt-6">
+        @if (annulationOuverte()) {
+          <label for="motif-annulation" class="etiquette">Motif de l'annulation</label>
+          <textarea id="motif-annulation" rows="2" [formControl]="motif" class="champ-saisie mt-1" [class.en-erreur]="motif.touched && motif.invalid" placeholder="Pluie annoncée, panne…"></textarea>
+          @if (motif.touched && motif.invalid) { <p class="message-champ mt-1">Indiquez le motif.</p> }
+          <p class="mt-2 text-sm text-gray-600">Les demandes redeviendront « validées » pour être replanifiées ; les agriculteurs et le chef d'équipe sont prévenus.</p>
+          <div class="mt-4 flex gap-3">
+            <button type="button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-red-700 px-6 py-3 font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+              [disabled]="envoiEnCours()" (click)="annuler(tournee)">Confirmer l'annulation</button>
+            <button type="button" class="bouton-secondaire" (click)="annulationOuverte.set(false)">Retour</button>
+          </div>
+        } @else {
+          <button type="button" class="inline-flex w-full items-center justify-center rounded-lg border border-red-300 px-6 py-3 font-semibold text-red-700 hover:bg-red-50"
+            (click)="annulationOuverte.set(true)">Annuler la tournée</button>
+        }
+      </div>
+    }
+  </app-panneau-lateral>
+}

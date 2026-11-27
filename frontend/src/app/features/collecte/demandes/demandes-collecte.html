@@ -1,0 +1,187 @@
+<header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+  <div>
+    <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">Demandes de récolte</h1>
+    <p class="mt-1 text-gray-600">Urgentes d'abord, puis les vergers les plus mûrs.</p>
+  </div>
+  <a routerLink="/collecte/planifier" class="bouton-principal">Planifier une tournée</a>
+</header>
+
+@if (messageSucces(); as message) {
+  <p role="status" class="mt-5 rounded-lg bg-white px-4 py-3 text-sm text-olive-900 shadow-sm">✓ {{ message }}</p>
+}
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+<nav class="mt-6 flex gap-1 overflow-x-auto border-b border-gray-200" aria-label="États des demandes">
+  @for (onglet of onglets; track onglet.libelle) {
+    <button type="button" (click)="changerOnglet(onglet.statut)" class="-mb-px shrink-0 border-b-2 px-4 py-3 text-sm font-semibold whitespace-nowrap"
+      [class]="statut() === onglet.statut ? 'border-olive-700 text-olive-900' : 'border-transparent text-gray-500 hover:text-gray-800'">
+      {{ onglet.libelle }}
+      @if (nombre(onglet.statut) !== null) { <span class="ml-1 text-gray-500">({{ nombre(onglet.statut) }})</span> }
+    </button>
+  }
+</nav>
+
+<div class="mt-4 flex flex-col gap-3 sm:flex-row">
+  <input type="search" class="champ-filtre sm:w-80" placeholder="Numéro ou nom du verger" aria-label="Rechercher une demande"
+    [value]="texte()" (input)="chercher($any($event.target).value)" />
+  <select class="champ-filtre" aria-label="Type de récolte" (change)="changerType($any($event.target).value)">
+    <option value="">Urgentes et planifiées</option>
+    <option value="URGENTE">Urgentes seulement</option>
+    <option value="PLANIFIEE">Planifiées seulement</option>
+  </select>
+</div>
+
+<div class="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+        <tr>
+          <th class="px-4 py-3 font-semibold">Demande</th>
+          <th class="px-4 py-3 font-semibold">Verger · agriculteur</th>
+          <th class="px-4 py-3 font-semibold">Type</th>
+          <th class="px-4 py-3 text-right font-semibold">Maturité</th>
+          <th class="px-4 py-3 font-semibold">Date souhaitée</th>
+          <th class="px-4 py-3 text-right font-semibold">Quantité</th>
+          <th class="px-4 py-3 font-semibold">État</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        @for (demande of resultat()?.elements ?? []; track demande.id) {
+          <tr class="cursor-pointer hover:bg-olive-50" (click)="ouvrir(demande)" (keydown.enter)="ouvrir(demande)" tabindex="0">
+            <td class="px-4 py-3 font-mono text-gray-700">{{ demande.numero }}</td>
+            <td class="px-4 py-3">
+              <p class="font-semibold text-gray-900">{{ demande.nomVerger }}</p>
+              <p class="text-gray-500">{{ demande.nomAgriculteur }}{{ demande.libelleDelegation ? ' · ' + demande.libelleDelegation : '' }}</p>
+            </td>
+            <td class="px-4 py-3">
+              @if (demande.type === 'URGENTE') {
+                <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">⚠ Urgente</span>
+              } @else {
+                <span class="text-gray-600">Planifiée</span>
+              }
+            </td>
+            <td class="px-4 py-3 text-right">{{ demande.niveauMaturite !== null ? demande.niveauMaturite + ' %' : '—' }}</td>
+            <td class="px-4 py-3 whitespace-nowrap">{{ demande.dateSouhaitee | date: 'EEE dd/MM/yyyy' }}</td>
+            <td class="px-4 py-3 text-right whitespace-nowrap">{{ demande.quantiteEstimeeKg | number }} kg</td>
+            <td class="px-4 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap" [class]="couleurs[demande.statut]">{{ demande.libelleStatut }}</span></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="px-4 py-10 text-center text-gray-500">{{ resultat() ? 'Aucune demande dans cette liste.' : 'Chargement…' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (resultat(); as pageResultat) {
+    <app-pagination [page]="pageResultat.page" [taille]="pageResultat.taille" [totalElements]="pageResultat.totalElements"
+      [totalPages]="pageResultat.totalPages" (changerPage)="page.set($event)" (changerTaille)="changerTaille($event)" />
+  }
+</div>
+
+<!-- Fiche d'une demande (maquette RC1) -->
+@if (fiche(); as fiche) {
+  @let demande = fiche.demande;
+  <app-panneau-lateral [titre]="'Demande ' + demande.numero + ' — ' + demande.nomVerger" [sousTitre]="demande.libelleType + ' · soumise le ' + (demande.dateSoumission | date: 'dd/MM à HH:mm')" (fermer)="fermer()">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="rounded-full px-3 py-1 text-sm font-semibold" [class]="couleurs[demande.statut]">{{ demande.libelleStatut }}</span>
+      @if (demande.type === 'URGENTE') { <span class="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">⚠ Urgente</span> }
+      @if (demande.creeeParLaCooperative) { <span class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">Créée par la coopérative</span> }
+    </div>
+
+    <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 text-sm">
+      <div class="col-span-2">
+        <dt class="text-gray-500">Agriculteur</dt>
+        <dd class="mt-1 font-medium text-gray-900">
+          {{ demande.nomAgriculteur }}{{ demande.numeroAdherent ? ' · ' + demande.numeroAdherent : '' }}
+          @if (demande.telephoneAgriculteur) { · <a class="text-olive-700 hover:underline" [href]="'tel:' + demande.telephoneAgriculteur">📞 {{ demande.telephoneAgriculteur | telephone }}</a> }
+        </dd>
+      </div>
+      <div><dt class="text-gray-500">Date souhaitée</dt><dd class="mt-1 font-medium text-gray-900">{{ demande.dateSouhaitee | date: 'EEEE d MMMM y' }}</dd></div>
+      <div><dt class="text-gray-500">Quantité estimée</dt><dd class="mt-1 font-medium text-gray-900">{{ demande.quantiteEstimeeKg | number }} kg</dd></div>
+      <div class="col-span-2">
+        <dt class="text-gray-500">Verger</dt>
+        <dd class="mt-1 font-medium text-gray-900">
+          {{ demande.codeVerger }} · {{ demande.nomVariete }} · {{ demande.superficieHa | number: '1.0-1' }} ha · {{ demande.nombreArbres }} arbres{{ demande.libelleDelegation ? ' · ' + demande.libelleDelegation : '' }}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-gray-500">Maturité (capteurs)</dt>
+        <dd class="mt-1 font-medium text-gray-900">{{ demande.niveauMaturite !== null ? demande.niveauMaturite + ' %' : 'Pas encore mesurée' }} · {{ demande.libelleStatutRecolte }}</dd>
+      </div>
+      <div>
+        <dt class="text-gray-500">Pressoir le plus proche</dt>
+        <dd class="mt-1 font-medium text-gray-900">{{ fiche.pressoirLePlusProche ? fiche.pressoirLePlusProche + ' (' + fiche.distancePressoirKm + ' km)' : '—' }}</dd>
+      </div>
+      @if (demande.commentaire) {
+        <div class="col-span-2"><dt class="text-gray-500">Commentaire de l'agriculteur</dt><dd class="mt-1 text-gray-900">{{ demande.commentaire }}</dd></div>
+      }
+      @if (demande.numeroTournee) {
+        <div class="col-span-2"><dt class="text-gray-500">Tournée</dt>
+          <dd class="mt-1"><a class="font-semibold text-olive-700 hover:underline" routerLink="/collecte/tournees" [queryParams]="{ date: demande.datePlanifiee }">{{ demande.numeroTournee }} · {{ demande.datePlanifiee | date: 'EEEE d MMMM' }} →</a></dd>
+        </div>
+      }
+      @if (demande.motifRejet) {
+        <div class="col-span-2"><dt class="text-gray-500">Motif du rejet</dt><dd class="mt-1 text-gray-900">{{ demande.motifRejet }}</dd></div>
+      }
+      @if (demande.motifAnnulation) {
+        <div class="col-span-2"><dt class="text-gray-500">Motif de l'annulation</dt><dd class="mt-1 text-gray-900">{{ demande.motifAnnulation }}</dd></div>
+      }
+    </dl>
+
+    <p class="mt-5 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
+      Historique du verger : {{ fiche.collectesTermineesDuVerger }} collecte(s) terminée(s) ·
+      {{ fiche.signalementsNonResolusDuVerger }} signalement(s) non résolu(s)
+    </p>
+
+    <h3 class="mt-8 font-semibold text-gray-900">Historique de la demande</h3>
+    <ol class="mt-3 space-y-3 border-l-2 border-olive-100 pl-4">
+      @for (etape of demande.historique.slice().reverse(); track $index) {
+        <li class="text-sm">
+          <p class="font-medium text-gray-900">{{ etape.libelleNouveau }}</p>
+          <p class="text-gray-500">{{ etape.date | date: 'dd/MM/yyyy à HH:mm' }}{{ etape.nomAuteur ? ' · ' + etape.nomAuteur : '' }}{{ etape.commentaire ? ' · ' + etape.commentaire : '' }}</p>
+        </li>
+      }
+    </ol>
+
+    @if (erreurFiche(); as message) {
+      <p role="alert" class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+    }
+
+    @if (demande.statut === 'SOUMISE' || demande.statut === 'VALIDEE') {
+      <div class="mt-8 border-t border-gray-200 pt-6">
+        @if (mode() === 'rejet') {
+          <h3 class="font-semibold text-gray-900">Rejeter la demande {{ demande.numero }}</h3>
+          <p class="mt-1 text-sm text-gray-600">Le motif est envoyé à l'agriculteur.</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            @for (motifRapide of motifsRapides; track motifRapide) {
+              <button type="button" class="rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:border-olive-500"
+                [class.bg-olive-100]="motif.value === motifRapide" (click)="choisirMotif(motifRapide)">{{ motifRapide }}</button>
+            }
+          </div>
+          <label for="motif-rejet" class="etiquette mt-4 block">Motif</label>
+          <textarea id="motif-rejet" rows="3" [formControl]="motif" class="champ-saisie mt-1" [class.en-erreur]="motif.touched && motif.invalid"></textarea>
+          @if (motif.touched && motif.invalid) { <p class="message-champ mt-1">Indiquez le motif du rejet.</p> }
+          <div class="mt-4 flex gap-3">
+            <button type="button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-red-700 px-6 py-3 font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+              [disabled]="envoiEnCours()" (click)="rejeter(demande)">Confirmer le rejet</button>
+            <button type="button" class="bouton-secondaire" (click)="mode.set('consultation')">Retour</button>
+          </div>
+        } @else {
+          @if (demande.statut === 'SOUMISE') {
+            <label for="commentaire-validation" class="etiquette">Commentaire interne <span class="font-normal text-gray-500">(facultatif)</span></label>
+            <textarea id="commentaire-validation" rows="2" [formControl]="commentaire" class="champ-saisie mt-1" placeholder="Prévoir accès par la piste nord…"></textarea>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <button type="button" class="bouton-principal" [disabled]="envoiEnCours()" (click)="valider(demande, false)">Valider la demande</button>
+              <button type="button" class="bouton-secondaire" [disabled]="envoiEnCours()" (click)="valider(demande, true)">Valider et planifier →</button>
+            </div>
+          } @else {
+            <a class="bouton-principal w-full" routerLink="/collecte/planifier" [queryParams]="{ demandes: demande.id, date: demande.dateSouhaitee }">Planifier cette demande →</a>
+          }
+          <button type="button" class="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-red-300 px-6 py-3 font-semibold text-red-700 hover:bg-red-50"
+            (click)="mode.set('rejet')">Rejeter…</button>
+        }
+      </div>
+    }
+  </app-panneau-lateral>
+}

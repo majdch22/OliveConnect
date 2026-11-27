@@ -1,0 +1,79 @@
+<header>
+  <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">Carte des vergers</h1>
+  <p class="mt-1 text-gray-600">Statut de récolte, signalements et pressoirs de la zone affichée.</p>
+</header>
+
+@if (messageErreur(); as message) {
+  <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+<div class="mt-6 grid gap-6 lg:grid-cols-4">
+  <!-- Filtres -->
+  <aside class="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 text-sm lg:order-first">
+    <fieldset>
+      <legend class="font-semibold text-gray-900">Statut de récolte</legend>
+      <div class="mt-2 space-y-1.5">
+        @for (statut of statuts; track statut) {
+          <label class="flex items-center gap-2">
+            <input type="checkbox" class="accent-olive-700" [checked]="statutsAffiches().includes(statut)" (change)="basculerStatut(statut)" />
+            <span class="h-3 w-3 rounded-full border border-gray-400" [style.background]="apparences[statut].couleur" aria-hidden="true"></span>
+            {{ apparences[statut].libelle }}
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <div>
+      <label for="variete" class="font-semibold text-gray-900">Variété</label>
+      <select id="variete" class="champ-filtre mt-2 w-full" (change)="variete.set($any($event.target).value)">
+        <option value="">Toutes</option>
+        @for (nom of varietes(); track nom) { <option [value]="nom">{{ nom }}</option> }
+      </select>
+    </div>
+
+    <div>
+      <label for="maturite" class="font-semibold text-gray-900">Maturité d'au moins {{ maturiteMinimum() }} %</label>
+      <input id="maturite" type="range" min="0" max="100" step="5" class="mt-2 w-full accent-olive-700" [value]="maturiteMinimum()" (input)="maturiteMinimum.set(+$any($event.target).value)" />
+    </div>
+
+    <fieldset>
+      <legend class="font-semibold text-gray-900">Afficher</legend>
+      <div class="mt-2 space-y-1.5">
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-olive-700" [checked]="afficherVergers()" (change)="afficherVergers.set(!afficherVergers())" /> Vergers</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-olive-700" [checked]="seulementTourneesDuJour()" (change)="seulementTourneesDuJour.set(!seulementTourneesDuJour())" /> Seulement les tournées du jour</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-olive-700" [checked]="afficherAlertes()" (change)="afficherAlertes.set(!afficherAlertes())" /> Signalements ({{ donnees()?.alertes?.length ?? 0 }})</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-olive-700" [checked]="afficherPressoirs()" (change)="afficherPressoirs.set(!afficherPressoirs())" /> Pressoirs</label>
+      </div>
+    </fieldset>
+
+    <div class="border-t border-gray-100 pt-4 text-xs text-gray-600">
+      <p class="font-semibold text-gray-800">Légende</p>
+      <p class="mt-1.5 flex items-center gap-2"><span class="inline-block h-4 w-4 rounded-full border-2 border-dashed border-olive-900" aria-hidden="true"></span> Verger d'une tournée du jour</p>
+      <p class="mt-1.5 flex items-center gap-2"><span class="text-red-700" aria-hidden="true">▲</span> Signalement non résolu</p>
+      <p class="mt-1.5 flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-sm bg-olive-900" aria-hidden="true"></span> Pressoir</p>
+    </div>
+  </aside>
+
+  <div class="lg:col-span-3">
+    <div #conteneurCarte class="h-[28rem] w-full overflow-hidden rounded-2xl border border-gray-200 lg:h-[34rem]" role="region" aria-label="Carte des vergers"></div>
+
+    <!-- Les mêmes vergers, sans la carte -->
+    <section class="mt-4 rounded-2xl border border-gray-200 bg-white">
+      <h2 class="border-b border-gray-100 px-5 py-3 font-semibold text-gray-900">{{ vergersFiltres().length }} verger(s) dans la zone affichée</h2>
+      <ul class="max-h-72 divide-y divide-gray-100 overflow-y-auto text-sm">
+        @for (verger of vergersFiltres(); track verger.id) {
+          <li>
+            <button type="button" class="flex w-full items-center gap-3 px-5 py-2.5 text-left hover:bg-olive-50" (click)="centrerSurVerger(verger)">
+              <span class="h-3 w-3 shrink-0 rounded-full border border-gray-400" [style.background]="apparences[verger.statutRecolte].couleur" aria-hidden="true"></span>
+              <span class="flex-1"><span class="font-medium text-gray-900">{{ verger.nom }}</span> <span class="text-gray-500">· {{ verger.nomAgriculteur }}</span></span>
+              <span class="text-gray-600">{{ verger.libelleStatutRecolte }} · {{ verger.niveauMaturite !== null ? verger.niveauMaturite + ' %' : '—' }}</span>
+              @if (verger.demandesEnCours) { <span class="rounded bg-olive-100 px-1.5 text-xs font-semibold text-olive-900">{{ verger.demandesEnCours }} demande(s)</span> }
+            </button>
+          </li>
+        } @empty {
+          <li class="px-5 py-6 text-center text-gray-500">{{ donnees() ? 'Aucun verger ne correspond aux filtres dans cette zone.' : 'Chargement…' }}</li>
+        }
+      </ul>
+    </section>
+  </div>
+</div>

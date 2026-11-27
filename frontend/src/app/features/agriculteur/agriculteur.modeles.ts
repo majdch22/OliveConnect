@@ -50,6 +50,15 @@ export interface Demande {
   modifiable: boolean;
   dateSoumission: string;
   motifAnnulation: string | null;
+  /** Motif donné par la coopérative si elle n'a pas retenu la demande. */
+  motifRejet: string | null;
+  /** Tournée et jour de collecte choisis par la coopérative, une fois la demande planifiée. */
+  numeroTournee: string | null;
+  datePlanifiee: string | null;
+  /** Résultat au pressoir, une fois la collecte terminée. */
+  poidsRecuKg: number | null;
+  aciditeMoyenne: number | null;
+  libelleCategorieQualite: string | null;
   historique: { libelleAncien: string | null; libelleNouveau: string; date: string; commentaire: string | null }[];
 }
 
@@ -79,6 +88,8 @@ export interface Signalement {
   statut: 'OUVERTE' | 'PRISE_EN_CHARGE' | 'RESOLUE';
   libelleStatut: string;
   dateCreation: string;
+  /** Dernière réponse de la coopérative (prise en charge, résolution). */
+  reponseCooperative: string | null;
 }
 
 export interface SignalementRequete {

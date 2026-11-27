@@ -107,7 +107,7 @@
     <!-- Autres actions -->
     <section class="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-6">
       <h2 class="font-semibold text-gray-900">Aide et session</h2>
-      @if (estAgriculteur) {
+      @if (avecVisiteGuidee) {
         <button type="button" class="bouton-secondaire" (click)="revoirVisiteGuidee()">▶ Revoir la visite guidée</button>
       }
       <button type="button" (click)="authentification.deconnecter()" class="inline-flex items-center justify-center gap-2 rounded-lg border border-red-300 px-6 py-3 font-semibold text-red-700 hover:bg-red-50">

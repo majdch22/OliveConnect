@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthentificationService } from '../../../core/authentification/authentification.service';
+import { ESPACE_PAR_ROLE } from '../../../core/authentification/modeles';
 import { CompteService, PreferencesNotification, Profil } from '../../../core/compte/compte.service';
 import { erreursParChamp, texteErreur } from '../../../core/erreurs/message-erreur';
 import { FormulaireMotDePasse } from '../../../shared/mot-de-passe/formulaire-mot-de-passe';
@@ -14,7 +15,7 @@ type NomChamp = 'telephone' | 'email' | 'delegation' | 'motDePasse';
 
 /**
  * Page « Mon profil » (tous les rôles) : coordonnées, préférences de notification, mot de passe,
- * visite guidée (agriculteur) et déconnexion.
+ * visite guidée (agriculteur, responsable de collecte, responsable du pressoir) et déconnexion.
  */
 @Component({
   selector: 'app-page-profil',
@@ -29,6 +30,8 @@ export class PageProfil {
   readonly profil = signal<Profil | null>(null);
   readonly delegations = toSignal(this.service.delegations(), { initialValue: [] });
   readonly estAgriculteur = this.authentification.session()?.role === 'AGRICULTEUR';
+  /** Espaces qui ont une visite guidée. */
+  readonly avecVisiteGuidee = ['AGRICULTEUR', 'RESPONSABLE_COLLECTE', 'RESPONSABLE_PRESSOIR'].includes(this.authentification.session()?.role ?? '');
 
   readonly modification = signal(false);
   readonly formulaire = inject(FormBuilder).nonNullable.group({
@@ -115,6 +118,7 @@ export class PageProfil {
   }
 
   revoirVisiteGuidee(): void {
-    this.router.navigate(['/agriculteur'], { queryParams: { visite: 1 } });
+    const role = this.authentification.session()?.role;
+    this.router.navigate([role ? ESPACE_PAR_ROLE[role] : '/'], { queryParams: { visite: 1 } });
   }
 }

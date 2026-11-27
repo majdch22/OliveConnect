@@ -110,7 +110,16 @@ public class PhotoSignalementService {
     }
 
     public Photo lire(String alerteId, String agriculteurId) {
-        Alerte alerte = signalementDe(alerteId, agriculteurId);
+        return photoDe(signalementDe(alerteId, agriculteurId));
+    }
+
+    /** Photo vue par le responsable de collecte qui traite le signalement (tous les signalements, sans contrôle d'auteur). */
+    public Photo lirePourLaCooperative(String alerteId) {
+        return photoDe(alerteRepository.findById(alerteId).orElseThrow(() ->
+                new ErreurMetierException(HttpStatus.NOT_FOUND, "SIGNALEMENT_INTROUVABLE", "Ce signalement n'existe pas.")));
+    }
+
+    private Photo photoDe(Alerte alerte) {
         Path fichier = alerte.getPhoto() == null ? null : dossier.resolve(alerte.getPhoto());
         if (fichier == null || !Files.isRegularFile(fichier)) {
             throw new ErreurMetierException(HttpStatus.NOT_FOUND, "PHOTO_INTROUVABLE", "Ce signalement n'a pas de photo.");

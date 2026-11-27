@@ -1,0 +1,184 @@
+@if (monPressoir(); as donnees) {
+  <header class="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+    <div>
+      <h1 class="text-2xl font-bold text-olive-900 sm:text-3xl">{{ donnees.pressoir.nom }}</h1>
+      <p class="mt-1 text-gray-600">{{ donnees.aujourdhui.date | date: 'EEEE d MMMM y' }}</p>
+    </div>
+  </header>
+
+  @if (visite.aProposer()) {
+    <section class="mt-5 flex flex-col justify-between gap-4 rounded-2xl border border-olive-100 bg-white p-5 sm:flex-row sm:items-center">
+      <div>
+        <p class="font-semibold text-olive-900">Première visite ?</p>
+        <p class="mt-1 text-sm text-gray-600">Une visite guidée de 5 étapes vous montre comment réceptionner une benne et publier la capacité.</p>
+      </div>
+      <div class="flex shrink-0 gap-2">
+        <button type="button" class="bouton-principal px-4 py-2 text-sm" (click)="visite.commencer()">Commencer la visite</button>
+        <button type="button" class="bouton-secondaire px-4 py-2 text-sm" (click)="visite.plusTard()">Plus tard</button>
+      </div>
+    </section>
+  }
+
+  <!-- Capacité du jour -->
+  <section class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Capacité aujourd'hui">
+    <div class="rounded-2xl border border-gray-200 bg-white p-4">
+      <p class="text-sm text-gray-500">Capacité aujourd'hui</p>
+      <p class="mt-1 text-2xl font-bold text-gray-900">{{ tonnes(donnees.aujourdhui.maximumKg) }}</p>
+      @if (donnees.aujourdhui.publiee) { <p class="mt-1 truncate text-xs text-amber-800" [title]="donnees.aujourdhui.motif ?? ''">Publiée{{ donnees.aujourdhui.motif ? ' · ' + donnees.aujourdhui.motif : '' }}</p> }
+    </div>
+    <div class="rounded-2xl border border-gray-200 bg-white p-4">
+      <p class="text-sm text-gray-500">Reçu aujourd'hui</p>
+      <p class="mt-1 text-2xl font-bold text-gray-900">{{ tonnes(donnees.aujourdhui.recuKg) }}</p>
+    </div>
+    <div class="rounded-2xl border border-gray-200 bg-white p-4">
+      <p class="text-sm text-gray-500">Encore attendu</p>
+      <p class="mt-1 text-2xl font-bold text-gray-900">{{ tonnes(donnees.aujourdhui.attenduKg) }}</p>
+    </div>
+    <a routerLink="/pressoir/capacite" class="rounded-2xl border border-gray-200 bg-white p-4 hover:border-olive-500">
+      <p class="text-sm text-gray-500">Capacité restante</p>
+      <p class="mt-1 text-2xl font-bold" [class]="donnees.aujourdhui.restantKg < 0 ? 'text-red-700' : 'text-gray-900'">{{ tonnes(donnees.aujourdhui.restantKg) }}</p>
+      <p class="mt-1 text-xs font-semibold text-olive-700">Mettre à jour →</p>
+    </a>
+  </section>
+} @else if (messageErreur(); as message) {
+  <p role="alert" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ message }}</p>
+}
+
+@if (messageSucces(); as message) {
+  <p role="status" class="mt-5 rounded-lg bg-white px-4 py-3 text-sm text-olive-900 shadow-sm">✓ {{ message }}</p>
+}
+
+<div class="mt-6 grid gap-6 lg:grid-cols-5">
+  <!-- Réceptionner une benne (maquette M7) -->
+  <section data-visite="reception" class="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 lg:col-span-2" aria-labelledby="titre-reception">
+    <h2 id="titre-reception" class="text-lg font-bold text-olive-900">Réceptionner une benne</h2>
+
+    @if (recevables().length === 0) {
+      <p class="rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">
+        Aucune benne à réceptionner pour le moment. Les tournées apparaissent ici dès que le chef d'équipe les a démarrées.
+      </p>
+    } @else {
+      <div>
+        <label for="tournee" class="etiquette">Tournée arrivée</label>
+        <select id="tournee" class="champ-saisie mt-1" [ngModel]="tourneeId()" (ngModelChange)="choisirTournee($event)">
+          <option value="">Choisir…</option>
+          @for (tournee of recevables(); track tournee.id) {
+            <option [value]="tournee.id">{{ tournee.numero }} · {{ tournee.nomChefEquipe }} · {{ tournee.bennes.length - bennesRecues(tournee) }} benne(s) à recevoir</option>
+          }
+        </select>
+      </div>
+
+      @if (tournee(); as tournee) {
+        <fieldset>
+          <legend class="etiquette">Benne</legend>
+          <div class="mt-2 flex flex-wrap gap-2">
+            @for (benne of tournee.bennes; track benne.id) {
+              <button type="button" class="rounded-full border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                [class]="benneId() === benne.id ? 'border-olive-700 bg-olive-700 text-white' : 'border-gray-300 text-gray-700 hover:border-olive-500'"
+                [disabled]="benne.recue" [attr.aria-pressed]="benneId() === benne.id" (click)="benneId.set(benne.id)">
+                {{ benne.code }} ({{ tonnes(benne.capaciteKg) }}){{ benne.recue ? ' · reçue' : '' }}
+              </button>
+            }
+          </div>
+          @if (erreurs()['benneId']; as message) { <p class="message-champ mt-1">{{ message }}</p> }
+        </fieldset>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="poids" class="etiquette">Poids net (kg)</label>
+            <input id="poids" type="number" inputmode="numeric" min="1" max="50000" step="10" class="champ-saisie mt-1"
+              [class.en-erreur]="!!erreurs()['poidsNetKg'] || (remplissage() ?? 0) > tolerance" [ngModel]="poids()" (ngModelChange)="poids.set($event)" />
+            @if (remplissage() !== null) {
+              <p class="mt-1 text-sm" [class]="remplissage()! > tolerance ? 'font-semibold text-red-700' : 'text-gray-600'">
+                Remplissage {{ remplissage() }} %{{ remplissage()! > tolerance ? ' : au-delà de ' + tolerance + ' %, pesée refusée' : '' }}
+              </p>
+            }
+            @if (erreurs()['poidsNetKg']; as message) { <p class="message-champ mt-1">{{ message }}</p> }
+          </div>
+          <div>
+            <label for="acidite" class="etiquette">Acidité (%)</label>
+            <input id="acidite" type="number" inputmode="decimal" min="0" max="20" step="0.1" class="champ-saisie mt-1"
+              [class.en-erreur]="!!erreurs()['aciditePourcent']" [ngModel]="acidite()" (ngModelChange)="acidite.set($event)" />
+            @if (categorie(); as categorie) {
+              <p class="mt-1.5"><span class="rounded-full px-2.5 py-1 text-xs font-semibold" [class]="categorie.classes">{{ categorie.libelle }}</span></p>
+            }
+            @if (erreurs()['aciditePourcent']; as message) { <p class="message-champ mt-1">{{ message }}</p> }
+          </div>
+        </div>
+
+        <div>
+          <label for="commentaire-reception" class="etiquette">Commentaire <span class="font-normal text-gray-500">(facultatif)</span></label>
+          <input id="commentaire-reception" type="text" maxlength="300" class="champ-saisie mt-1" placeholder="Olives abîmées, feuilles…"
+            [ngModel]="commentaire()" (ngModelChange)="commentaire.set($event)" />
+        </div>
+
+        @if (erreurReception() && !erreurs()['poidsNetKg'] && !erreurs()['benneId']) {
+          <p role="alert" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ erreurReception() }}</p>
+        }
+        <button type="button" class="bouton-principal w-full" [disabled]="!complet() || envoiEnCours()" (click)="receptionner()">
+          {{ envoiEnCours() ? 'Enregistrement…' : 'Confirmer la réception' }}
+        </button>
+        <p class="text-xs text-gray-500">Poids au-delà de {{ tolerance }} % de la capacité de la benne : refusé. Dernière benne reçue : tournée clôturée.</p>
+      }
+    }
+  </section>
+
+  <div class="space-y-6 lg:col-span-3">
+    <!-- Livraisons attendues -->
+    <section class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <h2 class="border-b border-gray-100 px-5 py-3 font-semibold text-gray-900">Livraisons attendues aujourd'hui</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+            <tr><th class="px-4 py-2.5 font-semibold">Tournée</th><th class="px-4 py-2.5 font-semibold">Chef</th>
+              <th class="px-4 py-2.5 text-right font-semibold">Bennes</th><th class="px-4 py-2.5 text-right font-semibold">Estimé</th>
+              <th class="px-4 py-2.5 text-right font-semibold">Reçu</th><th class="px-4 py-2.5 font-semibold">État</th></tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (tournee of livraisons() ?? []; track tournee.id) {
+              <tr>
+                <td class="px-4 py-2.5 font-mono font-semibold text-gray-900">{{ tournee.numero }}</td>
+                <td class="px-4 py-2.5">{{ tournee.nomChefEquipe }}</td>
+                <td class="px-4 py-2.5 text-right">{{ bennesRecues(tournee) }} / {{ tournee.bennes.length }}</td>
+                <td class="px-4 py-2.5 text-right whitespace-nowrap">{{ tournee.quantiteEstimeeKg | number }} kg</td>
+                <td class="px-4 py-2.5 text-right whitespace-nowrap">{{ tournee.recuKg | number }} kg</td>
+                <td class="px-4 py-2.5"><span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-gray-700">{{ tournee.libelleStatut }}</span></td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="px-4 py-6 text-center text-gray-500">{{ livraisons() === null ? 'Chargement…' : 'Aucune tournée prévue aujourd’hui vers ce pressoir.' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Réceptions du jour -->
+    <section class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <h2 class="border-b border-gray-100 px-5 py-3 font-semibold text-gray-900">Réceptions du jour</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+            <tr><th class="px-4 py-2.5 font-semibold">Heure</th><th class="px-4 py-2.5 font-semibold">Tournée</th><th class="px-4 py-2.5 font-semibold">Benne</th>
+              <th class="px-4 py-2.5 text-right font-semibold">Poids</th><th class="px-4 py-2.5 text-right font-semibold">Remplissage</th>
+              <th class="px-4 py-2.5 text-right font-semibold">Acidité</th><th class="px-4 py-2.5 font-semibold">Catégorie</th></tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (reception of receptionsDuJour() ?? []; track reception.id) {
+              <tr>
+                <td class="px-4 py-2.5">{{ reception.dateHeure | date: 'HH:mm' }}</td>
+                <td class="px-4 py-2.5 font-mono">{{ reception.numeroTournee }}</td>
+                <td class="px-4 py-2.5">{{ reception.codeBenne }}</td>
+                <td class="px-4 py-2.5 text-right whitespace-nowrap">{{ reception.poidsNetKg | number }} kg</td>
+                <td class="px-4 py-2.5 text-right">{{ reception.tauxRemplissage }} %</td>
+                <td class="px-4 py-2.5 text-right">{{ reception.aciditePourcent | number: '1.1-2' }} %</td>
+                <td class="px-4 py-2.5"><span class="rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap" [class]="classesCategorie(reception.categorie)">{{ reception.libelleCategorie }}</span></td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="px-4 py-6 text-center text-gray-500">{{ receptionsDuJour() === null ? 'Chargement…' : 'Aucune benne reçue aujourd’hui.' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
